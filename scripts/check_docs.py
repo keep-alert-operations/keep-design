@@ -17,8 +17,8 @@ for path in ROOT.rglob('*.md'):
             errors.append(f'{path.relative_to(ROOT)}: missing {link}')
 register = (ROOT / 'decisions/design-register.md').read_text(encoding='utf-8')
 ids = {int(value) for value in re.findall(r'^(?:\|\s*|##\s*)REV-(\d+)', register, re.M)}
-if ids != set(range(1, 38)):
-    errors.append('Expected REV-01 through REV-37')
+if ids != set(range(1, 39)):
+    errors.append('Expected REV-01 through REV-38')
 if errors:
     raise SystemExit('\n'.join(errors))
 print('Local document targets, fences and review identifiers passed.')
