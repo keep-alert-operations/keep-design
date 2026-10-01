@@ -286,3 +286,13 @@ records ownership and assistant-selected packaging, immutable dependency pins,
 HTTP/worker entrypoint separation, schema generation and workspace conventions.
 This supersedes the monorepo/shared-backend-image selections without changing
 product contracts, transaction boundaries or REV-34–36 worker scope.
+
+## REV-38 — Alembic PostgreSQL migration runner (2026-10-01)
+
+User decision: convert migrations to Alembic. Assistant-selected details in
+[repository layout](../specs/spec-repository-layout.md#alembic-migration-execution-rev-38)
+preserve SQL bytes/checksums and the original ledger, add one linear revision
+chain, verify legacy adoption, retain the transaction/advisory lock, and protect
+both ledgers from runtime roles. Forward-only execution and the dedicated
+before-writer job retain existing cutover and rollback requirements. Original
+issue IDs and decision numbers are unchanged. Executed evidence belongs in delivery.

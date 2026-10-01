@@ -187,3 +187,22 @@ Ingress starts neither publisher nor subscriber. Apply 0047 and confirm the
 separate live role is rejected; qualify combined API resource use and Redis loss
 with PostgreSQL reconciliation in the supplied deployment. See
 [worker scope](../specs/spec-worker-scope.md#6-live-updates-inside-the-product-api).
+
+## Alembic migration conversion (REV-38)
+
+Require fresh installation and repeated no-op execution from the packaged wheel;
+all historical SQL bytes/checksums and numbering gaps must remain unchanged.
+Exercise adoption of full and partial legacy histories without replaying applied
+SQL or changing existing ledger timestamps/application data. Reject altered SQL,
+checksum mismatches, missing/unknown migrations, history gaps, multiple heads and
+version/ledger disagreement before committing any change. `current` must not
+adopt or mutate a legacy/fresh database.
+
+Using isolated real PostgreSQL, prove complete rollback of adoption and pending
+DDL/ledger changes after a later revision fails, successful retry, serialization
+of two migration processes under the original lock, unchanged tenant RLS, and
+no API/worker access to either migration ledger. Verify native Alembic CLI and
+existing Python/CLI deployment entrypoints, including execution from a wheel
+without a source checkout. Reject arbitrary stamp, downgrade and offline paths.
+Run affected API/identity/maintenance/search SQL compatibility cases. Existing
+Kafka/scheduler cutover prerequisites and production qualification remain separate.

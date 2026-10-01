@@ -194,3 +194,12 @@ The 68 original decision numbers remain unchanged.
 REV-36 makes live hint publishing a Product API background task and removes the
 separate live worker deployment. [Worker scope section 6](../specs/spec-worker-scope.md#6-live-updates-inside-the-product-api) labels the assistant-selected
 runtime, privilege and rollout details. Original decision numbers are unchanged.
+
+## Later user decision — 2026-10-01 Alembic migrations
+
+REV-38 selects Alembic for the single PostgreSQL migration chain in
+`appchi-migrations`. The assistant-selected transition preserves immutable SQL,
+checksums and recorded history, verifies adoption of existing databases, and
+retains dedicated migration execution and transaction/privilege safeguards.
+[Repository layout](../specs/spec-repository-layout.md#alembic-migration-execution-rev-38)
+is authoritative. The 68 original decision numbers remain unchanged.

@@ -16,7 +16,7 @@ behavior, database transaction boundaries and current worker scope are unchanged
 | appchi-indexer | Elasticsearch writer, changed-record consumer, reconciliation, local search bootstrap |
 | appchi-domain | Shared Python domain rules, persistence helpers, authority/recovery checks and infrastructure adapters |
 | appchi-contracts | Native/Kafka wire models, serialization and generated HTTP/event schema artifacts |
-| appchi-migrations | Complete ordered PostgreSQL migration chain and checksum-verifying migration runner/image |
+| appchi-migrations | Complete ordered Alembic/PostgreSQL migration chain and checksum-verifying migration runner/image |
 | appchi-delivery | Workspace setup/AGENTS, deployment templates, local dependency services, system tests, runbooks, implementation evidence and revision inventory |
 | appchi-design | Normative specifications, decision register, architecture/design assets and acceptance requirements |
 
@@ -80,3 +80,27 @@ records the original commit plus the captured local working state in `SOURCE.md`
 Historical evidence describes its original code and environment; it is not proof
 for a new repository revision. Production deployment and shared infrastructure
 changes remain separately authorized activities.
+
+## Alembic migration execution (REV-38)
+
+**User decision — 2026-10-01:** use Alembic for the PostgreSQL migration chain.
+**Assistant-selected transition:** retain every published SQL filename, byte,
+checksum and numbering gap. One linear Alembic revision chain executes those SQL
+files. The packaged checksum manifest is `migration_sql/checksums.json`.
+`schema_migrations` remains immutable application history; `alembic_version`
+records the current revision. Each must describe the same ordered prefix.
+
+An existing database without an Alembic version table may be adopted only after
+all applied names/checksums form a complete known prefix. Adoption preserves its
+ledger rows/timestamps and does not rerun applied SQL. Reject unknown, changed,
+missing, non-prefix or inconsistent histories. Validate pending SQL against the
+packaged manifest before execution. Adoption, pending SQL and ledger/version
+changes share the existing PostgreSQL advisory transaction lock and commit or
+roll back together. Runtime API/worker roles cannot access either ledger.
+
+Keep the existing migration job, identity and before-writer ordering. Alembic
+adds no service database, ORM requirement or startup migration. Existing offline
+cutover and stopped-worker prerequisites remain. Use forward corrective migrations;
+no arbitrary stamping, schema downgrade or offline execution bypasses checksum
+and history verification. Stop using the legacy runner after adoption. The
+`current` command is read-only; history/heads inspection needs no database.
