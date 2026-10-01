@@ -1,5 +1,7 @@
 # Presets
 
+**Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+
 Shared saved feeds: configuration, editing, queries, dashboard references, APIs and history.
 
 ## 1. Identity, ownership and permissions
@@ -18,7 +20,7 @@ Enforce the name claim transactionally on create/rename. Release a former name a
 
 The editable definition is exactly `name`, `cel`, `sort` and `columns`. Keep server-owned `id`, `tenant_id`, monotonic `revision`, CEL environment version, creator/last-editor identities and creation/update instants separately. Record UTC instants and render using the application's display timezone. Preserve immutable actor IDs and display snapshots when an LDAP identity is later renamed/deleted; these metadata do not confer ownership.
 
-The new-preset form starts with CEL `true`, sort `timestamp` descending with alert ID ascending as the final tie-break, and these ordered columns: `severity`, `status`, `message`, `application`, `component`, `timestamp`, `acknowledged`, `assignee_id`. A name is required before creation. Explicitly label `true` as all retained alerts subject to the current suppression switch; do not add a hidden firing-only or date condition. No preset is persisted merely by opening this form.
+The new-preset form starts with CEL `true`, sort `timestamp` descending with alert ID ascending as the final tie-break, and these ordered columns: `severity`, `display_status`, `message`, `application`, `component`, `timestamp`, `assignee_id`. A name is required before creation. Explicitly label `true` as all retained alerts subject to the current suppression switch; do not add a hidden firing-only or date condition. No preset is persisted merely by opening this form.
 
 ## 4. Columns and sorting
 
@@ -26,9 +28,13 @@ Allow 1–30 distinct ordered columns from the searchable scalar fields in alert
 
 Allow 1–3 distinct user sort fields, each with `asc` or `desc`, from the existing sortable whitelist in alert supplement 24. Append alert ID ascending internally; users do not replace that tie-break. A sortable field need not be displayed. Preserve severity ordering, clear last and null last in either direction and the existing scalar ordering rules. Reject unknown/duplicate fields or an empty sort/column list. Column widths, density, horizontal position and selection are transient, not additional saved settings.
 
+On saved preset results, clicking a supported sortable column heading temporarily replaces the entire saved sort with that field ascending, then descending on a second click; a third click restores the saved sort. Clicking a different supported heading starts its ascending cycle. This is a read-only view choice, never a shared preset edit or dirty definition draft. Each change restarts result pagination on page one and clears selection. A new preset revision or reopening the preset clears the override. Headings without a supported sort field remain static.
+
+For current presentation, Status means `display_status`; the editor offers no separate acknowledgement columns. Assistant-selected REV-27 adaptation maps legacy `status` and `acknowledged` columns to a single Status column in their first position, removes old acknowledgement actor/time columns and preserves the other column order. If nothing remains, show Status. Apply this to current results and editor drafts without rewriting stored or historical revisions; an explicit normal save persists the adapted columns. Historical definitions remain readable as recorded. Raw lifecycle sorting is labelled Lifecycle; `display_status` sorting is unsupported. Existing acknowledgement sorts remain executable and visible as Legacy acknowledgement only when already selected.
+
 ## 5. CEL validation and compatibility
 
-Require nonblank UTF-8 CEL source no larger than 16 KiB and a boolean result under the shared versioned environment. Preserve its source text exactly rather than rewriting string literals or treating superficially similar expressions as equivalent. The initial form supplies `true`; the API rejects a blank expression rather than silently broadening it.
+Require nonblank UTF-8 CEL source no larger than 16 KiB and a boolean result under the shared versioned environment. Reference catalog fields by bare identifier in new expressions; the accepted `alert.field` compatibility spelling remains valid for previously saved source. Preserve source text exactly rather than rewriting string literals or treating superficially similar expressions as equivalent. The initial form supplies `true`; the API rejects a blank expression rather than silently broadening it.
 
 Run the shared parser, type checker, allowed-field/function checks, search-translation checks and bounded-cost validation on preview and every save, including a revision copied from history. Return field/source spans and actionable errors without mutating the stored preset. The size limit is an additional preset input bound, not permission to exceed shared CEL depth, cost or execution limits. Technical supplement 2–7 now selects the common language/runtime, field/operator restrictions, timestamp/clock behavior and cost accounting. Its feed-only `now()` is captured per snapshot; measured numerical deployment cost budgets remain qualification outputs. These shared limits apply in addition to this preset envelope.
 

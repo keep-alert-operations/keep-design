@@ -1,5 +1,11 @@
 # Incidents
 
+**Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+
+**Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
+
+The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
+
 Severity cannot change after creation; status and assignment are independent; correlation-created incidents start unassigned; incidents have no owning team; one active incident may own an alert; reopening is blocked by ownership or originating-rule/group conflicts; resolving an incident leaves alert statuses unchanged and requires fresh transitions for later automatic reuse; suppression preserves links; unchanged repeats do not reset incident inactivity. There are no notifications, incident acknowledgements, or automatic resolution merely because every linked alert resolved.
 
 ## Creation, content, assignment, and lifecycle
@@ -56,7 +62,7 @@ Use a fixed incident inactivity period of **30 elapsed days (30 × 24 hours)** a
 
 ### 11. What resets incident inactivity (I4)
 
-Reset for an actual user change to incident title, description, assignee, status, notes, or membership; an actual automatic alert addition; and an accepted firing-to-resolved or resolved-to-firing transition of a currently linked alert. A move counts for both active incidents. Do not reset for unchanged deliveries, allowed alert-content/metric updates without a lifecycle transition, alert acknowledgement/assignment/notes, suppression changes, rule edits, reads/searches, retries/no-ops, or automatic assignee clearing.
+Reset for an actual user change to incident title, description, assignee, status, notes, or membership; an actual automatic alert addition; and an accepted firing-to-resolved or resolved-to-firing transition of a currently linked alert. A move counts for both active incidents. Do not reset for unchanged deliveries, allowed alert-content/metric updates without a lifecycle transition, alert assignment/notes, suppression changes, rule edits, reads/searches, retries/no-ops, or automatic assignee clearing.
 
 Use the authoritative transaction timestamp of successful incident actions/new links and the accepted transition's system-arrival time for source-driven alert lifecycle changes (authoritative action time for manual alert transitions). Update last qualifying activity as part of the transaction handling each qualifying action or accepted transition, without waiting for a scheduled expiry check. Advance activity time monotonically with the maximum qualifying timestamp; delayed processing/replay cannot refresh it merely to worker catch-up time.
 

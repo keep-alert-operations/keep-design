@@ -1,10 +1,16 @@
 # Reliability and operations
 
+**Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+
+**Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
+
+The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
+
 Application service objectives, capacity, backpressure, failure handling and recovery. These are selected objectives; measured results and supplied service guarantees belong in [Delivery readiness](./delivery-readiness.md).
 
 ## 1. Preserved requirements and ownership
 
-Preserve the user-selected sustained requirement of 15,000 deliveries/minute (250/second), including concentration in one tenant or Global. Normal traffic is about 4,000/minute; peak duration is unknown. Preserve p99 normal-operation targets of one second for durable ingestion acceptance, five seconds for incoming alert/status UI visibility and five seconds for maintenance-expiry UI visibility. Preserve PostgreSQL admission commit before acknowledgement, original event/effective times, tenant ordering, occurrence semantics and protection of admitted work.
+Preserve the user-selected sustained requirement of 15,000 deliveries/minute (250/second), including concentration in one tenant or Global. Normal traffic is about 4,000/minute; peak duration is unknown. Preserve p99 normal-operation targets of one second for durable ingestion acceptance, five seconds for incoming alert/status UI visibility and five seconds for maintenance-expiry UI visibility. Preserve broker acknowledgement before 202, original ingress/effective times, per-key source order, tenant changed order and occurrence semantics. Acknowledged unprocessed inputs remain subject to Kafka retention.
 
 Appchi owns application objectives/instrumentation, processing correctness, tenant isolation, retries, idempotency, degraded-state UX, logical lifecycle rules, application backpressure and safe post-restore checks. Each technology team owns its service's operation, infrastructure retention, backups, HA, failover, maintenance, capacity and recovery. Appchi supplies workload and safety requirements; both sides agree supported integration settings, allocations and recovery handoff.
 
@@ -20,7 +26,7 @@ Numerator: eligible requests that receive a correct successful service outcome. 
 
 Include valid traffic and failures caused by infrastructure, capacity, timeouts, lost connections after full receipt, and unavailable authentication dependencies. Capacity-related 429/503 responses count as failures. Exclude proven malformed/oversized input, invalid or revoked credentials, expected permission/business-conflict rejections, health probes and identified load tests from production request SLIs; report those outcomes separately. An incorrect 4xx response to valid work is a service failure. Unknown eligibility during a dependency failure is counted as bad unless evidence establishes a genuine client error.
 
-A partial batch is successful only when all admissible items are durably admitted and rejected items have correct outcomes. Later legitimate semantic processing rejection does not retroactively change the durable-receipt contract. External retries count as request attempts; idempotent duplicates do not become new source events. Report fresh and duplicate-request cohorts separately. Gateways must not automatically replay mutating POST requests.
+A partial batch is successful only when all admissible items are durably admitted and rejected items have correct outcomes. Later legitimate semantic processing rejection does not retroactively change the durable-receipt contract. External retries count as request attempts; client resubmissions are new deliveries; same-delivery internal retries do not apply twice. Report accepted, unconfirmed and rejected cohorts separately. Gateways must not automatically replay mutating POST requests.
 
 ## 4. The three agreed latency objectives
 
@@ -28,9 +34,9 @@ Measure each separately as the fraction meeting its threshold over the rolling 3
 
 | Objective | Start | Successful end | Threshold |
 |---|---|---|---|
-| Durable acceptance | Complete request body at public ingress | Acceptance response sent after PostgreSQL admission commit | 1 second |
+| Durable acceptance | Complete request body at public ingress | Acceptance response sent after Kafka durable acknowledgement | 1 second |
 | Incoming alert/status visibility | Original system receipt timestamp | Correct state rendered in an eligible connected foreground view | 5 seconds |
-| Maintenance expiry visibility | Stored scheduled end | Expired maintenance and resulting suppression/count state rendered in an eligible view | 5 seconds |
+| Maintenance expiry visibility | Deferred under REV-34 | No timer-driven release in this scope | Nice-to-have |
 
 Include authentication, validation, queueing, processing, projection and rendering wherever they fall between the relevant boundaries. Enqueueing or sending a live hint is not completion. An error, timeout or still-incomplete observation past its deadline is a miss. A later correct state can satisfy an earlier observation without flashing every intermediate transient state.
 
@@ -38,7 +44,7 @@ Retain the previously agreed normal-operation scope: separately identify depende
 
 ## 5. Additional latency objectives
 
-Select p99 at two seconds for normal feed/list/search/count requests; one second for ordinary authoritative detail reads and local user commands; and two seconds from canonical change commit to completion of the resulting correlation evaluation/arbitration pass. Use the same rolling window and explicit normal-operation accounting. Local commands that launch external work return a durable job acceptance; these targets do not promise completion of Grafana or Kong operations.
+Select p99 at two seconds for normal feed/list/search/count requests; one second for ordinary authoritative detail reads and local user commands; and two seconds from canonical change commit to completion of the resulting correlation evaluation/arbitration pass. Use the same rolling window and explicit normal-operation accounting. Synchronous operator commands use the separate budgets in worker scope; the one-second ordinary-command target does not cover their remote completion.
 
 Correlation pass completion includes a deterministic exclusion or a recorded blocked outcome. Blocked-rule health and absent required actions remain separately visible; a quick failure is not successful correlation. End-to-end targets are measured directly: adding component p99 values does not prove an end-to-end p99.
 
@@ -58,7 +64,7 @@ Missing or late eligible acknowledgements cannot count as successes. With fewer 
 
 ## 8. Request timeouts and retries
 
-Set ingestion handler timeout to five seconds after full body receipt, with a ten-second gateway timeout. The one-second p99 remains the performance objective, not a forced commit deadline. Cancel safely before commit where possible; an uncertain commit follows the existing idempotency/retry contract and must not be reported as a proven rollback.
+Bound ingestion handling to five seconds, including body read, and retain the ten-second gateway timeout. Each Kafka attempt has a one-second broker delivery deadline and at most 1.1 seconds application wait; three attempts fit the handler budget. A timeout is an uncertain outcome, never proof of rollback. V2 context expires ten seconds after gateway authorization; deletion waits fifteen seconds after all-node denial before capturing its Kafka drain barrier. The one-second p99 remains an unqualified performance objective.
 
 Ordinary Product API and search requests have a ten-second handler timeout and fifteen-second gateway timeout. Technical supplement 18–20 selects SSE heartbeat, bounded buffering and stream/proxy timeout requirements; deployed compatibility remains to be confirmed. Bound database waits by the remaining request budget. HTTP timeout does not truncate an already admitted atomic background attachment or other mandatory operation. Use the selected 429/503 retry contracts below. Gateway timeouts are requested integration settings for the gateway team to confirm and apply; Appchi owns its handler deadlines and does not independently reconfigure the shared gateway.
 
@@ -66,50 +72,33 @@ Ordinary Product API and search requests have a ten-second handler timeout and f
 
 Require demonstrated processing recovery capacity of **500 deliveries/second** for a concentrated tenant while 250/second continue arriving. Net drain of 250/second clears a two-hour, 1.8-million-item backlog in two hours after dependencies are healthy. This is a qualification requirement, not measured capacity.
 
-Test an overload burst of 1,000 deliveries/second for sixty seconds. This is not a new guaranteed admission rate: durably accept only within available capacity, explicitly reject the rest, and process everything accepted. Display recovery lag without claiming five-second visibility for old queued events. Preserve the existing blocked-head and trusted-repair rules; recovery never skips an unproven predecessor.
+Test an overload burst of 1,000 deliveries/second for sixty seconds. This is not a new guaranteed admission rate: accept only broker-confirmed publications within the request deadline and return explicit publication failures otherwise. Demonstrate processing of retained accepted inputs while separately reporting Kafka retention loss; no application backlog gate is introduced. Display recovery lag without claiming five-second visibility for old queued events. Preserve the existing blocked-head and trusted-repair rules; recovery never skips an unproven predecessor.
 
 ## 10. Application backlog limits and admission control
 
-The application capacity requirement is two hours of full single-tenant input. Select pending-item limits of 1.8 million per tenant and 2.25 million globally. Agree sufficient allocation with the owning teams and derive application byte budgets from measured costs before launch. These are application admission limits, not Kafka retention or physical storage policy. For scale, 1.8 million 64 KiB members alone occupy about 110 GiB before overhead; the owning teams size infrastructure from the supplied workload.
-
-Reserve capacity atomically for the admissible subset of a batch using [shared backlog accounting](./spec-system-completion.md#backlog-accounting). If that whole subset cannot fit, reject the admission operation for retry rather than partially admitting otherwise-valid items merely to fit capacity. Warn at 70% of an application queue budget, escalate at 85%, and stop admission at the count/byte cap or when the service reports insufficient safe capacity. Resume below 75% of the relevant application budgets once the dependency permits safe admission. The storage team supplies its capacity/health contract and owns infrastructure disk thresholds.
-
-Use 429 with Retry-After: 10 seconds for capacity rejection and 503 with Retry-After: 5 seconds for unavailable authority/durability. Never delete accepted items to free room. Keep feasible read/status/repair paths available. Record and resolve any mismatch between supplied allocation and the application buffering requirement before qualification.
+Do not reject ingress based on source/correlation/index lag or an application PG backlog allocation. Keep payload, authentication, request deadline and Kafka-service safeguards. A valid item receives 202 only after broker acknowledgement; three unconfirmed attempts return a retryable item failure. Monitor lag and low watermarks, and report retention risk honestly. Capacity/retention ownership remains with Kafka operators. See [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 2.
 
 ## 11. Fairness and rule budgets
 
-Use fair scheduling across ready tenants, yielding between atomic work units after 100 events or 100 milliseconds, whichever is reached first. Finish an in-progress atomic unit before yielding; do not truncate complete incident attachment or skip tenant order. Admission caps also prevent one tenant from consuming the whole global pending budget.
+Use fair scheduling across ready tenants, yielding between atomic work units after 100 events or 100 milliseconds, whichever is reached first. Finish an in-progress atomic unit before yielding; do not truncate complete incident attachment or skip tenant order. Kafka assignment/partition scheduling and bounded authority reconciliation replace the old per-tenant ingress capacity reservations; qualify concentrated-tenant fairness without a lag-based admission cap.
 
 Preserve the correlation supplement's finite platform budgets for enabled rules, groups, evidence and evaluation. Derive and version their numerical limits from measured engine costs before enabling automatic correlation in production. The 50/100-rule test scenarios are not those limits. Missing qualified budget configuration prevents automatic-correlation readiness and produces visible degraded health; it does not silently discard evidence or invalidate otherwise admissible v1 delivery. Technical supplement 5 selects deterministic cost accounting and static syntax bounds; numerical deployment budget values remain measured qualification outputs. Measured limits are a required delivery artifact, not fabricated benchmark results.
 
 ## 12. Dependency failure behavior
 
-| Unavailable dependency | Behavior |
-|---|---|
-| PostgreSQL or its agreed durable-commit capability | Return 503; never acknowledge uncommitted admission. Obtain the offered durability/failover contract instead of assuming a replication mode. |
-| Kong or trusted v2 authentication | Reject affected v2 requests; no anonymous fallback. Preserve the separate unauthenticated v1 path when its own dependencies work. |
-| Kafka | Continue PostgreSQL durable admission within backlog limits; retain pending work and repair missed wakeups in order. |
-| Elasticsearch | Continue authoritative processing. PostgreSQL details/commands remain available; feeds/counts show stale or unavailable status, never fabricated zero counts. |
-| Redis/live delivery | Continue authoritative work; expose stale/disconnected view state. Technical supplement 18–21 selects durable generation reconciliation, SSE reconnect and foreground fallback polling. |
-| Grafana | Preserve existing pending operator jobs and rename/delete gates. Established independent senders continue where valid. |
-| Identity provider/LDAP access | Preserve five-minute normal-operation LDAP membership/disablement enforcement, including active sessions. During refresh outages use last-known trusted identity evidence for normal authorization without an age-only cutoff, alongside valid sessions, current Appchi grants and known revocations. Identity supplement 1–14 completes the delegated session, checkpoint, synchronization, logout and recovery configuration. Ordinary restarts preserve the accepted checkpoint; rollback/disaster restore gates human authorization on fresh identity and permission reconciliation. The user's team owns Keycloak; other service ownership remains unchanged. Deployment and end-to-end qualification are unperformed. |
-| Dependency backup/recovery protection | The owning team detects and handles backup failures. Appchi consumes any supplied degraded-protection signal and coordinates impact; otherwise valid durable admission need not stop solely because a backup failed. |
-
-Failures consume the relevant service budgets. No outage automatically resolves alerts, clears suppression, changes tenant ownership or rewrites source times.
+PostgreSQL failure blocks application processing and commands, but healthy Kafka ingress continues without a database connection. Kafka failure blocks new acknowledged admission and source transactional progress; manual PG commands can succeed with lost best-effort search hints. Search reconciliation continues during Kafka outages. Elasticsearch failure affects search/visibility while PG authority remains. Redis failures recover through existing PG/SSE reconciliation. Kong policy-store or trusted-context failure denies v2; v1 remains independent. Existing last-known trusted identity behavior remains unchanged.
 
 ## 13. Managed-service availability and HA boundary
 
 Dedicated technology teams choose and operate PostgreSQL replication/failover, Kafka broker/topic durability, Elasticsearch redundancy and other service HA.
 
-Obtain documented durable-write/acknowledgement semantics, failure/reconnect behavior, supported client settings, maintenance expectations and endpoints. Appchi client configuration must match that contract; uncertain writes retain the existing idempotency/receipt rules.
+Obtain documented durable-write/acknowledgement semantics, failure/reconnect behavior, supported client settings, maintenance expectations and endpoints. Appchi client configuration must match that contract; uncertain source publication retains one internal UUID across attempts; client resubmission is new. Product command idempotency remains unchanged.
 
 The application supports restart-safe workers, durable coordination, readiness and graceful draining without relying on one process's memory for correctness. Arrange application replica/runtime placement and scaling through the deployment team's supported platform model and measured requirements. Do not prescribe cluster topology or claim unconfirmed failure guarantees.
 
 ## 14. Transport retention and application search rebuilds
 
-The Kafka team owns topic retention and broker/topic operational policy. Record the supplied retention, replay/offset behavior and client/topic capabilities. PostgreSQL pending work/outbox records are application state: do not purge them merely because Kafka acknowledges publication or retention expires. Cleanup respects required consumer completion/checkpoints and replay/proof protection. Verify gap recovery from authoritative state within the offered service contract.
-
-Treat Redis as disposable application transport/cache state. The Elasticsearch team owns the service, physical lifecycle and capacity. Appchi owns projection semantics and reconstruction: snapshot plus ordered catch-up, no source lifecycle replay, validation of tenant scope/versions/counts before complete-index switching. Coordinate index creation, switching and cleanup with the team's supported interfaces and policies. [Alerts/history technical completion](./spec-alert-history-technical.md), decisions 12–17/25–26, selects relay/consumer/offset, projection and rebuild mechanics; supplied-service compatibility and implementation remain D2 delivery work.
+Kafka may expire an acknowledged unprocessed receipt; the user explicitly accepted this narrowed guarantee. No zero-acknowledged-loss claim applies across an arbitrary Kafka outage/retention interval. Broker offsets below low watermark produce visible loss diagnostics and fenced source/correlation recovery. Search can reconstruct committed PostgreSQL state through the bounded scan and fenced rebuild in [Kafka-first pipeline](spec-kafka-alert-pipeline.md) sections 6 and 8. The Kafka team owns transport retention and recovery policies.
 
 ## 15. Scheduler cadence and clock protection
 
@@ -119,11 +108,7 @@ Preserve hourly alert/incident inactivity sweeps and the existing operator thirt
 
 ## 16. Dependency recovery guarantees and application recovery
 
-Obtain each team's documented recovery-point objective (possible data loss), recovery-time objective, durability/failure guarantees, recovery scope and restore procedure. No numerical infrastructure RPO/RTO is assumed. Record supplied guarantees and qualify the application against them before release.
-
-Appchi retains protection of admitted work against application crashes/retries and the requirement to drain an intact two-hour backlog within two hours while 250/second arrive, once dependencies are healthy and qualified capacity is supplied. It cannot recreate authoritative data missing from a restored recovery point. Record offered data-loss behavior and consequences explicitly; do not silently permit loss or pretend it was recovered.
-
-Operating teams restore their services; Appchi checks credentials, deletion fences, tenant order, pending work and projections before reopening affected paths. Measure search reconstruction against supplied capacity and retained data. End-to-end restoration includes both stages, and outages/maintenance remain visible in application availability.
+Validate supplied service guarantees without inventing infrastructure RPO/RTO. A PostgreSQL-committed source effect survives a failed Kafka transaction through immutable replay proof; this is not one distributed commit. Unprocessed Kafka retention loss is unrecoverable unless the producer independently resubmits, which is a new delivery. Restores must reconcile delivery/retirement fences, consumer offsets, rule boundaries and search epochs before reopening affected capabilities. See [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 8.
 
 ## 17. Backup ownership and recovery handoff
 
@@ -147,7 +132,7 @@ Owning teams decide physical sizing, replicas, headroom, expansion, forecasts an
 
 ## 20. Application observability and telemetry ownership
 
-Appchi emits outcomes/latency, application queue depth/age/budget use, blocked processing/proof, correlation health, scheduler/projection lag and UI acknowledgement coverage through supported company observability interfaces. Use Prometheus-compatible metrics where provided. Dedicated teams monitor their services and expose agreed health/incident signals.
+Appchi emits outcomes/latency, Kafka partition lag/age/retention risk, non-alert job depth, blocked processing/proof, correlation health, scheduler/projection lag and UI acknowledgement coverage through supported company observability interfaces. Use Prometheus-compatible metrics where provided. Dedicated teams monitor their services and expose agreed health/incident signals.
 
 Observability/technology teams own telemetry storage/retention and infrastructure audit policy. Obtain sufficient measurements or supported aggregates for rolling 30-day application SLIs; record any compatibility gap. Retain 1% successful application trace sampling with bounded error coverage within the collector team's limits.
 

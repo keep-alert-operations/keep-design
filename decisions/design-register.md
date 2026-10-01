@@ -18,18 +18,18 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 |---|---|
 | L1 | Native v1/v2 validation, field catalog, managed/source separation and body/field limits are selected in alert operations 1–7; strict common models and wire conventions are completed in system completion 1/5. |
 | L2 | Tenant/schema/operator-specific identity, exact immutable material, collision handling, occurrences and no v1/v2 merging are selected in alert operations 5–9 and technical baseline 8–10. |
-| L3 | PG durable admission, finite external retry windows, tenant FIFO source order and semantic change-order separation are selected in alert operations 8–14 and technical baseline 12–14. Maintenance temporal integration is complete in maintenance 4–10. |
-| L4 | Only selected source fields mutate; manual pending-source/revision guards and source/manual precedence remain alert operations 5–7/13–18. Maintenance/correlation evaluate trustworthy before/after snapshots without inventing transitions. |
+| L3 | REV-33 selects Kafka-confirmed admission, internal delivery UUID replay, per-logical-key append order and tenant-keyed changed order. Ingress UTC and PG application proof order are distinct. Kafka pipeline sections 2–5 and the revised alert/maintenance supplements govern. |
+| L4 | Only selected source fields mutate; manual revision guards remain, while REV-33 removes the pending-source guard and permits queued Kafka input after a manual commit (alert operations 5–7/13–18). Maintenance/correlation evaluate trustworthy before/after snapshots without inventing transitions. |
 | L5 | PG-authoritative source/activity/occurrence/note history, current-note-only search, snapshots and read-your-writes are complete in alert operations 20–27 and technical baseline 8–22. |
-| L6 | 30-day source inactivity/hourly expiry, 90 days after latest resolution, reopening cancellation and no creation-age cap/manual deletion remain selected. Technical baseline 23–27 completes protected logical retirement and physical cleanup. |
+| L6 | REV-34 defers automatic 30-day inactivity resolution and 90-day retirement/cleanup as nice-to-have components. Existing retirement fences and read-time access rules remain; worker scope is authoritative over the retained algorithms in technical baseline 23–27. No creation-age cap or manual alert deletion is introduced. |
 
 ## O. Operators, Kong, and Grafana
 
 | ID | Selected contract and reference |
 |---|---|
 | O1 | V1 unauthenticated Global and v2 immutable operator tenant routing, strict batches and Grafana native-equivalent adapter are selected in alert/operator supplements. No alternate routing or credential bypass is introduced. |
-| O2 | Operator names/ownership/lifecycle, admin-only management, retained-alert/pending-input deletion guard and Grafana-gated rename/delete are complete in operator operations; physical records and saga integration in system completion 13/17–20. |
-| O3 | One current key plus a 24-hour retiring overlap, repeatable copy-only retrieval, encryption, immediate revoke, exact admission and restore denial fences remain operator operations 4–14/28. Secret/runtime integration is complete in system completion 13/20–22. |
+| O2 | Operator names/ownership/lifecycle, admin-only management, retained-alert guard, verified gateway denial plus Kafka drain, and Grafana-gated rename/delete are complete in operator operations; physical records and saga integration in system completion 13/17–20. |
+| O3 | One current key plus a 24-hour retiring overlap, repeatable copy-only retrieval, encryption, immediate local invalidation and verified all-node revocation completion, exact admission and restore denial fences remain operator operations 4–14/28 and Kafka pipeline 7. Secret/runtime integration is complete in system completion 13/20–22. |
 | O4 | Mandatory shared Grafana contact point/policy, exact Appchi - {operator name}=true matcher, safe external writer, durable setup/rename/delete/cancel and adapter contracts remain operator operations 15–28; capability acceptance is system completion 24. |
 
 ## Q. CEL, filtering, sorting, and pagination
@@ -79,9 +79,9 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | ID | Selected contract and reference |
 |---|---|
 | D1 | Versioned alert snapshots and separate domain metadata invalidations, immutable references/digests, consumer holds and atomic source/control proof are complete in technical baseline 8–14, maintenance 4–11 and system completion 18. |
-| D2 | PG durable work/outbox, Kafka tenant-keyed delivery, fenced retries/scans/offsets and Redis hint reconciliation are selected; other-resource jobs/live events complete in system completion 18/22. Supplied capabilities are DEL-01. |
+| D2 | REV-33 replaces alert PG queues/relays with self-contained received records and transactional changed/offset publication. PG retains authority/replay proof; bounded search reconciliation repairs lost manual hints. Unrelated PG jobs/live events remain in system completion 18/22. Supplied capabilities are DEL-01. |
 | D3 | Protected recovery evidence, fresh restore epochs, session/permission/key/deletion gates and snapshot-plus-catch-up search rebuild are complete in technical baseline 24–26 and system completion 20/24/29. Exercises are DEL-05. |
-| D4 | All domain/source/history/receipt/outbox atomic boundaries, full lock hierarchy, authorization guards, maintenance fan-out and reference races are selected in technical baseline, maintenance 4–11, dashboard 13 and system completion 7/17. |
+| D4 | Domain/source/history/proof transactions, the separate Kafka changed/offset transaction, full lock hierarchy, authorization guards, inline maintenance effects and bounded fan-out/reference races are selected in Kafka pipeline, technical baseline, maintenance 4–11, dashboard 13 and system completion 7/17. |
 | D5 | Physical record families, types/constraints/FKs/indexes/partitioning, RLS, search tokens and full-key context identity are complete in technical baseline 8–10, maintenance 11, dashboard 13 and system completion 11–17. DDL implementation is DEL-02. |
 
 ## R. Retention and deletion
@@ -89,7 +89,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | ID | Selected contract and reference |
 |---|---|
 | R1 | Alert and incident independent inactivity and 90-day latest-resolution retention remain selected, with no absolute creation-age cap. System completion 19 consolidates lifetimes without changing them. |
-| R2 | Parent-owned source/occurrence/note/activity/command history, finite ingress retry windows and protected pending proof remain selected. System completion 7/19–20 distinguishes internal-command fences from external retry retention. |
+| R2 | Parent-owned source/occurrence/note/activity/command history and protected proof remain selected. Kafka pipeline 8 preserves minimal delivery and retired-key fences; client resubmissions have no deduplication promise. System completion 7/19–20 retains internal command replay protections. |
 | R3 | Every product history category is selected in system completion 19, including final deleted correlation definitions, complete maintenance timeline, dashboards and platform configuration/repair audit. Infrastructure telemetry policy remains owner-managed. |
 | R4 | All-resource retirement/replay fences, independently protected intents/finals, dependency-aware bounded cleanup and restore gates are complete in technical baseline 23–27 and system completion 19–20; service protection/exercises remain DEL-05. |
 
@@ -175,3 +175,103 @@ Review validation checks documentation consistency, identifiers, local links and
 | Review ID | Original coverage | Resolution |
 |---|---|---|
 | REV-20 | U1, U5 | User requested dark mode after the full-system light visual reference. Shared system section 3 now requires an explicit Light/Dark choice for Appchi-owned screens, superseding REV-12's fixed-light behavior. Assistant-selected behavior retains the reference light palette by default, independent of OS preference, and persists the user's choice locally across navigation and reloads without identity or tenant data. Both palettes keep readable controls, status text and focus. External Keycloak pages retain their separate theme. |
+
+## Dashboard refresh correction — 2026-09-24
+
+| Review ID | Original coverage | Resolution |
+|---|---|---|
+| REV-21 | U3, U5 | User reported two brief yellow banners pushing dashboard panels down when an alert arrived. Tenant health and the count batch independently displayed indexing lag, while every in-flight count request marked retained panels stale. Assistant-selected presentation moves routine lag/progress into existing status areas and preserves panel positions, values and colors during refresh. Actual failures remain explicit. This refines the prior generic banner wording in shared system section 4 and dashboard section 16 without changing count snapshots, refresh timing or processing. |
+
+## Local v2 configuration — 2026-09-24
+
+| ID | Original coverage | Resolution |
+|---|---|---|
+| REV-22 | O1, O2 | User requested configuring v2 for local development after test alerts could only enter Global through v1. Assistant-selected dedicated local Kong/Grafana services and a worker-authenticated serving-member proof preserve the normal operator saga, encrypted keys, exact labels and pinned mTLS tenant routing. Local initial-gate bootstrap refuses production/shared databases and restore fences. Operator section 29 records the scope; docs/local-v2.md contains runtime bindings and evidence. |
+
+## Approved login design — 2026-09-27
+
+| ID | Original coverage | Resolution |
+|---|---|---|
+| REV-23 | U1, U5, N2 | User approved implementing the Appchi login mock after requesting a custom form backed by Keycloak. The `appchi` client login theme supersedes minimal stock-page branding and REV-20's separate-theme limitation. Assistant-selected integration preserves Keycloak's generated form action, code flow/PKCE and console theme; only an initial 401 `unauthenticated` starts login automatically, preserving the requested local path. Explicit logout, expired callbacks, access denial and service failures retain recovery controls. Light/dark preference is local to each origin. Identity sections 1–2 and shared system section 3 record the contract. |
+| REV-24 | U1, U5 | User requested an icon-based Light/Dark switch after reviewing the account menu. The signed-in account menu and signed-out application state now share an accessible sun/moon switch; existing preference persistence and the light default remain. The UI mapping records the control. |
+
+## Preset alert return navigation — 2026-09-27
+
+| ID | Original coverage | Resolution |
+|---|---|---|
+| REV-25 | U1, U3, U5 | User reported that opening an alert from saved preset results offered only the All alerts return path. Assistant-selected correction reuses the existing browser-tab alert-list context to show the preset breadcrumb and Back to preset action, and keeps Previous/Next scoped to the visible result page. A direct alert link without source context still opens normally. Returning to the preset resets transient filters under the existing preset contract. |
+| REV-26 | U1, U5 | User requested opening presets by clicking anywhere in a list row. The existing primary link now covers the row; Edit, History and the action menu retain independent hit targets. The same primary destinations and unsaved-change navigation guard remain in effect. |
+
+## Assignment-based alert status — 2026-09-27
+
+| Review ID | Original coverage | Decision / correction |
+|---|---|---|
+| REV-27 | L4, A4, Q4, U1, U5 | User approved one assignment control, removal of independent acknowledgement, and Acknowledged status whenever an alert is firing and assigned. Assignment, reassignment, unassignment and occurrence transitions follow alert operations section 17. Assistant-selected compatibility retains old physical fields, immutable evidence and legacy CEL/sort meanings without exposing a second current ownership field; current responses derive `display_status`, and search lowers that feed field onto the existing index. Retire `set_acknowledged` with 422; adapt legacy current-view columns without rewriting saved history. The new visible status is filterable but not sortable; raw lifecycle sort is labelled Lifecycle. This supersedes REV-13's current acknowledger display-name addition and the old independent acknowledgement contract. |
+
+## Current alert JSON viewer — 2026-09-27
+
+| Review ID | Original coverage | Decision / correction |
+|---|---|---|
+| REV-28 | U1, U5 | User requested a View alert button on the specific alert detail page. It displays the currently loaded detail response as formatted, read-only JSON in a native dialog available to page readers. Dismissal and focus follow native dialog behavior; opening performs no second request or mutation. UI mapping and shared system section 3 record this presentation contract. |
+
+## Bare CEL field identifiers — 2026-09-27
+
+| Review ID | Original coverage | Decision / correction |
+|---|---|---|
+| REV-29 | Q2, U2 | User requested that alert CEL conditions use field names directly (for example, `application`) without requiring `alert.`. Assistant-selected compatibility retains `alert.field` for saved source, keeps the existing context allow-lists, and treats bare identifiers as additive within `appchi-cel-v1` because old expression meaning is unchanged. The editor, chips, functions, quick views and new examples use bare identifiers; stored source is not rewritten. |
+
+## Local correlation preview — 2026-09-27
+
+| Review ID | Original coverage | Decision / correction |
+|---|---|---|
+| REV-30 | C1–C8, N1 | User asked the assistant to make correlation rules creatable in the isolated local stack. Assistant-selected development preview uses explicit finite limits while keeping the profile unqualified. Code, local deployment epoch and disposable-PostgreSQL check evidence bind the preview; audited activation requires healthy source order and no maintenance windows or effects. Production/staging retain the fully measured profile requirement. The preview worker uses the normal PostgreSQL journal and incident transaction path; its limits are local safety ceilings, not release capacity claims. |
+
+## Alert operator display — 2026-09-28
+
+| Review ID | Original coverage | Decision / correction |
+|---|---|---|
+| REV-31 | L2, U1, U5 | User requested operator names in alert views where the managed operator ID appeared. Alert detail, source activity and configurable Operator columns display the current same-tenant managed name for v2; v1 displays its exact source string. Assistant-selected implementation adds read-time `operator_display_name` to alert detail/feed/preview responses and shows Unknown operator when a v2 name cannot be resolved. The stable `operator` ID and its identity, CEL and sort contracts remain unchanged. See [alert operations section 3](spec-alert-operations.md#3-managed-field-catalog). |
+
+## Quick result sorting — 2026-09-28
+
+| Review ID | Original coverage | Decision / correction |
+|---|---|---|
+| REV-32 | Q4, U1, U5 | User requested column-title sorting on All alerts and saved preset results, cycling ascending, descending and regular order. The transient override replaces the preset's whole sort while active and never saves it. Assistant-selected scope makes only existing server-sortable fields clickable; composite and derived headings stay static under the existing sort whitelist. Sort changes restart the alert snapshot on page one and clear selection. See [alert operations section 24](spec-alert-operations.md#24-reads-search-and-presentation) and [preset operations section 4](spec-preset-operations.md#4-columns-and-sorting). |
+
+## Kafka-first alert redesign — 2026-09-30
+
+| Review ID | Original coverage | Decision / correction |
+|---|---|---|
+| REV-33 | L1–L4, C1–C8, D1–D4, N1, R1–R4 | User accepted Kafka-first admission, no Appchi PG ingress dependency, transactional source changed+offset publication, tenant Kafka correlation order, ignored manual edits except resolve, inline maintenance effects, best-effort search hints with reconciliation, and actual Kong policy enforcement. [Kafka-first pipeline](spec-kafka-alert-pipeline.md) records all eight assistant-selected technical decisions and the accepted Kafka retention-loss limitation. Implementation/qualification evidence remains separate. |
+
+## REV-34 — User-deferred workers and synchronous provisioning (2026-09-30)
+
+User correction: defer maintenance timer release, assignment cleanup, inactivity/
+retention workers and operator background orchestration. A later source update
+may clear ended maintenance suppression. Keep operator HTTP requests open until
+verified success/failure. Keycloak-only identity supply is a question, not an
+accepted replacement. [Worker scope](spec-worker-scope.md) records the normative
+supersession, nice-to-have components and explicitly assistant-selected details:
+source-time release/cutover, unchanged history access windows and assignee masking,
+durable partial-operation recovery, HTTP budgets, isolated provisioning connection
+and expiry disposal on the next successful mutation. Original issue IDs remain.
+Implementation/qualification evidence is tracked separately in
+[worker-scope implementation](docs/worker-scope-implementation.md).
+
+## REV-35 — Directory worker nice-to-have (2026-09-30)
+
+User decision: remove the directory worker from current deployment and put it in
+the nice-to-have list. This supersedes REV-34 section 4 and the automatic
+five-minute LDAP-change propagation release gate. Assistant-selected boundary:
+retain explicit complete trusted publication for bootstrap/manual refresh,
+existing identity/grant/session checks and restore gates; unknown identities
+remain unavailable until verified publication. No Keycloak-only identity supply
+is implied. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Original IDs are unchanged.
+
+## REV-36 — Live publishing in the Product API (2026-09-30)
+
+User decision: move live hint publishing into the Product API and remove the
+separate live worker. Assistant-selected details in [worker scope section 6](spec-worker-scope.md#6-live-updates-inside-the-product-api) cover off-event-loop bounded publishing,
+replica-safe duplicate invalidations, generation-conditional completion, drained
+shutdown and minimal API outbox privileges. SSE authorization and PostgreSQL
+reconciliation remain. Existing IDs and prior worker deferrals are preserved.

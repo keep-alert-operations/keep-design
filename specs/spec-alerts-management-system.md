@@ -1,5 +1,9 @@
 # Appchi system design
 
+**Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+
+**Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
+
 Appchi is an internal, multi-tenant alerts management system. It receives v1/v2 alerts, maintains one evolving row per logical alert with source and activity history, and provides CEL feeds, shared presets, incidents, automatic correlation, maintenance suppression and shared count dashboards.
 
 This specification set defines the initial release. Application implementation and production qualification are separate work; [Delivery readiness](./delivery-readiness.md) records the required service inputs and evidence.
@@ -11,6 +15,7 @@ Each contract has one authoritative home. Read the relevant domain document toge
 | Document | Authoritative content |
 |---|---|
 | [Alerts](./spec-alert-operations.md) | Native field inventory, validation, identity, ingestion, lifecycle, occurrences, notes, retention and alert API behavior. |
+| [Kafka-first alert pipeline](./spec-kafka-alert-pipeline.md) | Admission, transactional Kafka source processing, gateway policy, temporal boundaries, correlation triggers, search reconciliation and cutover. |
 | [Alerts and history technical design](./spec-alert-history-technical.md) | CEL semantics/execution, alert storage, ordered pipeline, projection, feed/history cursors, live updates, purge and rebuild. |
 | [Tenants and access](./spec-tenant-access.md) | Tenant lifecycle, role matrix, grants, directory selection, access audit and API contracts. |
 | [Identity configuration](./spec-identity-configuration.md) | Team-owned Keycloak, LDAP membership, username/password sign-in, sessions, five-minute access enforcement and outage behavior. |
@@ -38,7 +43,7 @@ A **tenant** is an independent authorization and data scope. Specific tenants re
 
 An **operator** permanently belongs to one tenant and represents a v2 sender. Kong/API keys establish its immutable identity and routing. Managed operators require verified setup in the shared company Grafana. Legacy v1 operator strings are source data, not managed operators or authorization.
 
-An **alert** is a logical identity, not a delivery. Source events update its permitted fields and lifecycle. Resolution followed by firing starts another occurrence on the same row. V1 and v2 identities are separate. Acknowledgement, assignment, notes and incident membership are management data; sources cannot overwrite them as arbitrary input.
+An **alert** is a logical identity, not a delivery. Source events update its permitted fields and lifecycle. Resolution followed by firing starts another occurrence on the same row. V1 and v2 identities are separate. Assignment, notes and incident membership are management data; sources cannot overwrite them as arbitrary input. Assignment acknowledges responsibility: the visible status is Firing for an unassigned firing alert, Acknowledged for an assigned firing alert, and Resolved for any resolved alert. Assignment is the sole current ownership control; there is no separate acknowledgement action. Alert operations section 17 defines transitions and retained compatibility evidence.
 
 **Suppression** is independent of firing/resolved lifecycle. V2 source suspension and maintenance contribute separate causes. Suppressed alerts remain ingested, stored and available through explicit feed inclusion, but ordinary feed counts and automatic correlation exclude them.
 
@@ -52,61 +57,63 @@ A **maintenance window** suppresses qualifying arrivals/transitions during a one
 
 ## Architecture and authority
 
-Backend services use Python/FastAPI; the UI uses Next.js/TypeScript. Workloads run in OpenShift. Modules share a transactional domain model; separate worker roles scale processing without changing authority or transaction boundaries.
+Backend services use Python/FastAPI; the UI uses Next.js/TypeScript. Workloads run in OpenShift. Modules share a transactional domain model. [Current worker scope](spec-worker-scope.md) defines active roles and deferred automation; operator provisioning runs during backend HTTP requests and live hint publishing runs as a Product API background task.
 
 ```mermaid
 flowchart LR
   V1[Native v1: Global] --> Ingress[Ingress API]
   V2[Native v2 / Grafana] --> Kong[Kong operator authentication]
   Kong --> Ingress
-  Ingress --> PG[(PostgreSQL authority)]
-  PG --> Relay[Durable outbox relay]
-  Relay --> Kafka[Kafka received / changed hints]
-  Kafka --> Workers[Ordered application workers]
-  Workers --> PG
-  PG --> Indexer[Projection worker]
-  Kafka --> Indexer
+  Ingress --> Received[Kafka alerts.received]
+  Received --> Source[Source processor]
+  Source --> PG[(PostgreSQL authority and replay proof)]
+  Source --> Changed[Kafka alerts.changed + input offset transaction]
+  Changed --> Correlation[Correlation consumer]
+  Correlation --> PG
+  Changed --> Indexer[Search indexer]
+  PG --> Reconcile[Bounded current-state reconciliation]
+  Reconcile --> Indexer
   Indexer --> ES[(Elasticsearch current alerts)]
-  UI[Next.js browser] --> API[Product API]
+  UI[Next.js browser] --> API[Product API + live updates]
   API --> PG
   API --> ES
-  PG --> Live[PG generations + Redis hints]
-  Live --> SSE[SSE and reconciliation]
-  SSE --> UI
+  API --> Redis[(Redis hints)]
+  Redis --> API
+  API -->|SSE and reconciliation| UI
   LDAP[Company LDAP] --> KC[Team-owned Keycloak]
   KC --> API
-  LDAP --> Directory[Trusted directory verifier]
+  LDAP --> Directory[Explicit trusted directory publication]
   Directory --> PG
 ```
 
 | Store/service | Responsibility | Consistency boundary |
 |---|---|---|
-| PostgreSQL | Current domain state, source/history, authorization, receipts, proofs, jobs, outboxes and progress | Successful admission/commands require the authoritative transaction to commit. |
+| PostgreSQL | Current domain state/history, authorization, immutable source replay proof, command results and non-alert jobs | Source application and product commands commit here; ingress has no database dependency. |
 | Elasticsearch | Rebuildable current-alert/current-note search projection | May lag; a searchable watermark proves visibility. Never authorizes access or supplies authoritative history. |
-| Kafka | Durable alert-pipeline transport and wake-ups | PostgreSQL identities, ordering and checkpoints prevent duplicate effects and recover missed delivery. |
+| Kafka | Self-contained received alerts and transactional changed transport | Broker acknowledgement precedes 202. Delivery UUID/proof prevents duplicate application; per-key source order and per-tenant changed order govern their respective consumers. Retention can lose unprocessed accepted records. |
 | Redis | Low-latency invalidation hints | Loss is repaired by PostgreSQL generation reconciliation and polling. |
 | Keycloak / LDAP | Human authentication / company identity and nested membership | Appchi combines a valid session, accepted directory evidence and current product grants on every authorization decision. |
-| Kong / Grafana | Operator authentication / shared remote alert delivery configuration | Appchi rechecks current credential state; remote provisioning uses a durable verified saga. |
+| Kong / Grafana | Operator authentication / shared remote alert delivery configuration | Kong Key Auth plus Appchi policy verifies credential/tenant/generation; all-node proof gates the remote saga. Ingress verifies private mTLS context. |
 | Protected recovery evidence | Minimal retirement, revocation and replay fences surviving database rollback | Restore and physical cleanup are gated by the independently supplied durability contract. |
 
 ### Admission and processing
 
-1. Validate the native payload or Grafana adapter result and resolve routing. V1 always routes to Global; v2 uses the authenticated operator's tenant.
-2. Resolve request/item retry identities. Atomically reserve backlog capacity and persist the admissible batch subset, its receipt and increasing tenant admission order in PostgreSQL.
-3. Return 202 after commit. The outbox relay publishes wake-ups; pending-work scans recover missed wake-ups.
-4. Apply source items in tenant order. Commit state, occurrences, history, suppression evidence, correlation input and projection work together. Source order and semantic change order are distinct.
-5. Correlation uses durable before/after evidence, current-time eligibility and the shared coordinator to commit complete incident/ownership changes.
-6. Project full committed snapshots to Elasticsearch. Publish view progress only after search visibility is proven. SSE invalidates scoped views; clients refetch and retain explicit lag/error state.
+1. Capture ingress UTC, validate native fields or Grafana transport, and use fixed Global or trusted Kong tenant routing without PostgreSQL.
+2. Publish valid batch members concurrently to `alerts.received`, keyed by tenant/application/key. Reuse an internal delivery UUID across three attempts; return per-item 202 only on broker acknowledgement.
+3. Consume each source partition in append order. Commit alert/history/suppression and immutable result proof once in PostgreSQL; then transactionally publish `alerts.changed` and commit the input offset in Kafka. A replay retrieves the same bytes without reapplying state.
+4. Correlation consumes changed events in tenant Kafka order, uses ingress UTC for eligibility, and checks current state before actions. Maintenance effects use bounded inline transactions; manual resolve atomically removes active evidence.
+5. Search consumes a separate group and reconciles authoritative PostgreSQL current state, including missed manual/maintenance/relationship/deletion notifications. A completed bounded scan establishes a lower-bound searchable watermark.
+6. SSE invalidates scoped views; clients refetch and show lag/errors. Infrastructure retention, topology and recovery remain with the dedicated teams.
 
-Source failures cannot skip accepted predecessors. Ten consecutive failures block that tenant's source head until the audited retry API resumes the same item after repair. Projection/relay retries remain automatic.
+Terminal post-202 business conflicts are recorded internally and advance the partition. Transient failures retry without advancing. The complete protocol, limitations and assistant-selected decisions are in [Kafka-first pipeline](./spec-kafka-alert-pipeline.md).
 
 ### Human reads and writes
 
-Sign-in uses username and password through backend OIDC authorization code flow with PKCE. Browser requests use an opaque protected session cookie; tokens remain server-side. Product APIs reauthorize tenant scope and nested references. Directory changes, including account disablement and nested super-admin loss, target enforcement within five minutes during normal operation. Refresh outages retain last-known trusted identity data; known revocations, current grants and session expiry still apply.
+Sign-in uses username and password through backend OIDC authorization code flow with PKCE. Browser requests use an opaque protected session cookie; tokens remain server-side. Product APIs reauthorize tenant scope and nested references. Automatic directory refresh and its five-minute LDAP-change propagation target are nice-to-have under REV-35. Explicit trusted publication supplies identity updates; last-known trusted identity data, known revocations, current grants and session expiry still apply.
 
 Alert feeds/counts query Elasticsearch under tenant scope, CEL, transient text filtering and suppression policy. Alert detail/history and incident/configuration reads use PostgreSQL. Feed pagination uses a five-minute search snapshot; other collection and history cursor semantics are specified per resource.
 
-Mutations carry command identity and expected revisions, commit authoritative results and history atomically, and return those results immediately. A retry never invents a new command after an uncertain timeout. Earlier pending source work blocks conflicting alert commands. Authorization guards precede domain locks; external service calls occur outside transactions.
+Mutations carry command identity and expected revisions, commit authoritative results and history atomically, and return those results immediately. A retry never invents a new command after an uncertain timeout. Queued source work does not block manual commands and may change an alert again afterward. Authorization guards precede domain locks; external service calls occur outside transactions.
 
 Navigation starts at the last accessible tenant from the session, otherwise Global Alerts. Shared views refresh through SSE plus reconciliation. Drafts remain in tab memory across ordinary conflicts and are cleared when access is lost. Search outages, pending maintenance and indexing lag are visible rather than presented as empty results.
 
@@ -114,18 +121,18 @@ Navigation starts at the last accessible tenant from the session, otherwise Glob
 
 - Immutable UUIDs identify resources. Names may be reused only under their resource's uniqueness and deletion rules; reuse never transfers old links, grants or history.
 - Every tenant reference, query, command, cursor and live message is scoped and reauthorized. Assignment and resource creation confer no extra permissions.
-- Effective changes commit state, history, progress and required outbox/proof records together. No-op retries do not create synthetic activity.
+- Effective changes commit state, history, progress and proof together; alert search notifications after non-source commits are best effort. No-op retries do not create synthetic activity.
 - Automatic correlation uses genuine eligible transitions and original qualifying times. Delayed work cannot revive expired evidence or treat unknown state as a false-to-true transition.
 - Active ownership, overlapping suppression and preset/dashboard references are enforced transactionally. A partially evaluated automatic attachment set is never presented as complete.
 - A visible count is exact for its stated query/snapshot. Errors and stale values retain provenance; failed searches never become zero.
-- Alert inactivity is 30 days of source inactivity; new valid repeats refresh it. Incident inactivity is independently 30 days of qualifying activity and excludes unchanged repeats.
-- Alert/incident retention is 90 days after the latest actual resolution. Reopening cancels retirement; resolved edits/repeats do not extend it. Other histories use the [retention matrix](./spec-system-completion.md#19-unified-retention-and-configuration-history).
+- Inactivity sweeps are deferred. Existing activity anchors remain; no timer automatically resolves alerts or incidents.
+- Automatic retention sweeps are deferred. Existing history-access windows and prior retirement/replay fences remain; the [retention matrix](./spec-system-completion.md#19-unified-retention-and-configuration-history) remains the future cleanup design.
 - Retirement preserves minimal references and replay fences. Recovery never restores deleted content, revoked credentials or old sessions from stale backups.
-- Service outages isolate affected capabilities. PostgreSQL authority failure prevents acknowledgement; Kafka/search/Redis failure does not by itself invalidate healthy durable admission.
+- Service outages isolate affected capabilities. PostgreSQL failure blocks processing/commands but not healthy Kafka admission; Kafka failure blocks acknowledged admission. Search/Redis failures isolate their affected capabilities.
 
 ## Capacity and ownership
 
-The sustained ingestion requirement is 250 deliveries/second company-wide, including all traffic in one tenant or Global; normal traffic is about 66.7/second. Selected normal-operation p99 objectives are one second for admission and authoritative commands, two seconds for searches/counts, and five seconds for incoming/maintenance changes to render. Path availability targets are 99.9% over rolling 30 days. [Reliability](./spec-reliability-operations.md) defines eligibility, measurement, stress/recovery workloads and admission budgets.
+The sustained ingestion requirement is 250 deliveries/second company-wide, including all traffic in one tenant or Global; normal traffic is about 66.7/second. Selected normal-operation p99 objectives are one second for admission and authoritative commands, two seconds for searches/counts, and five seconds for incoming/maintenance changes to render. Path availability targets are 99.9% over rolling 30 days. [Reliability](./spec-reliability-operations.md) defines eligibility, measurement, stress/recovery workloads and Kafka admission safeguards.
 
 These targets do not establish measured capacity. Before enabling affected capabilities, qualify combined workloads and record numeric application budgets, connection/resource allocations and service capability evidence.
 

@@ -18,8 +18,10 @@ authorization. Preserve the design, ownership and consistency rules below.
 Read [System design](./spec-alerts-management-system.md) before project work and
 reread affected normative supplements before changing behavior:
 
+- [Current worker scope](./spec-worker-scope.md).
 - [Alert operations](./spec-alert-operations.md).
 - [Alerts/history technical baseline](./spec-alert-history-technical.md).
+- [Kafka-first alert pipeline](./spec-kafka-alert-pipeline.md).
 - [Incident operations](./spec-incident-operations.md).
 - [Correlation rules](./spec-correlation-rules.md).
 - [Operator operations](./spec-operator-operations.md).
@@ -62,8 +64,9 @@ scenarios live in [Verification plan](./verification-plan.md).
 - Native v1 and v2 both remain accepted during migration. V1 is unauthenticated and
   routes to fixed Global. V2 uses Kong/operator keys and immutable owning-tenant routing.
 - Company LDAP is authoritative for users/nested teams. The user's team owns and
-  configures internal Keycloak. Preserve five-minute normal-operation change
-  enforcement and last-known trusted identity data during refresh outages.
+  configures internal Keycloak. Automatic directory synchronization and its
+  five-minute LDAP-change propagation target are nice-to-have under REV-35.
+  Preserve explicit trusted publication and last-known trusted identity data.
   The user's 2026-09-23 local-development exception permits an isolated Keycloak
   realm with native custom users and groups, using immutable native UUIDs and
   the normal OIDC/directory-publication path; production LDAP remains unchanged.

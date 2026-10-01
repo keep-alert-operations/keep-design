@@ -1,5 +1,9 @@
 # Tenants and access
 
+**Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+
+**Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
+
 Tenant lifecycle, grants, permissions, directory selectors and audit. [Identity configuration](./spec-identity-configuration.md) defines authentication, trusted membership and sessions.
 
 **User-selected audit policy:** tenant and permission changes are retained for 365 days and readable only by current tenant admins and global super-admins.
@@ -20,7 +24,7 @@ Creation accepts a name and 1–100 initial user/team grants, with at least one 
 
 Commit the tenant, name claim, initial grants, revision, audit and command receipt in one PostgreSQL transaction. A failure creates none of them. Return 201 only after commit. Creation does not provision a Keycloak realm, operator, Grafana resource, default preset or dashboard. Operators retain their separately selected setup flow. Initialize the tenant revision to 1; the server determines the specific-tenant kind and identity.
 
-An unknown principal or incomplete new team expansion cannot satisfy the administrator requirement. Obtain the evidence through the directory reader; if unavailable within the existing request deadline, return 503 with a retry indication and leave creation uncommitted. A coalesced background verification may continue. Existing complete evidence remains usable under the selected outage policy; do not add a freshness cutoff.
+An unknown principal or incomplete new team expansion cannot satisfy the administrator requirement. Use explicitly published trusted directory evidence; if unavailable within the existing request deadline, return 503 with a retry indication and leave creation uncommitted. An administrator must explicitly publish the required verification; no background directory job continues in this scope. Existing complete evidence remains usable under the selected outage policy; do not add a freshness cutoff.
 
 ## 3. Grant model and changes
 
@@ -126,7 +130,7 @@ Do not duplicate change history for retries or no-ops. Validation failures, deni
 
 Compare consecutive successfully verified semantic identity states and record effective tenant-role/eligibility changes for affected principals and local-admin vacancy transitions. Removing one path without changing effective access creates no synthetic access-loss event. Local grant edits still receive audit even when another grant keeps effective access unchanged.
 
-Use the system directory-synchronizer actor, directory revision and observation time; include an authoritative source-change time only when actually available. Do not invent a human LDAP administrator or backdate an observed change. First synchronization records baseline establishment, not fabricated historical grant actions. Failed or partial refreshes do not generate removal, vacancy or assignment-loss events. Identity refresh scheduling and source visibility remain subject to the existing five-minute qualification target.
+Use the system directory-synchronizer actor, directory revision and observation time; include an authoritative source-change time only when actually available. Do not invent a human LDAP administrator or backdate an observed change. First synchronization records baseline establishment, not fabricated historical grant actions. Failed or partial refreshes do not generate removal, vacancy or assignment-loss events. Automatic identity refresh and the five-minute LDAP-change propagation target are deferred under REV-35; explicit publications retain these audit and completeness rules.
 
 ## 15. Platform access audit
 

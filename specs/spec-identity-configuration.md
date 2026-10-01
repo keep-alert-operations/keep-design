@@ -1,5 +1,9 @@
 # Identity and sign-in configuration
 
+**Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+
+**Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
+
 OIDC sign-in, LDAP membership, sessions and access-change enforcement. [Tenants and access](./spec-tenant-access.md) defines product grants and audit.
 
 **User decisions:** the existing Keycloak installation belongs to the user's team, which can configure it. It runs inside company infrastructure and provides company-credential SSO. LDAP remains authoritative for users and teams. Nested membership applies to both tenant grants and the designated global-super-admin team. LDAP changes and account disablement target enforcement within five minutes under normal operation, including open sessions. During identity-refresh outages, use last-known identity data for normal authorization without an identity-data age cutoff.
@@ -14,7 +18,7 @@ The user's team owns Keycloak configuration and operation for this integration. 
 
 Use a dedicated production realm named `appchi`, with separate `appchi-dev` and `appchi-staging` realms and credentials. Appchi tenants share the production realm; creating a tenant does not create a Keycloak realm, client or role. Use the existing installation rather than introducing another identity product. Actual hostnames and the installed release are deployment facts to inventory, not values to invent.
 
-Keep the login page close to the standard Keycloak page, with Appchi name/logo and a directory-support link. Avoid a custom authentication extension or a heavily customized theme for the initial release. Turn off self-registration, social sign-in, direct password grants, implicit flow, device/CIBA grants for this client, service-account grants and offline access. Users do not create a second Appchi password.
+The user approved an Appchi-branded username/password form on 2026-09-27. Implement it as the `appchi` Keycloak login theme for the `appchi-web` client, with the approved centered card, light/dark appearance, password visibility control, provider errors and directory-support help. This supersedes the earlier restriction to minimal standard-page branding. Submit credentials directly to Keycloak's generated form action and retain its authentication/session checks; do not add an Appchi password API or authentication extension. Keep unrelated clients and console administration on their existing themes. Turn off self-registration, social sign-in, direct password grants, implicit flow, device/CIBA grants for this client, service-account grants and offline access. Users do not create a second Appchi password.
 
 ## 2. Login flow and browser boundary
 
@@ -32,6 +36,8 @@ Use these application routes:
 | `POST /auth/activity` | Record foreground application activity, including a visible dashboard heartbeat. |
 
 Configure exact HTTPS callback and post-logout redirect URLs for each environment, without wildcard origins. After login, accept only a validated local relative return path. Keep one-use state, nonce and PKCE verifier server-side; login transactions expire after ten minutes and are bound to the initiating browser. Callback replay or failed validation cannot create a session.
+
+Assistant-selected entry behavior opens `/auth/login` after an initial session check returns 401 `unauthenticated`, preserving the current local path and query as `return_to`. Existing authenticated workspaces retain their mounted session across navigation. Session loss after admission, explicit sign-out, access denial and service failures retain their explicit recovery controls. `/signed-out` and `/sign-in-expired` never automatically restart login.
 
 For a browser callback whose transaction is expired, consumed or missing, redirect
 to `/sign-in-expired` with 303 and no-store caching. This public page explains the
@@ -94,6 +100,10 @@ Configure a protected, read-only OIDC claim containing that immutable directory 
 Keycloak groups/roles and browser token claims are not authoritative Appchi tenant permissions. Appchi keeps its own grants, and the designated LDAP team supplies global-super-admin eligibility. Use a standard Python OIDC library and a small directory-schema adapter; do not build a pluggable identity-provider framework for the first release.
 
 ## 7. Membership supply and the five-minute target
+
+**REV-35 current boundary:** use explicit trusted publications for bootstrap and
+manual identity refresh. The automatic polling algorithm and timing budgets below
+are deferred design references, not current deployment or release gates.
 
 Use an Appchi background directory reader with a read-only LDAP connection to obtain account eligibility, group edges and complete transitive membership. This avoids making live authorization depend on login-time JWT groups or on Keycloak changed-user synchronization detecting every group-edge change.
 
@@ -176,6 +186,6 @@ Assistant-selected local bindings use directory source `keycloak-local`, native 
 
 A separate confidential `appchi-directory` service account uses client credentials solely to read the local Admin REST API. Grant only the required realm-management read/query permissions; do not enable service accounts or password grants on `appchi-web`. The dedicated reader requires a loopback HTTPS issuer, configured certificate trust, explicit allocation/page bounds, a secret environment binding and explicit `APPCHI_ENVIRONMENT=development`. It enumerates this small local realm, including subgroup/member pagination, excludes service-account identities, and publishes through the same guarded directory verifier and PostgreSQL publisher. The company LDAP reader and schema configuration remain unchanged.
 
-Polling starts each local verification cycle about every 60 seconds. Complete evidence can update users, teams, labels and memberships; incomplete traversal preserves the last complete publication while separately applying positively verified disablement. An identity missing from enumeration requires explicit absence from both the user and group endpoints before it becomes a tombstone. Provider timeouts, malformed responses, ambiguity and exhausted bounds cannot establish deletion or an empty successful roster. This implementation is not a measured claim about the five-minute production enforcement target.
+REV-35 removes continuous local polling. Startup performs one complete publication; subsequent identity changes require explicit manual refresh. The optional future poller starts each local verification cycle about every 60 seconds. Complete evidence can update users, teams, labels and memberships; incomplete traversal preserves the last complete publication while separately applying positively verified disablement. An identity missing from enumeration requires explicit absence from both the user and group endpoints before it becomes a tombstone. Provider timeouts, malformed responses, ambiguity and exhausted bounds cannot establish deletion or an empty successful roster. This implementation is not a measured claim about the five-minute production enforcement target.
 
 Development startup may invoke the existing initial-bootstrap publication flag after verifying the configured group's membership. That flag may only open `directory_bootstrap_required`; it cannot open a restore-integrity gate. The regular signed-token, password authentication, CSRF, session timeout, reauthorization, assignment and audit contracts continue to apply. Store generated local credentials outside version control and preserve them across ordinary restarts. The [local setup instructions](./docs/local-keycloak.md) contain operational commands and verification status.

@@ -1,5 +1,7 @@
 # Dashboards
 
+**Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+
 Shared dashboards display preset alert counts. This document defines editing, layout, count consistency, APIs and history.
 
 ## 1. Identity, names and permissions
@@ -107,6 +109,15 @@ Deletion is editor-authorized, revision-checked and confirmed with “Delete thi
 Keep active configuration and minimal creator/editor metadata until deletion. Superseded revisions retain 90 elapsed days from supersession; activity 90 days from recording; final deleted definition/deletion event 90 days from deletion. Retained events hold their before/after snapshots. Command results last 90 days from completion. Pending dependencies extend only required records. Expired history is unavailable even before physical deletion; daily guarded cleanup targets 24 hours after eligibility. Minimal retired IDs/command fences and protected restore evidence follow system completion. Dashboard history contains references and presentation only, never retained count snapshots or expired alert payloads.
 
 ## 16. Accessibility and visual states
+
+The user's dashboard refresh correction requires stable panel positions while
+incoming alerts are processed. Assistant-selected presentation keeps routine
+count refresh, indexing lag and suppression progress in the existing status line,
+with a reserved width and a stable narrow-screen layout. Keep the last successful
+counts, threshold colors and captured time while refreshing; an in-flight request
+alone does not mark every panel stale or add warning banners. Failed or invalidated
+observations still show their unavailable/stale state. No animation or added
+refresh delay is needed.
 
 Use the system's selected light or dark palette, tabular numerals, visible focus, labeled count cards and text status alongside color. The visual reference and theme behavior are governed by [shared system section 3](./spec-system-completion.md#3-navigation-and-visual-system). Announce an aggregated “Dashboard updated” politely after a batch; do not announce every second or every changed digit. Reduced-motion preference removes count transitions; do not animate counting through intermediate false values. A screen reader can read panel title, exact count, preset, freshness and threshold. Keyboard users can enter/exit fullscreen, open presets and operate all editing controls.
 
