@@ -6,7 +6,7 @@
 
 The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
 
-Shared CEL, PostgreSQL records, ordered processing, search, live updates and protected deletion. Product behavior is defined in [Alert operations](./spec-alert-operations.md).
+Shared CEL, PostgreSQL records, ordered processing, search, live updates and protected deletion. Product behavior is defined in [Alert operations](spec-alert-operations.md).
 
 ## 1. Authority and implementation boundary
 
@@ -233,8 +233,8 @@ Record post-202 semantic rejection, UUID conflict, invalid protocol proof, broke
 
 Before enabling each dependent path, verify the supplied PostgreSQL partition/locking/RLS capabilities, Elasticsearch PIT/wildcard/external-version/refresh/alias behavior, Kafka record/client limits and Redis/proxy connectivity against the selected contracts. Pin the deployed versions and record authenticated endpoints, supported timeouts, allocation and recovery-evidence handoff. Obtain values from the owning teams; do not invent them or silently switch engines when incompatible.
 
-Separate Kafka admission, authoritative Product API, source processing, correlation, search and live-delivery health. PostgreSQL or search outage does not disable valid Kafka admission. Missing automatic-evaluation budgets/proof blocks the affected unsafe processing. No application backlog or tenant pending-item budget rejects ingress while Kafka can acknowledge publication. Monitor Kafka retention risk and retained PostgreSQL proof/history growth; capacity, recovery-throughput and one-tenant stress qualification remain required. Expired unprocessed Kafka records are an accepted acknowledged-loss risk, with offset-gap diagnostics and fenced source/correlation recovery as specified in [Kafka alert pipeline](./spec-kafka-alert-pipeline.md).
+Separate Kafka admission, authoritative Product API, source processing, correlation, search and live-delivery health. PostgreSQL or search outage does not disable valid Kafka admission. Missing automatic-evaluation budgets/proof blocks the affected unsafe processing. No application backlog or tenant pending-item budget rejects ingress while Kafka can acknowledge publication. Monitor Kafka retention risk and retained PostgreSQL proof/history growth; capacity, recovery-throughput and one-tenant stress qualification remain required. Expired unprocessed Kafka records are an accepted acknowledged-loss risk, with offset-gap diagnostics and fenced source/correlation recovery as specified in [Kafka alert pipeline](spec-kafka-alert-pipeline.md).
 
 ## 29. Qualification and acceptance evidence
 
-See [required alert execution and recovery checks](./verification-plan.md#alert-execution-and-recovery).
+See [required alert execution and recovery checks](../verification/verification-plan.md#alert-execution-and-recovery).

@@ -1,10 +1,10 @@
 # Verification plan
 
-**REV-35 scope:** directory polling and its five-minute LDAP-change propagation cases are future qualification. Current identity acceptance must cover explicit complete bootstrap/refresh, unknown-user/team refusal without evidence, last-trusted authorization, immediate Appchi grant edits, known revocation/logout/session expiry and unchanged restore gates. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+**REV-35 scope:** directory polling and its five-minute LDAP-change propagation cases are future qualification. Current identity acceptance must cover explicit complete bootstrap/refresh, unknown-user/team refusal without evidence, last-trusted authorization, immediate Appchi grant edits, known revocation/logout/session expiry and unchanged restore gates. See [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
-**REV-34 scope:** [Worker scope](spec-worker-scope.md) supersedes acceptance requirements for deferred schedulers. Existing timer/fan-out and automatic-cleanup scenarios are future qualification, not active release gates. Pre-cutover maintenance history still requires compatibility checks.
+**REV-34 scope:** [Worker scope](../specs/spec-worker-scope.md) supersedes acceptance requirements for deferred schedulers. Existing timer/fan-out and automatic-cleanup scenarios are future qualification, not active release gates. Pre-cutover maintenance history still requires compatibility checks.
 
-Required acceptance cases for the selected design. Record executions, environment/version, workload, results and defects during implementation. No tests are reported as executed here. Link failures to [Design register](./design-register.md) and release evidence to [Delivery readiness](./delivery-readiness.md).
+Required acceptance cases for the selected design. Record executions, environment/version, workload, results and defects during implementation. No tests are reported as executed here. Link failures to [Design register](../decisions/design-register.md) and release evidence to [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md).
 
 ## Alerts
 
@@ -145,7 +145,7 @@ Verify direct approved field references, string methods on bare fields, `has(fie
 
 ## Kafka-first redesign (REV-33)
 
-Verify the [normative Kafka pipeline](spec-kafka-alert-pipeline.md) separately from legacy cutover compatibility tests:
+Verify the [normative Kafka pipeline](../specs/spec-kafka-alert-pipeline.md) separately from legacy cutover compatibility tests:
 
 - HTTP: no PG connection at ingress; immutable receive/default time and UUID across three attempts; concurrent partial batches; broker acknowledgement before202; failed Kafka503; no backlog gate; legacy IDs syntax-only; removed receipt lookup; five-second request and ten-second gateway deadlines.
 - Source: partition append order despite reversed UTC, PG commit before Kafka failure, immutable replay after manual edit, transaction unknown outcome and fenced rebalance, duplicate UUID at another offset, mismatched UUID bytes, client resubmission and unchanged-repeat evidence, terminal semantic rejection, no offset advancement on transient failure.
@@ -155,7 +155,7 @@ Verify the [normative Kafka pipeline](spec-kafka-alert-pipeline.md) separately f
 - Migration: old work drained, new groups start at captured topic boundaries, active legacy writers refused, incompatible saved correlation CEL/grouping blocked by parsed field reference, edited rule starts fresh epoch, old event schema never consumed as new.
 - Recovery: retained minimal delivery/key fences, outstanding publication/proof holds, missing protected replay baseline keeps restore closed, explicit Kafka low-watermark loss interval and reviewed reset. No client receipt service or zero-loss promise beyond supplied retention.
 
-Production capacity, multi-node failover/rebalance, clock-discontinuity and rollback-survival runs remain required even when focused local tests pass. Actual results and remaining gaps belong in [implementation evidence](docs/kafka-first-implementation.md).
+Production capacity, multi-node failover/rebalance, clock-discontinuity and rollback-survival runs remain required even when focused local tests pass. Actual results and remaining gaps belong in [implementation evidence](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/kafka-first-implementation.md).
 
 ## Worker scope correction
 
@@ -186,4 +186,4 @@ authorization remain intact, and SQL pools close only after publication drains.
 Ingress starts neither publisher nor subscriber. Apply 0047 and confirm the
 separate live role is rejected; qualify combined API resource use and Redis loss
 with PostgreSQL reconciliation in the supplied deployment. See
-[worker scope](spec-worker-scope.md#6-live-updates-inside-the-product-api).
+[worker scope](../specs/spec-worker-scope.md#6-live-updates-inside-the-product-api).

@@ -6,7 +6,7 @@
 
 The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
 
-Native v1/v2 inputs, logical identity, admission, lifecycle, history and alert APIs. Shared execution and storage are specified in [Alerts and history technical design](./spec-alert-history-technical.md).
+Native v1/v2 inputs, logical identity, admission, lifecycle, history and alert APIs. Shared execution and storage are specified in [Alerts and history technical design](spec-alert-history-technical.md).
 
 ## Input and normalized fields
 
@@ -110,7 +110,7 @@ Generate one internal delivery UUID before the first Kafka publish attempt and r
 
 ### 10. Request shapes and gateway context
 
-These are the strict native endpoint contracts. The later [operator supplement](./spec-operator-operations.md), sections 7–8 and 17–19, adds an authenticated Grafana webhook transport adapter with a fixed conversion to native-equivalent v2 events. Its standard Grafana envelope and Bearer authentication are specific to that route; they do not add accepted fields or authentication alternatives to the native endpoints. All v2 transports share authoritative operator/credential checks and the existing identity, occurrence, history and durable-admission rules.
+These are the strict native endpoint contracts. The later [operator supplement](spec-operator-operations.md), sections 7–8 and 17–19, adds an authenticated Grafana webhook transport adapter with a fixed conversion to native-equivalent v2 events. Its standard Grafana envelope and Bearer authentication are specific to that route; they do not add accepted fields or authentication alternatives to the native endpoints. All v2 transports share authoritative operator/credential checks and the existing identity, occurrence, history and durable-admission rules.
 
 Use these distinct transport routes; the route selects the source schema and authentication contract:
 
@@ -154,7 +154,7 @@ V2 firing means lifecycle firing and removes the source-suspension cause. Suspen
 
 V1 has no customer-supplied suppression field. Its native severity determines firing/resolved. The team-generated `to_show` is a compatibility projection: `return` while effectively suppressed, `suspend` otherwise; clear always determines resolution regardless of to_show. It is not accepted as an unauthenticated customer override. The initial system has no imported legacy snapshot/enriched-ingress interface; an adapter requiring historical to_show imports needs a separately designed trusted migration contract. This preserves the current literal meanings without inventing a third lifecycle status or permitting public v1 input to control maintenance.
 
-Manual status changes do not directly clear source or maintenance suppression causes. Re-evaluate maintenance against the resulting before/after state: a condition that becomes false closes its maintenance cause under the maintenance contract; source suppression remains controlled by source deliveries. A manual reopening is a new firing transition and must be evaluated for maintenance before correlation, using action time. Maintenance changes and source-cause removal use effective before/after suppression; only final effective unsuppression of a firing alert can supply fresh correlation evidence. Keep existing no-backfill/overlap/late-arrival rules, scheduled effective end times, links and active ownership. Record each cause's activation/release and effective suppression intervals with origin identity. [Maintenance](./spec-maintenance-operations.md) sections 4–11 define scheduler recovery, temporal proof and control races.
+Manual status changes do not directly clear source or maintenance suppression causes. Re-evaluate maintenance against the resulting before/after state: a condition that becomes false closes its maintenance cause under the maintenance contract; source suppression remains controlled by source deliveries. A manual reopening is a new firing transition and must be evaluated for maintenance before correlation, using action time. Maintenance changes and source-cause removal use effective before/after suppression; only final effective unsuppression of a firing alert can supply fresh correlation evidence. Keep existing no-backfill/overlap/late-arrival rules, scheduled effective end times, links and active ownership. Record each cause's activation/release and effective suppression intervals with origin identity. [Maintenance](spec-maintenance-operations.md) sections 4–11 define scheduler recovery, temporal proof and control races.
 
 ### 17. Assignment and derived acknowledgement
 
@@ -267,4 +267,4 @@ Deduplicate the selection before counting. Validate all permissions, pending-sou
 
 ### 28. Acceptance
 
-See [required alerts checks](./verification-plan.md#alerts).
+See [required alerts checks](../verification/verification-plan.md#alerts).

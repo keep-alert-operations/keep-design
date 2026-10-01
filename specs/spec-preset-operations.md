@@ -149,4 +149,4 @@ If PostgreSQL authority is unavailable, return dependency errors for preset read
 
 ## 20. Acceptance
 
-See [required presets checks](./verification-plan.md#presets).
+See [required presets checks](../verification/verification-plan.md#presets).

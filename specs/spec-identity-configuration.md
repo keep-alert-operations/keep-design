@@ -4,7 +4,7 @@
 
 **Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
 
-OIDC sign-in, LDAP membership, sessions and access-change enforcement. [Tenants and access](./spec-tenant-access.md) defines product grants and audit.
+OIDC sign-in, LDAP membership, sessions and access-change enforcement. [Tenants and access](spec-tenant-access.md) defines product grants and audit.
 
 **User decisions:** the existing Keycloak installation belongs to the user's team, which can configure it. It runs inside company infrastructure and provides company-credential SSO. LDAP remains authoritative for users and teams. Nested membership applies to both tenant grants and the designated global-super-admin team. LDAP changes and account disablement target enforcement within five minutes under normal operation, including open sessions. During identity-refresh outages, use last-known identity data for normal authorization without an identity-data age cutoff.
 
@@ -176,7 +176,7 @@ Keep sanitized realm/client settings and mapping definitions under version contr
 
 Deliver authentication failures, factor resets, administrative configuration changes and synchronization health to the approved operational logging service without credentials. Measure verification age, coverage/completeness, cycle duration, end-to-end membership/disablement propagation, refresh failures and logout delivery. Operational telemetry retention remains with its owning service. The tenant/access audit policy permits current tenant admins and global super-admins only; Global's corresponding audit history is global-super-admin-only. Enforce current effective access through this supplement's session and identity policy. Tenant/access supplement 13–19 completes audit event coverage, the user's 365-day tenant audit period, assistant-selected platform audit readership/retention, and recovery integration. Operational telemetry ownership remains unchanged.
 
-See [identity acceptance cases](./verification-plan.md#identity).
+See [identity acceptance cases](../verification/verification-plan.md#identity).
 
 ## 14. Local Keycloak development exception
 
@@ -188,4 +188,4 @@ A separate confidential `appchi-directory` service account uses client credentia
 
 REV-35 removes continuous local polling. Startup performs one complete publication; subsequent identity changes require explicit manual refresh. The optional future poller starts each local verification cycle about every 60 seconds. Complete evidence can update users, teams, labels and memberships; incomplete traversal preserves the last complete publication while separately applying positively verified disablement. An identity missing from enumeration requires explicit absence from both the user and group endpoints before it becomes a tombstone. Provider timeouts, malformed responses, ambiguity and exhausted bounds cannot establish deletion or an empty successful roster. This implementation is not a measured claim about the five-minute production enforcement target.
 
-Development startup may invoke the existing initial-bootstrap publication flag after verifying the configured group's membership. That flag may only open `directory_bootstrap_required`; it cannot open a restore-integrity gate. The regular signed-token, password authentication, CSRF, session timeout, reauthorization, assignment and audit contracts continue to apply. Store generated local credentials outside version control and preserve them across ordinary restarts. The [local setup instructions](./docs/local-keycloak.md) contain operational commands and verification status.
+Development startup may invoke the existing initial-bootstrap publication flag after verifying the configured group's membership. That flag may only open `directory_bootstrap_required`; it cannot open a restore-integrity gate. The regular signed-token, password authentication, CSRF, session timeout, reauthorization, assignment and audit contracts continue to apply. Store generated local credentials outside version control and preserve them across ordinary restarts. The [local setup instructions](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/local-keycloak.md) contain operational commands and verification status.

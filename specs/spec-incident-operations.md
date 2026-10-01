@@ -42,7 +42,7 @@ Offer an explicit Move action between two active incidents in the same tenant. V
 
 ### 7. Linked-alert presentation (I3, I5)
 
-The incident detail shows all linked alerts, including resolved and suppressed ones, and their status, suppression indicator, and history access. Display `total linked` and the suppressed subset distinctly, counting each logical alert once. The manual-selection dialog offers an explicit Include suppressed toggle, off initially; selecting a suppressed alert never clears suppression. Use the managed catalog in the [alert supplement](./spec-alert-operations.md); do not invent additional source fields.
+The incident detail shows all linked alerts, including resolved and suppressed ones, and their status, suppression indicator, and history access. Display `total linked` and the suppressed subset distinctly, counting each logical alert once. The manual-selection dialog offers an explicit Include suppressed toggle, off initially; selecting a suppressed alert never clears suppression. Use the managed catalog in the [alert supplement](spec-alert-operations.md); do not invent additional source fields.
 
 Cross-tenant alerts are neither discoverable nor selectable. After counterpart retention purge, show a minimal unavailable-reference entry rather than silently losing the relationship; distinguish its unknown current state and show the unavailable subset separately from the known suppressed subset. Link-reference totals remain distinct logical identifiers, including unavailable references. Unavailable references are historical only: they cannot be claimed or moved. Reopening checks actual retained alerts for ownership conflicts, retains unavailable references as history, and never recreates purged alerts.
 
@@ -54,7 +54,7 @@ Users with tenant edit permission or higher may add, edit, and delete any incide
 
 ### 9. Audit and accountability (I2–I5)
 
-Record incident creation, effective content/status/assignment changes, note revisions/deletion, link/unlink/move, reopen, and automatic expiry. Include prior/new values or relationship change, actor (user or system), authoritative timestamp, cause, and originating command/event reference. Keep stable actor identifiers plus the display label captured at the action, so later LDAP renames or deletion do not rewrite history. Preserve originating rule/group snapshots and lifecycle cycles. Do not generate duplicate change records or refresh inactivity for retries/no-ops. These are incident activity records available to incident readers; standalone tenant/platform access audit follows [Tenant and access completion](./spec-tenant-access.md), while incident activity visibility and retention remain as selected here.
+Record incident creation, effective content/status/assignment changes, note revisions/deletion, link/unlink/move, reopen, and automatic expiry. Include prior/new values or relationship change, actor (user or system), authoritative timestamp, cause, and originating command/event reference. Keep stable actor identifiers plus the display label captured at the action, so later LDAP renames or deletion do not rewrite history. Preserve originating rule/group snapshots and lifecycle cycles. Do not generate duplicate change records or refresh inactivity for retries/no-ops. These are incident activity records available to incident readers; standalone tenant/platform access audit follows [Tenant and access completion](spec-tenant-access.md), while incident activity visibility and retention remain as selected here.
 
 ### 10. Inactivity period and scope (I4)
 
@@ -124,8 +124,8 @@ Check current product grants and the identity integration's trusted membership v
 
 The identity configuration defines five-minute normal-operation LDAP enforcement and last-known identity fallback during refresh outages. A cached membership view accepted under that policy can support a trustworthy authorization decision; absent required evidence still fails closed. Use the identity configuration and shared live-update protocol for enforcement.
 
-Correlation context and coordination are now defined in [Correlation rules](./spec-correlation-rules.md); the incident product policies above remain unchanged.
+Correlation context and coordination are now defined in [Correlation rules](spec-correlation-rules.md); the incident product policies above remain unchanged.
 
 ### Verification scenarios
 
-See [incident acceptance cases](./verification-plan.md#incidents).
+See [incident acceptance cases](../verification/verification-plan.md#incidents).

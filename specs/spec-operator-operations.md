@@ -182,7 +182,7 @@ Expose pending-job age, last successful reconciliation, setup/rotation/cleanup f
 
 ## 26. Concurrency and failure verification
 
-See [required operators checks](./verification-plan.md#operators).
+See [required operators checks](../verification/verification-plan.md#operators).
 
 ## 28. Restoration and replay boundary
 
@@ -194,4 +194,4 @@ V1 recovery and broader alert replay continue to follow their selected contracts
 
 ## 29. Isolated local development
 
-The isolated development stack installs the actual appchi-policy Lua plugin alongside Kong OSS Key Auth and exercises the same policy evaluator and non-ingesting proof routes. Native UUID/Keycloak development exceptions remain unchanged. Bind the observed node-local gateway identity and actual installed versions; synthetic identity-only readiness is not plugin proof. Local results are development evidence, not qualification of a shared company fleet. See [local v2](docs/local-v2.md) and [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 7.
+The isolated development stack installs the actual appchi-policy Lua plugin alongside Kong OSS Key Auth and exercises the same policy evaluator and non-ingesting proof routes. Native UUID/Keycloak development exceptions remain unchanged. Bind the observed node-local gateway identity and actual installed versions; synthetic identity-only readiness is not plugin proof. Local results are development evidence, not qualification of a shared company fleet. See [local v2](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/local-v2.md) and [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 7.

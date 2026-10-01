@@ -15,28 +15,28 @@ authorization. Preserve the design, ownership and consistency rules below.
 
 ## Read the design first
 
-Read [System design](./spec-alerts-management-system.md) before project work and
+Read [System design](../specs/spec-alerts-management-system.md) before project work and
 reread affected normative supplements before changing behavior:
 
-- [Current worker scope](./spec-worker-scope.md).
-- [Alert operations](./spec-alert-operations.md).
-- [Alerts/history technical baseline](./spec-alert-history-technical.md).
-- [Kafka-first alert pipeline](./spec-kafka-alert-pipeline.md).
-- [Incident operations](./spec-incident-operations.md).
-- [Correlation rules](./spec-correlation-rules.md).
-- [Operator operations](./spec-operator-operations.md).
-- [Reliability and operations](./spec-reliability-operations.md).
-- [Identity configuration](./spec-identity-configuration.md).
-- [Tenant and access](./spec-tenant-access.md).
-- [Preset operations](./spec-preset-operations.md).
-- [Maintenance completion](./spec-maintenance-operations.md).
-- [Dashboard completion](./spec-dashboard-operations.md).
-- [Shared system completion](./spec-system-completion.md).
+- [Current worker scope](../specs/spec-worker-scope.md).
+- [Alert operations](../specs/spec-alert-operations.md).
+- [Alerts/history technical baseline](../specs/spec-alert-history-technical.md).
+- [Kafka-first alert pipeline](../specs/spec-kafka-alert-pipeline.md).
+- [Incident operations](../specs/spec-incident-operations.md).
+- [Correlation rules](../specs/spec-correlation-rules.md).
+- [Operator operations](../specs/spec-operator-operations.md).
+- [Reliability and operations](../specs/spec-reliability-operations.md).
+- [Identity configuration](../specs/spec-identity-configuration.md).
+- [Tenant and access](../specs/spec-tenant-access.md).
+- [Preset operations](../specs/spec-preset-operations.md).
+- [Maintenance completion](../specs/spec-maintenance-operations.md).
+- [Dashboard completion](../specs/spec-dashboard-operations.md).
+- [Shared system completion](../specs/spec-system-completion.md).
 
-The [grouped final decision list](./design-decisions-2026-09-22.md) summarizes the
-68 choices made under the final all-subject delegation. [Design register](./design-register.md) preserves all 55 original issue identifiers.
-[Delivery readiness](./delivery-readiness.md) tracks DEL-01–DEL-08; required test
-scenarios live in [Verification plan](./verification-plan.md).
+The [grouped final decision list](design-decisions-2026-09-22.md) summarizes the
+68 choices made under the final all-subject delegation. [Design register](design-register.md) preserves all 55 original issue identifiers.
+[Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md) tracks DEL-01–DEL-08; required test
+scenarios live in [Verification plan](../verification/verification-plan.md).
 
 ## Decisions and gaps
 

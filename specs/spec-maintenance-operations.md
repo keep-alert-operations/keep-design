@@ -91,7 +91,7 @@ All routes below are under `/api/tenants/{tenant_id}`. Viewer reads; edit/admin 
 | `POST /maintenance/{id}/test` | Assistant-selected saved-window convenience: current `expected_revision` and one `alert_id`; evaluates persisted CEL and UTC endpoints, including ended windows, without rescheduling. |
 | `GET /timezones` | Supported zone identifiers, tzdata version and current offsets; no implicit schedule selection. |
 
-Strong ETag is current configuration revision. Same-value saves/actions are no-ops with a receipt, not new revisions or activations. Expired re-enable/extension, immutable start/CEL, stale revision and conflicting retry are 409 with stable codes. Invalid local time/zone/field/CEL is 422 on save; missing explicit timezone is never defaulted server-side. Authorization and common errors follow [system completion](./spec-system-completion.md).
+Strong ETag is current configuration revision. Same-value saves/actions are no-ops with a receipt, not new revisions or activations. Expired re-enable/extension, immutable start/CEL, stale revision and conflicting retry are 409 with stable codes. Invalid local time/zone/field/CEL is 422 on save; missing explicit timezone is never defaulted server-side. Authorization and common errors follow [system completion](spec-system-completion.md).
 
 ## 13. List, detail and editing experience
 
@@ -129,4 +129,4 @@ Surface “Updating suppression” during lag and “Updates delayed” when unh
 
 ## 19. Acceptance scenarios
 
-See [required maintenance checks](./verification-plan.md#maintenance).
+See [required maintenance checks](../verification/verification-plan.md#maintenance).

@@ -2,11 +2,11 @@
 
 The user delegated completion of every remaining product and technical subject on 2026-09-22. **The 68 numbered decisions listed here are assistant-selected.** Their full contracts are in the linked specifications. Earlier user decisions remain unchanged; this list reports the additions from this final completion, not earlier sessions' decisions.
 
-This is a provenance record, not an additional normative contract. Current specifications govern details. Later clarifications are recorded in the [design register](./design-register.md#documentation-review--2026-09-22); implementation and executed evidence are tracked in [Delivery readiness](./delivery-readiness.md#evidence-register).
+This is a provenance record, not an additional normative contract. Current specifications govern details. Later clarifications are recorded in the [design register](design-register.md#documentation-review--2026-09-22); implementation and executed evidence are tracked in [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#evidence-register).
 
 ## Maintenance — 20 decisions
 
-Details: [Maintenance operations](./spec-maintenance-operations.md).
+Details: [Maintenance operations](../specs/spec-maintenance-operations.md).
 
 1. **Identity and content:** immutable tenant/UUID; duplicate names allowed, 1–200 characters; optional 10,000-character reason; separate intent, phase and health; start/CEL lock at scheduled start even while disabled.
 2. **Schedule input:** explicit IANA timezone and second-precision local endpoints; explicit first/second choice at DST ambiguity; reject nonexistent times; retain UTC, original local/offset and tzdata evidence.
@@ -31,7 +31,7 @@ Details: [Maintenance operations](./spec-maintenance-operations.md).
 
 ## Dashboards — 18 decisions
 
-Details: [Dashboard operations](./spec-dashboard-operations.md).
+Details: [Dashboard operations](../specs/spec-dashboard-operations.md).
 
 1. **Ownership and names:** shared tenant resources with immutable IDs, unique active names and existing view/edit/admin permissions; no private dashboards or resource-specific access lists.
 2. **Definition:** zero through 24 panels; each references an active same-tenant preset's current saved query; repeated presets allowed; no saved personal controls.
@@ -54,14 +54,14 @@ Details: [Dashboard operations](./spec-dashboard-operations.md).
 
 ## Application architecture and repository — 2 decisions
 
-Details: [System completion 1–2](./spec-system-completion.md#1-application-framework-and-module-boundaries).
+Details: [System completion 1–2](../specs/spec-system-completion.md#1-application-framework-and-module-boundaries).
 
 1. **Frameworks and boundaries:** FastAPI/Uvicorn, strict Pydantic models, Psycopg/explicit SQL, Next.js App Router/TypeScript and selected service clients; Python owns business/authentication authority; reuse PG durable work rather than introduce another queue.
-2. **Repository and contracts:** monorepo with backend/frontend/contracts/migrations/deployment/qualification/docs; locked dependencies, generated API types, checked-in SQL migrations, immutable images and release manifests.
+2. **Repository and contracts:** original monorepo selection is superseded by [REV-37 independent repositories](../specs/spec-repository-layout.md); locked dependencies, generated API types, checked-in SQL migrations, immutable images and release manifests.
 
 ## General experience and API behavior — 8 decisions
 
-Details: [System completion 3–10](./spec-system-completion.md#3-navigation-and-visual-system).
+Details: [System completion 3–10](../specs/spec-system-completion.md#3-navigation-and-visual-system).
 
 3. **Navigation/visuals:** tenant-scoped navigation and administration, last accessible tenant with Global fallback, compact responsive interface, English labels/Unicode content and WCAG 2.2 AA acceptance target. The original automatic light/dark choice is superseded by the user's 2026-09-24 visual direction recorded below.
 4. **Interactions:** explicit configuration saves, concrete deletion/revocation confirmations, preserved conflict drafts, immediate protected-state clearing on access loss, and no offline/private/export/attachment additions.
@@ -74,7 +74,7 @@ Details: [System completion 3–10](./spec-system-completion.md#3-navigation-and
 
 ## Data, transactions and events — 8 decisions
 
-Details: [System completion 11–18](./spec-system-completion.md#11-shared-postgresql-conventions).
+Details: [System completion 11–18](../specs/spec-system-completion.md#11-shared-postgresql-conventions).
 
 11. **Database conventions:** typed relational state, scoped keys/foreign keys, minimal identity records, selected history partitions and non-owner tenant RLS roles.
 12. **Identity/access storage:** explicit principal/binding/grant/checkpoint/edge/session/login/logout/guard/audit records, complete-generation publication and safe negative-evidence handling.
@@ -87,14 +87,14 @@ Details: [System completion 11–18](./spec-system-completion.md#11-shared-postg
 
 ## Retention, deletion and recovery — 2 decisions
 
-Details: [System completion 19–20](./spec-system-completion.md#19-unified-retention-and-configuration-history).
+Details: [System completion 19–20](../specs/spec-system-completion.md#19-unified-retention-and-configuration-history).
 
 19. **Remaining lifetimes:** consolidate every category; final deleted correlation definitions retain 90 days, platform configuration/repair audit 365 days, maintenance keeps its complete non-deleted timeline, and infrastructure retention remains owner-managed.
 20. **Cross-resource recovery:** protected intent/final fences before irreversible cleanup, bounded physical deletion, survivor-safe incident purge, independent recovery evidence, current permission/key/deletion reconciliation and fresh sessions after rollback restore.
 
 ## Security, runtime and service integration — 5 decisions
 
-Details: [System completion 21–25](./spec-system-completion.md#21-application-security-and-secret-boundaries).
+Details: [System completion 21–25](../specs/spec-system-completion.md#21-application-security-and-secret-boundaries).
 
 21. **Security:** same-origin HTTPS, strict trust/headers, escaped content, no arbitrary URL fetching, no protected shared cache, role-scoped versioned secrets and separate key purposes.
 22. **OpenShift runtime:** separate workload roles, migration job, least-privilege containers, capability-specific readiness, bounded pools and safe draining/fenced retries.
@@ -104,7 +104,7 @@ Details: [System completion 21–25](./spec-system-completion.md#21-application-
 
 ## Verification, delivery and support — 5 decisions
 
-Details: [System completion 26–30](./spec-system-completion.md#26-ci-and-release-artifacts).
+Details: [System completion 26–30](../specs/spec-system-completion.md#26-ci-and-release-artifacts).
 
 26. **CI/release artifacts:** domain/migration/contract/integration/browser/security gates, actual CEL/ES differential tests, immutable images, schema/profile manifests and compatibility records.
 27. **Acceptance:** cross-subject race/outage/restore/security cases and the existing sustained/recovery/visibility workloads; correctness requires zero isolation, replay or revoked-credential violations.
@@ -117,8 +117,8 @@ Details: [System completion 26–30](./spec-system-completion.md#26-ci-and-relea
 The user requested username/password-only Appchi login and removal of the one-time
 code. This supersedes the earlier assistant-selected TOTP requirement for Appchi
 users, including global administrators. Separate Keycloak console MFA remains in
-place. [Identity section 3](./spec-identity-configuration.md#3-username-and-password-authentication)
-and REV-15 in the [design register](./design-register.md) record this correction;
+place. [Identity section 3](../specs/spec-identity-configuration.md#3-username-and-password-authentication)
+and REV-15 in the [design register](design-register.md) record this correction;
 the original 68-decision numbering is preserved.
 
 Follow-up REV-16 records an assistant-selected recovery screen for expired or
@@ -129,23 +129,23 @@ unchanged. The original decision numbering is preserved.
 The user's preset creation report supersedes REV-14's assistant-selected grouping
 exception for default preset columns. REV-17 requires every configured column list
 to render its fields individually and in order from creation onward, under the
-existing [preset contract](./spec-preset-operations.md#4-columns-and-sorting).
+existing [preset contract](../specs/spec-preset-operations.md#4-columns-and-sorting).
 
 The user's loading-text and layout-jump report is recorded as REV-18. The
 assistant-selected correction keeps completed content and empty states visible
 during refreshes of the same query, with initial loading and genuine failures
-kept distinct under [shared system section 4](./spec-system-completion.md#4-common-interaction-and-information-boundaries).
+kept distinct under [shared system section 4](../specs/spec-system-completion.md#4-common-interaction-and-information-boundaries).
 
-The later incoming-alert dashboard report (REV-21) identified duplicate indexing warnings and routine stale-panel flashing. Assistant-selected presentation uses existing status areas and keeps counts and panel positions steady during refresh, as recorded in [dashboard section 16](./spec-dashboard-operations.md#16-accessibility-and-visual-states).
+The later incoming-alert dashboard report (REV-21) identified duplicate indexing warnings and routine stale-panel flashing. Assistant-selected presentation uses existing status areas and keeps counts and panel positions steady during refresh, as recorded in [dashboard section 16](../specs/spec-dashboard-operations.md#16-accessibility-and-visual-states).
 
 The later screenshot of the session-check screen appearing on every navigation
 identified a separate workspace-lifetime issue (REV-19). A shared operational
 layout now retains the session-owning workspace across route changes while
 preserving the existing authorization and tenant-isolation rules.
 
-The user supplied the [Option B full-system visual reference](https://claude.ai/artifact/XMD6gScr8TVDnWvYtcvNWP) and requested its application throughout the frontend. This superseded the earlier visual shell and OS-selected theme, while preserving the domain contracts and original decision numbering. The user's later dark-mode request supersedes the reference's fixed-light behavior, while retaining its light palette as the default. [REV-12 and REV-20](./design-register.md) and [shared system section 3](./spec-system-completion.md#3-navigation-and-visual-system) record the visual contract. The [UI mapping](./docs/ui-design.md) distinguishes the user's reference from assistant-selected responsive, theme and live-data adaptations.
+The user supplied the [Option B full-system visual reference](https://claude.ai/artifact/XMD6gScr8TVDnWvYtcvNWP) and requested its application throughout the frontend. This superseded the earlier visual shell and OS-selected theme, while preserving the domain contracts and original decision numbering. The user's later dark-mode request supersedes the reference's fixed-light behavior, while retaining its light palette as the default. [REV-12 and REV-20](design-register.md) and [shared system section 3](../specs/spec-system-completion.md#3-navigation-and-visual-system) record the visual contract. The [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md) distinguishes the user's reference from assistant-selected responsive, theme and live-data adaptations.
 
-The user's local v2 setup request is recorded as REV-22. Assistant-selected dedicated Kong/Grafana and a private serving-member proof keep the existing operator/key, tenant-routing and mTLS contracts. Only the isolated initial development gate may be bootstrapped; recovery/production gates remain intact. [Operator section 29](./spec-operator-operations.md#29-isolated-local-development) defines this scope and [local v2 setup](./docs/local-v2.md) records runtime details.
+The user's local v2 setup request is recorded as REV-22. Assistant-selected dedicated Kong/Grafana and a private serving-member proof keep the existing operator/key, tenant-routing and mTLS contracts. Only the isolated initial development gate may be bootstrapped; recovery/production gates remain intact. [Operator section 29](../specs/spec-operator-operations.md#29-isolated-local-development) defines this scope and [local v2 setup](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/local-v2.md) records runtime details.
 
 The user approved implementing the custom Appchi sign-in mock on 2026-09-27 (REV-23). The selected Keycloak client theme provides the approved form while retaining code flow and PKCE. Assistant-selected entry behavior starts login on the initial unauthenticated session response and preserves safe return paths; logout and recovery pages require an explicit new attempt. Appearance is stored separately on the application and identity origins. This supersedes the earlier minimal stock-theme restriction without changing the original decision numbers.
 
@@ -155,7 +155,7 @@ The user requested an icon-based Light/Dark switch after reviewing the account m
 
 REV-27 supersedes the independent alert acknowledgement workflow. The user approved a single assignment control for self/other users and Acknowledged status when lifecycle is firing and an assignee exists. Unassigned firing alerts display Firing; resolved alerts display Resolved. Resolution preserves assignment and a new occurrence clears it.
 
-Assistant-selected details preserve historical evidence and legacy saved CEL/sort behavior, expose a virtual feed `display_status` without an index migration, adapt legacy table columns in current views and retire acknowledgement commands. Derived status has no independent write or sort; raw lifecycle sorting is labelled Lifecycle. [Alert operations section 17](spec-alert-operations.md#17-assignment-and-derived-acknowledgement) and the preset/technical supplements are authoritative. The original 68 decision numbers and 55 issue identifiers remain unchanged.
+Assistant-selected details preserve historical evidence and legacy saved CEL/sort behavior, expose a virtual feed `display_status` without an index migration, adapt legacy table columns in current views and retire acknowledgement commands. Derived status has no independent write or sort; raw lifecycle sorting is labelled Lifecycle. [Alert operations section 17](../specs/spec-alert-operations.md#17-assignment-and-derived-acknowledgement) and the preset/technical supplements are authoritative. The original 68 decision numbers and 55 issue identifiers remain unchanged.
 
 ## Later user request: current alert JSON viewer — 2026-09-27
 
@@ -167,15 +167,15 @@ The user requested direct field names in CEL conditions, such as `application` i
 
 ## Later user request: local correlation preview — 2026-09-27
 
-The user requested making correlation rules creatable in the running local stack. REV-30 records the assistant-selected bounded development preview: an explicitly unqualified profile with finite limits, bound to local code, epoch and check evidence, plus an audited gate opening after source-order and empty-maintenance checks. The normal PostgreSQL correlation worker processes local rules. This exception is limited to the isolated development stack; [shared system section 23](./spec-system-completion.md#23-measured-capacity-profile-and-readiness-rules) retains full qualification for staging and production.
+The user requested making correlation rules creatable in the running local stack. REV-30 records the assistant-selected bounded development preview: an explicitly unqualified profile with finite limits, bound to local code, epoch and check evidence, plus an audited gate opening after source-order and empty-maintenance checks. The normal PostgreSQL correlation worker processes local rules. This exception is limited to the isolated development stack; [shared system section 23](../specs/spec-system-completion.md#23-measured-capacity-profile-and-readiness-rules) retains full qualification for staging and production.
 
 ## Later user decision: Kafka-first alert redesign — 2026-09-30
 
-REV-33 replaces the PG-first alert transport with the user-authorized Kafka-first flow. [Kafka-first pipeline](spec-kafka-alert-pipeline.md) is authoritative. Its explicitly labelled assistant-selected choices cover HTTP outcomes/legacy identifiers, two-commit replay and fencing, packaged Kong policy/propagation, UTC ties and clock health, bounded search reconciliation/rebuild, maintenance provenance and inline effects, saved correlation rule migration, and cutover/loss diagnostics. Preserve the original 68 decision numbers and 55 original issue identifiers. Implementation and production qualification are separate records.
+REV-33 replaces the PG-first alert transport with the user-authorized Kafka-first flow. [Kafka-first pipeline](../specs/spec-kafka-alert-pipeline.md) is authoritative. Its explicitly labelled assistant-selected choices cover HTTP outcomes/legacy identifiers, two-commit replay and fencing, packaged Kong policy/propagation, UTC ties and clock health, bounded search reconciliation/rebuild, maintenance provenance and inline effects, saved correlation rule migration, and cutover/loss diagnostics. Preserve the original 68 decision numbers and 55 original issue identifiers. Implementation and production qualification are separate records.
 
 ## Later user correction — 2026-09-30 worker scope
 
-[REV-34 worker scope](spec-worker-scope.md) supersedes the earlier automation
+[REV-34 worker scope](../specs/spec-worker-scope.md) supersedes the earlier automation
 requirements without renumbering the 68 original decisions. Maintenance release
 waits for the next source update; assignment cleanup, inactivity/retention workers
 and background operator orchestration are nice-to-have. Provisioning executes in
@@ -186,11 +186,11 @@ HTTP requests. New implementation choices are labelled assistant-selected there.
 REV-35 makes the directory worker and automatic five-minute LDAP-change
 propagation nice-to-have. Explicit trusted publication remains for bootstrap
 and manual refresh under the assistant-selected safeguards in
-[worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+[worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 The 68 original decision numbers remain unchanged.
 
 ## Later user decision — 2026-09-30 live updates
 
 REV-36 makes live hint publishing a Product API background task and removes the
-separate live worker deployment. [Worker scope section 6](spec-worker-scope.md#6-live-updates-inside-the-product-api) labels the assistant-selected
+separate live worker deployment. [Worker scope section 6](../specs/spec-worker-scope.md#6-live-updates-inside-the-product-api) labels the assistant-selected
 runtime, privilege and rollout details. Original decision numbers are unchanged.

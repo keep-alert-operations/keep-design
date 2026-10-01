@@ -156,7 +156,7 @@ processor, indexer, correlation, frontend and backend; live publishing runs insi
 the Product API under REV-36, while explicit recovery/proof helpers remain.
 This is not a claim of exactly six running processes or replicas.
 The directory role is deferred by REV-35; explicit one-off publication remains.
-See [implementation evidence](docs/worker-scope-implementation.md).
+See [implementation evidence](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/worker-scope-implementation.md).
 
 ## 6. Live updates inside the Product API
 

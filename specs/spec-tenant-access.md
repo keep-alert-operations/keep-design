@@ -4,7 +4,7 @@
 
 **Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
 
-Tenant lifecycle, grants, permissions, directory selectors and audit. [Identity configuration](./spec-identity-configuration.md) defines authentication, trusted membership and sessions.
+Tenant lifecycle, grants, permissions, directory selectors and audit. [Identity configuration](spec-identity-configuration.md) defines authentication, trusted membership and sessions.
 
 **User-selected audit policy:** tenant and permission changes are retained for 365 days and readable only by current tenant admins and global super-admins.
 
@@ -76,7 +76,7 @@ Apply this matrix only where the resource lifecycle already permits the action. 
 | Administer Global or read its tenant/access-change audit | No | No | No local admin role | Yes |
 | Delete/disable a tenant, rename Global, delete an incident manually, or disable an operator | No | No | No | No |
 
-Viewer table adjustments are temporary in the current view and cannot write a preset or create a private/personal saved preset. [Presets](./spec-preset-operations.md) defines explicit shared Save/Save as new, per-tab drafts, retained history and deletion blocked by current dashboard references. [Dashboards](./spec-dashboard-operations.md) defines presentation and editing. Existing resource audit visibility and retention are not replaced by the new tenant audit policy.
+Viewer table adjustments are temporary in the current view and cannot write a preset or create a private/personal saved preset. [Presets](spec-preset-operations.md) defines explicit shared Save/Save as new, per-tab drafts, retained history and deletion blocked by current dashboard references. [Dashboards](spec-dashboard-operations.md) defines presentation and editing. Existing resource audit visibility and retention are not replaced by the new tenant audit policy.
 
 ## 9. Tenant navigation and access loss
 
@@ -174,4 +174,4 @@ After rollback/disaster restore, do not reopen human authorization from older gr
 
 ## 20. Acceptance
 
-See [required tenants and access checks](./verification-plan.md#tenants-and-access).
+See [required tenants and access checks](../verification/verification-plan.md#tenants-and-access).

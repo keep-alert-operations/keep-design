@@ -1,6 +1,6 @@
 # Design register
 
-All 55 original issue identifiers are retained below. Status: **design closed** for the initial release. The domain specifications own the contracts; this index records coverage. [Delivery readiness](./delivery-readiness.md#evidence-register) tracks implementation, supplied service facts and executed qualification separately. Record newly discovered gaps here without reusing or deleting an identifier.
+All 55 original issue identifiers are retained below. Status: **design closed** for the initial release. The domain specifications own the contracts; this index records coverage. [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#evidence-register) tracks implementation, supplied service facts and executed qualification separately. Record newly discovered gaps here without reusing or deleting an identifier.
 
 ## A. Identity, tenant administration, and permissions
 
@@ -141,16 +141,16 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Resolution |
 |---|---|---|
-| REV-12 | U1, U2, U3, U5 | User supplied a full-system visual reference and requested the entire UI adopt it. Shared system section 3 records its left rail, typography and original fixed light palette, which superseded automatic OS theme selection at the time. REV-20 later adds user-selectable dark mode while retaining this light reference as default. Assistant-selected adaptations retain responsive stacking, real API data, existing authorization and conflict/recovery controls; illustrative prototype counts and people are not application defaults. See [UI mapping](docs/ui-design.md). |
-| REV-13 | U1, U5, I4 | User reported gaps between the implemented UI and the reference and asked for an exact match. Every screen now uses the reference page frame, grid tables and controls (see [UI mapping](docs/ui-design.md)). Assistant-selected read-time enrichment adds optional current-directory labels beside principal ids — `assignee_display_name`, `acknowledged_by_display_name`, `created_by_display_name`, `updated_by_display_name` — plus `active_incident_id`/`active_incident_title` on alerts and `origin_rule_id`/`origin_rule_name` on incidents. These are presentation labels for current records; recorded history keeps its captured labels per REV-10. **Open gap:** incident activity stores only `actor_id`, so the UI cannot show captured actor names there without new persisted evidence; historical names are not rebuilt from today's directory. |
-| REV-14 | Q4, U1, U5 | Continuation review found the redesigned table ignored saved/draft preset columns and always indicated descending last-received sorting. Corrected custom field order and actual sort indicators under the existing [preset column contract](spec-preset-operations.md#4-columns-and-sorting). Assistant-selected presentation adaptation retains the reference's compact default grouping and uses individual columns for custom selections; row navigation and suppression remain visible independently of Message. Added browser regressions, and scoped the saved-preview pagination assertion to its cursor request rather than the last concurrent count request. See [UI mapping](docs/ui-design.md). |
+| REV-12 | U1, U2, U3, U5 | User supplied a full-system visual reference and requested the entire UI adopt it. Shared system section 3 records its left rail, typography and original fixed light palette, which superseded automatic OS theme selection at the time. REV-20 later adds user-selectable dark mode while retaining this light reference as default. Assistant-selected adaptations retain responsive stacking, real API data, existing authorization and conflict/recovery controls; illustrative prototype counts and people are not application defaults. See [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md). |
+| REV-13 | U1, U5, I4 | User reported gaps between the implemented UI and the reference and asked for an exact match. Every screen now uses the reference page frame, grid tables and controls (see [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md)). Assistant-selected read-time enrichment adds optional current-directory labels beside principal ids — `assignee_display_name`, `acknowledged_by_display_name`, `created_by_display_name`, `updated_by_display_name` — plus `active_incident_id`/`active_incident_title` on alerts and `origin_rule_id`/`origin_rule_name` on incidents. These are presentation labels for current records; recorded history keeps its captured labels per REV-10. **Open gap:** incident activity stores only `actor_id`, so the UI cannot show captured actor names there without new persisted evidence; historical names are not rebuilt from today's directory. |
+| REV-14 | Q4, U1, U5 | Continuation review found the redesigned table ignored saved/draft preset columns and always indicated descending last-received sorting. Corrected custom field order and actual sort indicators under the existing [preset column contract](../specs/spec-preset-operations.md#4-columns-and-sorting). Assistant-selected presentation adaptation retains the reference's compact default grouping and uses individual columns for custom selections; row navigation and suppression remain visible independently of Message. Added browser regressions, and scoped the saved-preview pagination assertion to its cursor request rather than the last concurrent count request. See [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md). |
 
 ## User sign-in direction — 2026-09-24
 
 | Review ID | Original coverage | Resolution |
 |---|---|---|
-| REV-15 | A2, N2, U5 | User requested removal of the one-time-code step and username/password-only Appchi login. [Identity section 3](spec-identity-configuration.md#3-username-and-password-authentication) supersedes the earlier assistant-selected application TOTP requirement. Assistant-selected migration disables local application OTP execution/enrollment, preserves existing accounts and passwords, and requires protected password evidence in the backend. Separate Keycloak console MFA and production LDAP identity ownership remain unchanged; no shared service was modified. |
-| REV-16 | A2, U5 | User reported the raw expired/consumed sign-in transaction error. Assistant-selected recovery sends HTML browser callbacks with unavailable transactions to a public page with an explicit fresh sign-in link. No rejected code is exchanged and no session is created; JSON clients retain 401 and existing ten-minute expiry/one-use checks remain authoritative. Corrected stale authenticator-code copy in the sign-in shell. See [identity section 2](spec-identity-configuration.md#2-login-flow-and-browser-boundary). |
+| REV-15 | A2, N2, U5 | User requested removal of the one-time-code step and username/password-only Appchi login. [Identity section 3](../specs/spec-identity-configuration.md#3-username-and-password-authentication) supersedes the earlier assistant-selected application TOTP requirement. Assistant-selected migration disables local application OTP execution/enrollment, preserves existing accounts and passwords, and requires protected password evidence in the backend. Separate Keycloak console MFA and production LDAP identity ownership remain unchanged; no shared service was modified. |
+| REV-16 | A2, U5 | User reported the raw expired/consumed sign-in transaction error. Assistant-selected recovery sends HTML browser callbacks with unavailable transactions to a public page with an explicit fresh sign-in link. No rejected code is exchanged and no session is created; JSON clients retain 401 and existing ten-minute expiry/one-use checks remain authoritative. Corrected stale authenticator-code copy in the sign-in shell. See [identity section 2](../specs/spec-identity-configuration.md#2-login-flow-and-browser-boundary). |
 
 ## Preset creation correction — 2026-09-24
 
@@ -230,19 +230,19 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Decision / correction |
 |---|---|---|
-| REV-31 | L2, U1, U5 | User requested operator names in alert views where the managed operator ID appeared. Alert detail, source activity and configurable Operator columns display the current same-tenant managed name for v2; v1 displays its exact source string. Assistant-selected implementation adds read-time `operator_display_name` to alert detail/feed/preview responses and shows Unknown operator when a v2 name cannot be resolved. The stable `operator` ID and its identity, CEL and sort contracts remain unchanged. See [alert operations section 3](spec-alert-operations.md#3-managed-field-catalog). |
+| REV-31 | L2, U1, U5 | User requested operator names in alert views where the managed operator ID appeared. Alert detail, source activity and configurable Operator columns display the current same-tenant managed name for v2; v1 displays its exact source string. Assistant-selected implementation adds read-time `operator_display_name` to alert detail/feed/preview responses and shows Unknown operator when a v2 name cannot be resolved. The stable `operator` ID and its identity, CEL and sort contracts remain unchanged. See [alert operations section 3](../specs/spec-alert-operations.md#3-managed-field-catalog). |
 
 ## Quick result sorting — 2026-09-28
 
 | Review ID | Original coverage | Decision / correction |
 |---|---|---|
-| REV-32 | Q4, U1, U5 | User requested column-title sorting on All alerts and saved preset results, cycling ascending, descending and regular order. The transient override replaces the preset's whole sort while active and never saves it. Assistant-selected scope makes only existing server-sortable fields clickable; composite and derived headings stay static under the existing sort whitelist. Sort changes restart the alert snapshot on page one and clear selection. See [alert operations section 24](spec-alert-operations.md#24-reads-search-and-presentation) and [preset operations section 4](spec-preset-operations.md#4-columns-and-sorting). |
+| REV-32 | Q4, U1, U5 | User requested column-title sorting on All alerts and saved preset results, cycling ascending, descending and regular order. The transient override replaces the preset's whole sort while active and never saves it. Assistant-selected scope makes only existing server-sortable fields clickable; composite and derived headings stay static under the existing sort whitelist. Sort changes restart the alert snapshot on page one and clear selection. See [alert operations section 24](../specs/spec-alert-operations.md#24-reads-search-and-presentation) and [preset operations section 4](../specs/spec-preset-operations.md#4-columns-and-sorting). |
 
 ## Kafka-first alert redesign — 2026-09-30
 
 | Review ID | Original coverage | Decision / correction |
 |---|---|---|
-| REV-33 | L1–L4, C1–C8, D1–D4, N1, R1–R4 | User accepted Kafka-first admission, no Appchi PG ingress dependency, transactional source changed+offset publication, tenant Kafka correlation order, ignored manual edits except resolve, inline maintenance effects, best-effort search hints with reconciliation, and actual Kong policy enforcement. [Kafka-first pipeline](spec-kafka-alert-pipeline.md) records all eight assistant-selected technical decisions and the accepted Kafka retention-loss limitation. Implementation/qualification evidence remains separate. |
+| REV-33 | L1–L4, C1–C8, D1–D4, N1, R1–R4 | User accepted Kafka-first admission, no Appchi PG ingress dependency, transactional source changed+offset publication, tenant Kafka correlation order, ignored manual edits except resolve, inline maintenance effects, best-effort search hints with reconciliation, and actual Kong policy enforcement. [Kafka-first pipeline](../specs/spec-kafka-alert-pipeline.md) records all eight assistant-selected technical decisions and the accepted Kafka retention-loss limitation. Implementation/qualification evidence remains separate. |
 
 ## REV-34 — User-deferred workers and synchronous provisioning (2026-09-30)
 
@@ -250,13 +250,13 @@ User correction: defer maintenance timer release, assignment cleanup, inactivity
 retention workers and operator background orchestration. A later source update
 may clear ended maintenance suppression. Keep operator HTTP requests open until
 verified success/failure. Keycloak-only identity supply is a question, not an
-accepted replacement. [Worker scope](spec-worker-scope.md) records the normative
+accepted replacement. [Worker scope](../specs/spec-worker-scope.md) records the normative
 supersession, nice-to-have components and explicitly assistant-selected details:
 source-time release/cutover, unchanged history access windows and assignee masking,
 durable partial-operation recovery, HTTP budgets, isolated provisioning connection
 and expiry disposal on the next successful mutation. Original issue IDs remain.
 Implementation/qualification evidence is tracked separately in
-[worker-scope implementation](docs/worker-scope-implementation.md).
+[worker-scope implementation](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/worker-scope-implementation.md).
 
 ## REV-35 — Directory worker nice-to-have (2026-09-30)
 
@@ -266,12 +266,23 @@ five-minute LDAP-change propagation release gate. Assistant-selected boundary:
 retain explicit complete trusted publication for bootstrap/manual refresh,
 existing identity/grant/session checks and restore gates; unknown identities
 remain unavailable until verified publication. No Keycloak-only identity supply
-is implied. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Original IDs are unchanged.
+is implied. See [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Original IDs are unchanged.
 
 ## REV-36 — Live publishing in the Product API (2026-09-30)
 
 User decision: move live hint publishing into the Product API and remove the
-separate live worker. Assistant-selected details in [worker scope section 6](spec-worker-scope.md#6-live-updates-inside-the-product-api) cover off-event-loop bounded publishing,
+separate live worker. Assistant-selected details in [worker scope section 6](../specs/spec-worker-scope.md#6-live-updates-inside-the-product-api) cover off-event-loop bounded publishing,
 replica-safe duplicate invalidations, generation-conditional completion, drained
 shutdown and minimal API outbox privileges. SSE authorization and PostgreSQL
 reconciliation remain. Existing IDs and prior worker deferrals are preserved.
+
+## REV-37 — Independent Git repositories (2026-10-01)
+
+User decision: implement the agreed eleven-repository split inside the existing
+GitHub organization, retain the original repository, use `appchi-frontend`,
+`appchi-ingestion` and `appchi-migrations`, and work from a parent directory with
+system-wide AGENTS.md. [Repository layout](../specs/spec-repository-layout.md)
+records ownership and assistant-selected packaging, immutable dependency pins,
+HTTP/worker entrypoint separation, schema generation and workspace conventions.
+This supersedes the monorepo/shared-backend-image selections without changing
+product contracts, transaction boundaries or REV-34–36 worker scope.

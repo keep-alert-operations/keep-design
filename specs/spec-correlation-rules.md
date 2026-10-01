@@ -118,7 +118,7 @@ Provide a read-only Test against a selected existing tenant alert, including an 
 
 ## 24. Integration and acceptance boundaries (C1–C8)
 
-All callers that affect ownership or correlation input use the selected coordinator and atomic boundaries, including source processing, manual incident actions, maintenance effects and incident inactivity expiry. The maintenance producer must provide effective suppression transitions with their true times and current authoritative suppression state before correlation may act; maintenance completion 4–11 selects overlap/proof implementation design. Source identity/newer-event acceptance remains L1–L4. See [correlation acceptance cases](./verification-plan.md#correlation).
+All callers that affect ownership or correlation input use the selected coordinator and atomic boundaries, including source processing, manual incident actions, maintenance effects and incident inactivity expiry. The maintenance producer must provide effective suppression transitions with their true times and current authoritative suppression state before correlation may act; maintenance completion 4–11 selects overlap/proof implementation design. Source identity/newer-event acceptance remains L1–L4. See [correlation acceptance cases](../verification/verification-plan.md#correlation).
 
 ## Processing and persistence
 
@@ -135,4 +135,4 @@ flowchart LR
   Arbitration --> Commit[Atomic evidence, incident, ownership + consumed event]
 ```
 
-Internal records cover coordinator/order state, rule revisions/epochs/grouping generations, full context identity, live per-condition memberships, immutable transition proof/Kafka consumed-event identity/in-transaction arbitration, ownership/reset barriers and diagnostic/audit records. Physical records, keys and indexes are defined in [Shared system contracts](./spec-system-completion.md#16-correlation-persistence-and-large-grouping-values).
+Internal records cover coordinator/order state, rule revisions/epochs/grouping generations, full context identity, live per-condition memberships, immutable transition proof/Kafka consumed-event identity/in-transaction arbitration, ownership/reset barriers and diagnostic/audit records. Physical records, keys and indexes are defined in [Shared system contracts](spec-system-completion.md#16-correlation-persistence-and-large-grouping-values).

@@ -6,7 +6,7 @@
 
 The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
 
-Cross-resource UI, HTTP, persistence, transactions, security and application deployment. [System design](./spec-alerts-management-system.md) maps each domain to its authoritative specification.
+Cross-resource UI, HTTP, persistence, transactions, security and application deployment. [System design](spec-alerts-management-system.md) maps each domain to its authoritative specification.
 
 ## 1. Application framework and module boundaries
 
@@ -18,7 +18,7 @@ Organize backend modules by identity/access, ingestion, alerts, incidents, corre
 
 ## 2. Repository, generated contracts and documentation
 
-Select one repository with `backend/`, `frontend/`, `contracts/`, `migrations/`, `deploy/`, `qualification/` and `docs/`. This is a future layout, not a request to scaffold now. One backend image has role-specific entrypoints; frontend has its own image. Shared domain packages are versioned together. Use Python `pyproject.toml` with a committed uv lockfile, and npm with a committed package lock for Next.js. Builds run only from those resolved dependencies and produce immutable image digests, an SBOM and release manifest.
+REV-37 supersedes the original monorepo selection. Use the eleven independent repositories and service-owned images in [repository layout](spec-repository-layout.md), each with owned source, tests and locked dependencies. PostgreSQL migrations remain one ordered chain in `appchi-migrations`. Builds produce immutable image digests, SBOMs and a multi-repository release inventory; qualification remains separate.
 
 Keep machine-readable OpenAPI and internal JSON Schemas under contracts, generated from reviewed strict models and checked for breaking diffs. Generate the frontend client/types; business validation stays server-authoritative. Store checked-in ordered SQL migrations with checksums and an application migration runner using a dedicated role/lock. Markdown decisions are normative for behavior; generated schemas must conform rather than turn old illustrative JSON into accepted inputs. Publish developer API documentation internally, authenticated, with secrets and real payload examples removed.
 
@@ -26,7 +26,7 @@ Keep machine-readable OpenAPI and internal JSON Schemas under contracts, generat
 
 Use the user's 2026-09-24 [Option B full-system design](https://claude.ai/artifact/XMD6gScr8TVDnWvYtcvNWP) as the visual reference. A persistent 76-pixel left rail contains Alerts, Incidents, Presets, Correlation rules, Maintenance and Dashboards, with Administration and the identity/session menu at its foot. The top breadcrumb contains the tenant selector and current role; scoped update status remains visible. Administration contains Operators, Permissions and tenant/access audit only for their authorized audience. Global super-admins additionally get tenant creation and platform health/audit. Existing resource-read permissions still apply: hiding an admin action is not a substitute for authorization, and permitted read-only operator summaries remain available as selected earlier.
 
-Preserve the prior navigation rule: open the last accessible tenant, falling back to Global, with Alerts as its default page. Keep the last-tenant hint in the server-side human session and preserve validated local return paths; reauthorize it before use. A new session without a valid hint enters Global. Explicit deep links preserve their accessible tenant. Do not add an editable personal default tenant or server-side table preferences. Browser history includes tenant/resource IDs and safe resource subpages, not raw credentials, note drafts or unsaved CEL. When an alert is opened from saved preset results, its detail view offers a return link to that preset and steps through the visible result page. Returning to the preset follows its normal transient-filter reset. Use the reference's compact desktop-first interface: Geist and Geist Mono, 13.5-pixel body text, 24-pixel page titles, warm off-white backgrounds, dark primary actions, semantic tables and consistently placed filters. Narrow screens use scrollable data tables with stable row-open controls and stacked forms. Keep visible focus and text status alongside color. The supplied reference's light palette remains the default. The user's subsequent dark-mode request adds an explicit Light/Dark choice for Appchi-owned screens, including sign-in and session states; persist the choice locally across navigation and reloads without storing identity or tenant data. Assistant-selected behavior keeps the light reference on first use, independent of OS preference, and gives an explicit user choice precedence over OS preference. Both palettes retain readable text, status meaning and visible focus. [UI implementation mapping](./docs/ui-design.md) records reference provenance and responsive adaptations.
+Preserve the prior navigation rule: open the last accessible tenant, falling back to Global, with Alerts as its default page. Keep the last-tenant hint in the server-side human session and preserve validated local return paths; reauthorize it before use. A new session without a valid hint enters Global. Explicit deep links preserve their accessible tenant. Do not add an editable personal default tenant or server-side table preferences. Browser history includes tenant/resource IDs and safe resource subpages, not raw credentials, note drafts or unsaved CEL. When an alert is opened from saved preset results, its detail view offers a return link to that preset and steps through the visible result page. Returning to the preset follows its normal transient-filter reset. Use the reference's compact desktop-first interface: Geist and Geist Mono, 13.5-pixel body text, 24-pixel page titles, warm off-white backgrounds, dark primary actions, semantic tables and consistently placed filters. Narrow screens use scrollable data tables with stable row-open controls and stacked forms. Keep visible focus and text status alongside color. The supplied reference's light palette remains the default. The user's subsequent dark-mode request adds an explicit Light/Dark choice for Appchi-owned screens, including sign-in and session states; persist the choice locally across navigation and reloads without storing identity or tenant data. Assistant-selected behavior keeps the light reference on first use, independent of OS preference, and gives an explicit user choice precedence over OS preference. Both palettes retain readable text, status meaning and visible focus. [UI implementation mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md) records reference provenance and responsive adaptations.
 
 Use English initial labels, Unicode content, browser locale number formatting and the previously selected date format/timezone labels. Maintenance continues to display its selected IANA zone. All controls have keyboard alternatives, descriptive labels and error association; target WCAG 2.2 AA in implementation acceptance, including contrast, zoom, focus, dialog trapping/return and reduced motion. No audio, toast-only critical error, blinking count or inaccessible drag-only workflow. This is an acceptance target, not certified accessibility.
 
@@ -37,7 +37,7 @@ change alone does not return users to the initial session-check screen. Continue
 normal session revalidation, clear protected content on access loss or expiry,
 and reset tenant-scoped content and subscriptions when switching tenants.
 
-The later user-approved sign-in design uses the Appchi Keycloak theme described in [identity section 1](./spec-identity-configuration.md#1-ownership-and-realm-boundary). Its light/dark selection is stored on the identity origin, independently of the application origin, with light as the initial default. Only the appearance string is persisted; credentials remain in the normal Keycloak form submission.
+The later user-approved sign-in design uses the Appchi Keycloak theme described in [identity section 1](spec-identity-configuration.md#1-ownership-and-realm-boundary). Its light/dark selection is stored on the identity origin, independently of the application origin, with light as the initial default. Only the appearance string is persisted; credentials remain in the normal Keycloak form submission.
 
 ## 4. Common interaction and information boundaries
 
@@ -71,7 +71,7 @@ Responses contain `data` and `meta` (request ID, current revision/ETag, relevant
 Use `{error: {code, message, request_id, fields, conflicts, retry_after_seconds}}`, omitting inapplicable fields. `fields` contains stable JSON paths and CEL source spans; `conflicts` contains only currently accessible IDs/revisions and repair instructions. Never echo secret/body values, SQL, stack traces, directory rosters or inaccessible resource names. Translate database unique/check conflicts into the resource's stable errors.
 
 Browser navigation recovery for an expired/consumed/missing sign-in callback follows
-[identity section 2](./spec-identity-configuration.md#2-login-flow-and-browser-boundary):
+[identity section 2](spec-identity-configuration.md#2-login-flow-and-browser-boundary):
 a no-store redirect to the public retry page. JSON clients retain the error envelope.
 
 | Status | Meaning and client behavior |
@@ -217,7 +217,7 @@ Use mounted, versioned OpenShift Secrets for service credentials/wrapping keys u
 
 ## 22. OpenShift workloads and readiness
 
-Select separately deployable frontend, Product API/SSE, Ingestion API, Kafka source processor, correlation worker and search indexer roles, plus explicit recovery/proof helpers. REV-36 puts live hint publishing inside the Product API alongside SSE and reconciliation. Maintenance/scheduler, retention sweeps and directory polling are nice-to-have; operator provisioning runs inside Product API requests. Roles may share a backend image but keep separate pools, concurrency budgets, credentials and probes. A migration job is separate and runs before new writers; APIs never race schema migration during startup. Run as a non-root arbitrary UID compatible with OpenShift, read-only application filesystem with explicitly bounded temporary storage, dropped capabilities and least-privilege service accounts. No dependence on pod-local files for durable state.
+Select separately deployable frontend, Product API/SSE, Ingestion API, Kafka source processor, correlation worker and search indexer roles, plus explicit recovery/proof helpers. REV-36 puts live hint publishing inside the Product API alongside SSE and reconciliation. Maintenance/scheduler, retention sweeps and directory polling are nice-to-have; operator provisioning runs inside Product API requests. Each active service owns its image and entrypoint, with separate pools, concurrency budgets, credentials and probes (REV-37). A migration job is separate and runs before new writers; APIs never race schema migration during startup. Run as a non-root arbitrary UID compatible with OpenShift, read-only application filesystem with explicitly bounded temporary storage, dropped capabilities and least-privilege service accounts. No dependence on pod-local files for durable state.
 
 Liveness checks process health only; readiness is capability-specific. Ingress needs Kafka acknowledgement and trusted Kong policy context for v2, with immutable Global routing for v1; it has no Appchi PG, ES or Redis dependency. Product metadata needs PG/auth authority; search endpoints additionally require ES/profile/index readiness. Workers require their processing/proof dependencies. Global process readiness must not unnecessarily take healthy metadata or ingestion offline during a search failure; expose per-capability status internally and return route-specific 503. Public probes contain no tenant details. Client pool/concurrency totals across replicas must stay within agreed service allocation, with bounded acquisition timeout and no unlimited connection burst.
 
@@ -235,7 +235,7 @@ For the isolated local development stack only, a bounded correlation preview may
 
 ## 24. Service capability manifest and integration handoff
 
-See [delivery service bindings](./delivery-readiness.md#service-bindings).
+See [delivery service bindings](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#service-bindings).
 
 ## 25. Team-owned Keycloak operations
 
@@ -245,22 +245,22 @@ Release realm/config changes through staging exports/diffs and reviewed deployme
 
 ## 26. CI and release artifacts
 
-See [delivery ci and release artifacts](./delivery-readiness.md#ci-and-release-artifacts).
+See [delivery ci and release artifacts](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#ci-and-release-artifacts).
 
 ## 27. Full-system acceptance matrix
 
-See [required cross-system acceptance checks](./verification-plan.md#cross-system-acceptance).
+See [required cross-system acceptance checks](../verification/verification-plan.md#cross-system-acceptance).
 
 ## 28. Delivery sequence and rollout
 
-See [delivery delivery sequence and rollout](./delivery-readiness.md#delivery-sequence-and-rollout).
+See [delivery delivery sequence and rollout](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#delivery-sequence-and-rollout).
 
 ## 29. Source processor repair API
 
 Preserve the existing source-head rule: ten consecutive processing failures block that tenant's source processor until an audited global-super-admin retry after repair. Expose `POST /api/admin/tenants/{tenant_id}/processing/retry` with command UUID, expected block generation and a required 1–1,000-code-point plain-text reason. Recheck current global privilege and unchanged head/proof condition; 200 resumes that same durable item without marking it applied or changing its event/time/order. A stale generation is 409; unrepaired required proof is 409 `repair_required`. Record the attempt/result in platform repair audit and current health. This action cannot skip/reject the item, reset correlation evidence or lower any retention/credential fence. Relay/index retries retain their automatic durable retry policy.
 
-Operational response procedures are in [Runbooks and support](./delivery-readiness.md#runbooks-and-support).
+Operational response procedures are in [Runbooks and support](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#runbooks-and-support).
 
 ## 30. Delivery evidence
 
-Track implementation and executed evidence in [DEL-01–DEL-08](./delivery-readiness.md#evidence-register). Design issue IDs are preserved in [Design register](./design-register.md).
+Track implementation and executed evidence in [DEL-01–DEL-08](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#evidence-register). Design issue IDs are preserved in [Design register](../decisions/design-register.md).

@@ -6,7 +6,7 @@
 
 The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
 
-Application service objectives, capacity, backpressure, failure handling and recovery. These are selected objectives; measured results and supplied service guarantees belong in [Delivery readiness](./delivery-readiness.md).
+Application service objectives, capacity, backpressure, failure handling and recovery. These are selected objectives; measured results and supplied service guarantees belong in [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md).
 
 ## 1. Preserved requirements and ownership
 
@@ -60,7 +60,7 @@ Define the primary profile as 50 correlation rules, 20 maintenance windows, 50 c
 
 Use complete backend outcome counters, deterministic 10% sampling of real incoming-event/view observations, 100% of maintenance-expiry observations and 100% UI observation in qualification tests. Report sampling coverage, missing acknowledgements and exclusions. UI percentiles estimated from samples must be labelled as estimates. A rendered projection/version acknowledgement establishes visible state; a hint alone does not. Server receipt of that acknowledgement supplies a conservative completion bound without trusting the browser clock.
 
-Missing or late eligible acknowledgements cannot count as successes. With fewer than 100 eligible observations, show raw outcomes and insufficient-confidence status rather than a confident percentile claim. Tenant reports remain permission-scoped. The live transport and observation protocol is defined in [Alerts and history technical design](./spec-alert-history-technical.md).
+Missing or late eligible acknowledgements cannot count as successes. With fewer than 100 eligible observations, show raw outcomes and insufficient-confidence status rather than a confident percentile claim. Tenant reports remain permission-scoped. The live transport and observation protocol is defined in [Alerts and history technical design](spec-alert-history-technical.md).
 
 ## 8. Request timeouts and retries
 
@@ -154,4 +154,4 @@ Do not lower objectives retroactively or reset budgets after incidents. Record a
 
 ## 23. Qualification and fault tests
 
-See [required reliability checks](./verification-plan.md#reliability).
+See [required reliability checks](../verification/verification-plan.md#reliability).

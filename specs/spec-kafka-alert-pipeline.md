@@ -7,15 +7,15 @@
 Normative redesign accepted by the user on 2026-09-30 (REV-33). PostgreSQL remains
 the alert, history, incident and configuration authority. This supplement governs
 the alert transport, ordering and recovery contracts. Implementation and executed
-evidence are tracked separately in [implementation status](implementation-status.md)
-and [the implementation record](docs/kafka-first-implementation.md).
+evidence are tracked separately in [implementation status](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/implementation-status.md)
+and [the implementation record](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/kafka-first-implementation.md).
 
 ## 1. Authority and topology
 
 ```mermaid
 flowchart LR
   Client[Native client / Grafana] --> Gateway[Kong Key Auth + Appchi policy for v2]
-  Gateway --> Ingress[Stateless ingress]
+  Gateway --> Ingress[Ingestion API]
   V1[Unauthenticated native v1] --> Ingress
   Ingress --> Received[Kafka alerts.received]
   Received --> Source[Source processor]

@@ -119,8 +119,8 @@ alone does not mark every panel stale or add warning banners. Failed or invalida
 observations still show their unavailable/stale state. No animation or added
 refresh delay is needed.
 
-Use the system's selected light or dark palette, tabular numerals, visible focus, labeled count cards and text status alongside color. The visual reference and theme behavior are governed by [shared system section 3](./spec-system-completion.md#3-navigation-and-visual-system). Announce an aggregated “Dashboard updated” politely after a batch; do not announce every second or every changed digit. Reduced-motion preference removes count transitions; do not animate counting through intermediate false values. A screen reader can read panel title, exact count, preset, freshness and threshold. Keyboard users can enter/exit fullscreen, open presets and operate all editing controls.
+Use the system's selected light or dark palette, tabular numerals, visible focus, labeled count cards and text status alongside color. The visual reference and theme behavior are governed by [shared system section 3](spec-system-completion.md#3-navigation-and-visual-system). Announce an aggregated “Dashboard updated” politely after a batch; do not announce every second or every changed digit. Reduced-motion preference removes count transitions; do not animate counting through intermediate false values. A screen reader can read panel title, exact count, preset, freshness and threshold. Keyboard users can enter/exit fullscreen, open presets and operate all editing controls.
 
 ## 17. Acceptance and observability
 
-See [required dashboards checks](./verification-plan.md#dashboards).
+See [required dashboards checks](../verification/verification-plan.md#dashboards).

@@ -6,7 +6,7 @@
 
 Appchi is an internal, multi-tenant alerts management system. It receives v1/v2 alerts, maintains one evolving row per logical alert with source and activity history, and provides CEL feeds, shared presets, incidents, automatic correlation, maintenance suppression and shared count dashboards.
 
-This specification set defines the initial release. Application implementation and production qualification are separate work; [Delivery readiness](./delivery-readiness.md) records the required service inputs and evidence.
+This specification set defines the initial release. Application implementation and production qualification are separate work; [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md) records the required service inputs and evidence.
 
 ## Specification map
 
@@ -14,26 +14,26 @@ Each contract has one authoritative home. Read the relevant domain document toge
 
 | Document | Authoritative content |
 |---|---|
-| [Alerts](./spec-alert-operations.md) | Native field inventory, validation, identity, ingestion, lifecycle, occurrences, notes, retention and alert API behavior. |
-| [Kafka-first alert pipeline](./spec-kafka-alert-pipeline.md) | Admission, transactional Kafka source processing, gateway policy, temporal boundaries, correlation triggers, search reconciliation and cutover. |
-| [Alerts and history technical design](./spec-alert-history-technical.md) | CEL semantics/execution, alert storage, ordered pipeline, projection, feed/history cursors, live updates, purge and rebuild. |
-| [Tenants and access](./spec-tenant-access.md) | Tenant lifecycle, role matrix, grants, directory selection, access audit and API contracts. |
-| [Identity configuration](./spec-identity-configuration.md) | Team-owned Keycloak, LDAP membership, username/password sign-in, sessions, five-minute access enforcement and outage behavior. |
-| [Operators, API keys and Grafana](./spec-operator-operations.md) | Operator lifecycle, credentials, ingress authentication and remote provisioning. |
-| [Incidents](./spec-incident-operations.md) | Manual/automatic incident behavior, ownership, activity, notes, inactivity and retention. |
-| [Correlation rules](./spec-correlation-rules.md) | Conditions, grouping, transition evidence, reset boundaries, arbitration and coordination. |
-| [Presets](./spec-preset-operations.md) | Shared saved feeds, editing, validation, history and dashboard references. |
-| [Maintenance](./spec-maintenance-operations.md) | One-time windows, temporal proof, overlapping causes, scheduling, APIs and history. |
-| [Dashboards](./spec-dashboard-operations.md) | Saved panel layout, count batches, editing, drill-through, APIs and history. |
-| [Shared system contracts](./spec-system-completion.md) | Common UI/HTTP/errors, non-alert schemas, incident/correlation routes, locking, security and workloads. |
-| [Reliability and operations](./spec-reliability-operations.md) | SLOs, capacity objectives, backpressure, failures, telemetry and recovery. |
+| [Alerts](spec-alert-operations.md) | Native field inventory, validation, identity, ingestion, lifecycle, occurrences, notes, retention and alert API behavior. |
+| [Kafka-first alert pipeline](spec-kafka-alert-pipeline.md) | Admission, transactional Kafka source processing, gateway policy, temporal boundaries, correlation triggers, search reconciliation and cutover. |
+| [Alerts and history technical design](spec-alert-history-technical.md) | CEL semantics/execution, alert storage, ordered pipeline, projection, feed/history cursors, live updates, purge and rebuild. |
+| [Tenants and access](spec-tenant-access.md) | Tenant lifecycle, role matrix, grants, directory selection, access audit and API contracts. |
+| [Identity configuration](spec-identity-configuration.md) | Team-owned Keycloak, LDAP membership, username/password sign-in, sessions, five-minute access enforcement and outage behavior. |
+| [Operators, API keys and Grafana](spec-operator-operations.md) | Operator lifecycle, credentials, ingress authentication and remote provisioning. |
+| [Incidents](spec-incident-operations.md) | Manual/automatic incident behavior, ownership, activity, notes, inactivity and retention. |
+| [Correlation rules](spec-correlation-rules.md) | Conditions, grouping, transition evidence, reset boundaries, arbitration and coordination. |
+| [Presets](spec-preset-operations.md) | Shared saved feeds, editing, validation, history and dashboard references. |
+| [Maintenance](spec-maintenance-operations.md) | One-time windows, temporal proof, overlapping causes, scheduling, APIs and history. |
+| [Dashboards](spec-dashboard-operations.md) | Saved panel layout, count batches, editing, drill-through, APIs and history. |
+| [Shared system contracts](spec-system-completion.md) | Common UI/HTTP/errors, non-alert schemas, incident/correlation routes, locking, security and workloads. |
+| [Reliability and operations](spec-reliability-operations.md) | SLOs, capacity objectives, backpressure, failures, telemetry and recovery. |
 
 Supporting records are separate from runtime contracts:
 
-- [Verification plan](./verification-plan.md): required acceptance scenarios.
-- [Delivery readiness](./delivery-readiness.md): service bindings, CI, rollout, runbooks and DEL-01–DEL-08 evidence.
-- [Design register](./design-register.md): coverage of the 55 original issues and corrections from this review.
-- [Decision history](./design-decisions-2026-09-22.md): provenance of the final all-subject choices; current specifications govern details.
+- [Verification plan](../verification/verification-plan.md): required acceptance scenarios.
+- [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md): service bindings, CI, rollout, runbooks and DEL-01–DEL-08 evidence.
+- [Design register](../decisions/design-register.md): coverage of the 55 original issues and corrections from this review.
+- [Decision history](../decisions/design-decisions-2026-09-22.md): provenance of the final all-subject choices; current specifications govern details.
 
 The user delegated completion of all remaining design decisions on 2026-09-22. Specifications combine preserved user requirements with assistant-selected details; explicitly marked user choices take precedence. New choices made during this review are labelled in the design register.
 
@@ -61,7 +61,7 @@ Backend services use Python/FastAPI; the UI uses Next.js/TypeScript. Workloads r
 
 ```mermaid
 flowchart LR
-  V1[Native v1: Global] --> Ingress[Ingress API]
+  V1[Native v1: Global] --> Ingress[Ingestion API]
   V2[Native v2 / Grafana] --> Kong[Kong operator authentication]
   Kong --> Ingress
   Ingress --> Received[Kafka alerts.received]
@@ -105,7 +105,7 @@ flowchart LR
 5. Search consumes a separate group and reconciles authoritative PostgreSQL current state, including missed manual/maintenance/relationship/deletion notifications. A completed bounded scan establishes a lower-bound searchable watermark.
 6. SSE invalidates scoped views; clients refetch and show lag/errors. Infrastructure retention, topology and recovery remain with the dedicated teams.
 
-Terminal post-202 business conflicts are recorded internally and advance the partition. Transient failures retry without advancing. The complete protocol, limitations and assistant-selected decisions are in [Kafka-first pipeline](./spec-kafka-alert-pipeline.md).
+Terminal post-202 business conflicts are recorded internally and advance the partition. Transient failures retry without advancing. The complete protocol, limitations and assistant-selected decisions are in [Kafka-first pipeline](spec-kafka-alert-pipeline.md).
 
 ### Human reads and writes
 
@@ -126,13 +126,13 @@ Navigation starts at the last accessible tenant from the session, otherwise Glob
 - Active ownership, overlapping suppression and preset/dashboard references are enforced transactionally. A partially evaluated automatic attachment set is never presented as complete.
 - A visible count is exact for its stated query/snapshot. Errors and stale values retain provenance; failed searches never become zero.
 - Inactivity sweeps are deferred. Existing activity anchors remain; no timer automatically resolves alerts or incidents.
-- Automatic retention sweeps are deferred. Existing history-access windows and prior retirement/replay fences remain; the [retention matrix](./spec-system-completion.md#19-unified-retention-and-configuration-history) remains the future cleanup design.
+- Automatic retention sweeps are deferred. Existing history-access windows and prior retirement/replay fences remain; the [retention matrix](spec-system-completion.md#19-unified-retention-and-configuration-history) remains the future cleanup design.
 - Retirement preserves minimal references and replay fences. Recovery never restores deleted content, revoked credentials or old sessions from stale backups.
 - Service outages isolate affected capabilities. PostgreSQL failure blocks processing/commands but not healthy Kafka admission; Kafka failure blocks acknowledged admission. Search/Redis failures isolate their affected capabilities.
 
 ## Capacity and ownership
 
-The sustained ingestion requirement is 250 deliveries/second company-wide, including all traffic in one tenant or Global; normal traffic is about 66.7/second. Selected normal-operation p99 objectives are one second for admission and authoritative commands, two seconds for searches/counts, and five seconds for incoming/maintenance changes to render. Path availability targets are 99.9% over rolling 30 days. [Reliability](./spec-reliability-operations.md) defines eligibility, measurement, stress/recovery workloads and Kafka admission safeguards.
+The sustained ingestion requirement is 250 deliveries/second company-wide, including all traffic in one tenant or Global; normal traffic is about 66.7/second. Selected normal-operation p99 objectives are one second for admission and authoritative commands, two seconds for searches/counts, and five seconds for incoming/maintenance changes to render. Path availability targets are 99.9% over rolling 30 days. [Reliability](spec-reliability-operations.md) defines eligibility, measurement, stress/recovery workloads and Kafka admission safeguards.
 
 These targets do not establish measured capacity. Before enabling affected capabilities, qualify combined workloads and record numeric application budgets, connection/resource allocations and service capability evidence.
 
@@ -143,3 +143,5 @@ The user's team owns Appchi and Keycloak configuration/operation. Dedicated team
 No tenant deletion/disablement, custom roles or resource-specific ACLs; no private presets/dashboards or persisted personal table preferences; no recurring maintenance; no correlation count thresholds, sequence/branching language, configurable priority or automatic overlap analysis; no incident acknowledgement/owning team; no product notifications, attachments, bulk export or public sharing; no enriched historical import or v1/v2 identity merge; no full event-sourcing architecture or full-history Elasticsearch index.
 
 These exclusions define scope rather than unresolved gaps.
+
+Current repository and deployment ownership: [REV-37 repository layout](spec-repository-layout.md).
