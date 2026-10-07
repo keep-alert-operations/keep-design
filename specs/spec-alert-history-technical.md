@@ -142,15 +142,76 @@ The active alert path has no PostgreSQL inbox/outbox relay or CDC. Kafka is the 
 
 Every visible mutation atomically allocates tenant projection_seq, per-alert projection_version and identity current_projection_seq. Search rejects older snapshots, verifies equal-version identity and retains permanent versioned deletion markers. Changed records prompt current-authority reads; bounded scans repair lost notifications. See [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 6. No pending projection-work scan is the active indexing trigger.
 
+**Assistant-selected scalability implementation (2026-10-06):** coalesce changed
+hints into bounded bulk writes and reuse process-owned search clients. Verify
+already refresh-visible matching versions/digests without rewriting them. Bound
+bulk bytes and individual projection bytes using the supplied capacity profile;
+`search_max_document_bytes` is mandatory outside development. A development
+fallback is unqualified. Read current note text with bounded cursors and retain
+every searchable token; never silently truncate notes or impose a new note quota.
+Use the partial live-note `(tenant_id, alert_id, id)` index for existence probes
+and ordered streaming reads. Probe note presence with the current alert batch;
+an alert without live notes requires no separate streaming cursor.
+A document beyond the supplied integration allocation is a visible failed
+projection, not a false watermark advance. Partition and tenant retries preserve
+their predecessor fences while allowing independent partitions/tenants to run.
+
 ## 16. Searchable progress and refresh proof
 
 Capture committed S at the beginning of a tenant authority scan. Verify every keyset page is refresh-visible, then advance searchable_seq only to S after the full pass. Concurrent writes and behind-cursor insertions have sequence above S and belong to later passes. Individual hints never advance the tenant watermark to their maximum. Expose committed/searchable positions and verified time; publish live invalidations from durable view-state reconciliation. Details and rebuild fencing are in [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 6.
+
+Claim reconciliation pages using expiring PostgreSQL owner tokens. Only the
+current owner may checkpoint a page; stale owners cannot advance progress.
+Persist a failed tenant's safe error code and retry time and yield to other
+eligible tenants. Authority scans continue when Kafka notifications are
+unavailable, and healthy notifications can continue when a scan fails.
+
+After a verified pass, an incremental pass persists that verified sequence as
+its lower bound and scans current identities whose projection sequence exceeds
+it. Capture a new upper boundary S at pass start. Do not exclude identities newer
+than S: their complete current snapshot can cover the earlier required state.
+A write behind the UUID cursor necessarily has sequence greater than S and is
+covered by a later pass. A new epoch starts at lower bound zero and requires a
+complete initial pass before advancing its searchable watermark.
+
+Five minutes after the previous audit completes, a full-authority repair audit
+becomes eligible. Persist its own UUID cursor, captured sequence S, start time,
+last-page time and scheduling counter. Select current identities with sequence
+greater than zero and no greater than S; subsequent writes have larger sequences
+and remain covered by ordinary delta passes. New identities cannot appear behind
+this audit cursor with a sequence at or below S. Give an audit at most one bounded
+page for every four ordinary reconciliation turns, under the same expiring
+tenant lease. Audit progress never advances or resets the ordinary searchable
+watermark, and an unfinished audit never replaces ordinary delta progress.
+Recheck lease ownership after locking the checkpoint row. Persist audit failure
+and retry time separately from ordinary scan failure: an old document failing
+repair must not prevent healthy new deltas from advancing the watermark.
+Completion depends on retained tenant size and available repair allocation; the
+five-minute eligibility interval is not a repair-completion promise. This repairs
+unchanged missing search documents without making routine freshness wait for a
+large historical scan. Restore/rebuild gates and complete rebuild copy passes
+remain required.
 
 ## 17. Search snapshots, counts and purged IDs
 
 Use Elasticsearch point-in-time (PIT) plus `search_after` and the selected sort/tie-break, with an absolute five-minute Appchi cursor lifetime. Set each PIT keep-alive no later than the remaining application lifetime, carry the newest returned PIT ID, close it on disposal when possible, and let it expire after abandoned views. A successful first-page live refresh disposes the replaced PIT after accepting the new result; do not accumulate five minutes of abandoned PITs on every one-second refresh. A snapshot still being traversed retains its own lifetime. The [PIT pagination contract](https://www.elastic.co/docs/reference/elasticsearch/rest-apis/paginate-search-results) preserves a stable traversal.
 
 An authenticated cursor contains/binds tenant, session/principal visibility scope, index/environment epoch, effective-filter digest, sort, captured query time, latest PIT ID, last sort tuple and expiry. Protect it using authenticated encryption with the existing approved application secret mechanism; never expose a raw client-editable Elasticsearch request. Query changes/expiry/retired index restart traversal. Reauthorization can invalidate an otherwise live snapshot.
+
+First-page responses include a separate purpose-bound `meta.close_token`.
+`POST /api/tenants/{tenant_id}/alerts/snapshot/close` accepts `{token}` and
+reauthorizes its session, tenant and index scope without requiring the old filter
+or preview revision. Discarded late responses and disposed views close their PIT;
+transport uncertainty retains the existing finite expiry fallback. Pagination
+tokens retain all their original filter and visibility bindings.
+
+`POST /api/tenants/{tenant_id}/alerts/counts` accepts at most 24 uniquely identified
+queries with CEL, text and suppression options and returns a decimal count map.
+This bounded quick-count operation uses the count engine; it does not fetch feed
+rows or allocate one PIT per badge. Existing preset/dashboard authorization and
+specialized count contracts remain authoritative for those resources. Query
+responses identify relative-time expressions so the browser can run their
+existing one-second refresh contract even without a data invalidation.
 
 Capture the verified searchable vector before opening a new PIT and recheck its epoch afterward. Report at most that pre-PIT verified lower bound; reading a newer watermark after opening the PIT cannot make its older snapshot fresh. Return a newer observed vector separately as a reason to refresh, never as a rendered acknowledgement for that snapshot.
 

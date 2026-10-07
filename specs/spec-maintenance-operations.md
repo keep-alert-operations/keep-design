@@ -129,4 +129,27 @@ Surface “Updating suppression” during lag and “Updates delayed” when unh
 
 ## 19. Acceptance scenarios
 
+**Assistant-selected scalability implementation (2026-10-06):** persist a
+versioned continuation at the exact input head and maintenance generation. A
+strictly advancing input can update active causes and the final union interval
+without rereading the alert's lifetime proof. Record full versus tail history
+representations explicitly so historical union reconstruction remains exact.
+The historical-input allocation is a read page size, not a lifetime alert limit;
+evaluation work budgets apply to one admitted input.
+
+For delayed inputs, changed catalogs or legacy checkpoints, read immutable input
+pages in short read transactions and prepare exact reduction outside tenant
+writer locks. Consume only against the same alert head, catalog generation and
+source proof. An unrelated alert's tenant-order advance can relabel the prepared
+new boundary without repeating historical evaluation; a same-alert conflict
+requires fresh preparation. Preparation remains linear in that alert's retained
+history and is not a promise of constant memory or durable background progress.
+It introduces no scheduler, physical cleanup or backfill.
+
+Normal catalog selection includes temporally relevant segments and explicitly
+active cause segments. Ended or deactivated historical segments do not consume
+the concurrently evaluated-window budget. Bulk commands scope preparation to
+their target alerts. Exact historical fallback retains every relevant old
+boundary and must not silently discard proof to fit an allocation.
+
 See [required maintenance checks](../verification/verification-plan.md#maintenance).
