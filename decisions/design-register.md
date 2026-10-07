@@ -296,3 +296,43 @@ chain, verify legacy adoption, retain the transaction/advisory lock, and protect
 both ledgers from runtime roles. Forward-only execution and the dedicated
 before-writer job retain existing cutover and rollback requirements. Original
 issue IDs and decision numbers are unchanged. Executed evidence belongs in delivery.
+
+## Scalability and code review observations — 2026-10-06
+
+The user requested a system-wide review against 5,000 deliveries/minute,
+100 active users and 50 tenants. The [review evidence](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/qualification/scalability-review-2026-10-06.md)
+records implementation findings under the existing N1/reliability, search/live,
+maintenance and correlation contracts: serial refresh-bound indexing, failed
+projection isolation, browser search amplification, blocking async paths,
+lifetime maintenance proof limits, whole-evidence rewrites, broad context locks,
+activity timer resets, duplicate live polling and missing ordinary request
+deadlines. The ended-window evaluation quota discrepancy remains unresolved.
+
+These are review observations and proposed corrections, not new approved design
+choices, measured capacity, altered release gates or authorization to reintroduce
+deferred workers. Existing 250/second sustained and 500/second recovery requirements,
+REV-34–36 scope, all original issue identifiers and decision numbering remain.
+
+## Scalability implementation authorization — 2026-10-06
+
+The user subsequently requested implementation of all review corrections and
+combined load/browser testing. Assistant-selected implementation details under
+the existing contracts are bounded/coalesced projection batches, per-tenant
+leased reconciliation and retry isolation, count-only quick-filter batches,
+session-bound PIT disposal, stable activity heartbeats, off-thread SQL, pooled
+clients and absolute request budgets. See the updated search and reliability
+supplements. Continuation and differential persistence preserve replay proof,
+source order, tenant ordering, history access and current worker scope. These
+are application implementation choices, not production capacity claims or
+authorization to modify shared infrastructure. Executed evidence belongs in
+delivery; release pins must advance coherently only after the source combination
+is committed and its immutable artifacts are available.
+
+Further assistant-selected implementation detail: periodic repair of unchanged
+search documents uses a persisted cursor separate from ordinary delta progress,
+with at most one audit page per four ordinary reconciliation turns. A growing
+tenant's historical scan must not hold its ordinary searchable watermark at the
+audit's starting point. Initial epoch verification remains a complete authority
+pass; background audit progress itself never advances that watermark. Database
+setup statements may use ordered wire pipelining while preserving separate SQL
+snapshots, recovery lock acquisition/check order and transaction boundaries.

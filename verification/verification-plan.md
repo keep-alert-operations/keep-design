@@ -1,5 +1,38 @@
 # Verification plan
 
+## Additional scalability regressions — 2026-10-06
+
+- Verify coalesced indexing, unchanged-document no-op, all note tokens beyond the
+  former 1 MiB projection ceiling, visible over-allocation failure and continued
+  progress for independent tenants. Exercise exclusive reconciliation leases,
+  expired/stale owners, lost Kafka hints, retained lower watermarks and retries.
+  Keep an audit unfinished across multiple pages, admit changes ahead of and
+  behind its cursor, and prove ordinary delta watermarks continue advancing while
+  unchanged missing documents are repaired under the bounded audit allocation.
+- Compare incremental maintenance with exact replay over long, repeated,
+  overlapping and out-of-order histories. Historical input count is a paging
+  concern, not a lifetime admission cap; ended windows do not consume the current
+  concurrently evaluated-window budget. Verify immutable proof and no backfill.
+- Confirm correlation changes only altered evidence and locks required live or
+  explicitly targeted contexts while preserving dormant reset proof and order.
+- Exercise one feed plus one bounded quick-count request per invalidation,
+  replacement/navigation/late-response PIT disposal, idle relative-time ticks,
+  hidden-tab pause, healthy-SSE polling suppression and foreground activity across
+  repeated session refreshes. Recheck tenant/session token misuse rejection.
+- Exercise concurrent users and arrivals together at 5,000 deliveries/minute,
+  100 users and 50 tenants, recording retained data growth, exact durable/search
+  counts, errors, latency boundaries and resource allocation. Keep fixture API
+  tests, real OIDC/browser tests and supplied-service qualification distinct.
+- Verify request deadlines under database contention and that timed-out local
+  transactions cannot later commit. Recheck synchronous operator and SSE budgets.
+  With ordered SQL pipelining, change the restore fence between acquisition's
+  statement snapshot and the following control read; reject business entry.
+  Uncertain acquisition/release must discard the connection without leaking a
+  session lock.
+
+These cases supplement the existing stronger sustained/recovery and enabled-rule
+qualification requirements; executed outcomes belong in delivery.
+
 **REV-35 scope:** directory polling and its five-minute LDAP-change propagation cases are future qualification. Current identity acceptance must cover explicit complete bootstrap/refresh, unknown-user/team refusal without evidence, last-trusted authorization, immediate Appchi grant edits, known revocation/logout/session expiry and unchanged restore gates. See [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
 **REV-34 scope:** [Worker scope](../specs/spec-worker-scope.md) supersedes acceptance requirements for deferred schedulers. Existing timer/fan-out and automatic-cleanup scenarios are future qualification, not active release gates. Pre-cutover maintenance history still requires compatibility checks.

@@ -136,3 +136,12 @@ flowchart LR
 ```
 
 Internal records cover coordinator/order state, rule revisions/epochs/grouping generations, full context identity, live per-condition memberships, immutable transition proof/Kafka consumed-event identity/in-transaction arbitration, ownership/reset barriers and diagnostic/audit records. Physical records, keys and indexes are defined in [Shared system contracts](spec-system-completion.md#16-correlation-persistence-and-large-grouping-values).
+
+**Assistant-selected scalability implementation (2026-10-06):** compare live
+evidence with the loaded snapshot and persist only removed, changed or newly
+created memberships. An unchanged support must not incur a delete/reinsert or
+revision refresh. Lock live contexts needed for evidence/ownership and explicitly
+targeted contexts in canonical order; do not lock every dormant historical group.
+Load an incoming alert's exact retained group/reset proof even when that context
+has no current evidence. Narrowing work must preserve arbitration order, complete
+eligible attachment, manual ownership boundaries and stale-evidence rejection.

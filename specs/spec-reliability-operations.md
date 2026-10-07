@@ -68,6 +68,23 @@ Bound ingestion handling to five seconds, including body read, and retain the te
 
 Ordinary Product API and search requests have a ten-second handler timeout and fifteen-second gateway timeout. Technical supplement 18–20 selects SSE heartbeat, bounded buffering and stream/proxy timeout requirements; deployed compatibility remains to be confirmed. Bound database waits by the remaining request budget. HTTP timeout does not truncate an already admitted atomic background attachment or other mandatory operation. Use the selected 429/503 retry contracts below. Gateway timeouts are requested integration settings for the gateway team to confirm and apply; Appchi owns its handler deadlines and does not independently reconfigure the shared gateway.
 
+The handler propagates an absolute request budget into database acquisition,
+statement/lock waits and the pre-commit check. Cancellation alone cannot stop a
+synchronous Python thread; a late local transaction must observe the expired
+budget before committing. Operator mutations retain a 100-second handler budget
+for their separately bounded remote provisioning contract. SSE setup is bounded;
+each later reconciliation iteration receives its own bounded request budget.
+Run synchronous database work outside the async event loop. Registry locks
+protect in-memory state only, with per-tenant loading coordination across users.
+
+The user's 2026-10-06 implementation check adds a combined diagnostic scenario of
+5,000 deliveries/minute, 100 active users and 50 tenants. This does not supersede
+the existing 250/second sustained and 500/second recovery qualification gates.
+Record retained population, enabled features, payload size, replica/pool counts,
+test duration, routing/identity fixtures, failures and measured latency boundaries.
+A library-admission or synthetic-session workload cannot establish gateway, OIDC
+or rendered-visibility qualification; those paths need their own real checks.
+
 ## 9. Recovery capacity and overload tests
 
 Require demonstrated processing recovery capacity of **500 deliveries/second** for a concentrated tenant while 250/second continue arriving. Net drain of 250/second clears a two-hour, 1.8-million-item backlog in two hours after dependencies are healthy. This is a qualification requirement, not measured capacity.
