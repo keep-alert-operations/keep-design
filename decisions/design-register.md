@@ -336,3 +336,16 @@ audit's starting point. Initial epoch verification remains a complete authority
 pass; background audit progress itself never advances that watermark. Database
 setup statements may use ordered wire pipelining while preserving separate SQL
 snapshots, recovery lock acquisition/check order and transaction boundaries.
+
+## Context navigation implementation — 2026-10-12
+
+The user requested implementation of a task-based context layer and linked map.
+Assistant-selected implementation details are a design-owned JSON catalog of
+exact source sections, mandatory and conditional route edges, a delivery-owned
+standard-library reader, and generated Markdown pages that can be browsed in
+Obsidian. See the [context guide](../context/README.md). These are navigation
+choices, not changes to product requirements or authorization boundaries.
+The concise workspace entrypoint retains universal constraints and links the
+preserved detailed engineering policies. Scope corrections accompany extracted
+sections; keyword matches and routing fixtures never establish complete context
+or agent understanding. Original issue IDs and REV numbering are unchanged.
