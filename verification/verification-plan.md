@@ -41,6 +41,10 @@ Required acceptance cases for the selected design. Record executions, environmen
 
 ## Alerts
 
+Following the 2026-10-11 user correction, verify Feed as the page title, sidebar
+label and breadcrumb on desktop and narrow views. Alert-detail return navigation
+uses Feed and existing `/alerts` URLs; saved-preset breadcrumbs remain contextual.
+
 Implementation verification must cover these specified outcomes:
 
 | Scenario | Required outcome |
@@ -98,7 +102,40 @@ views; update labels stay readable without transient warning rows. Verify that
 actual search failures still identify stale values and blocked source processing
 still displays its error.
 
-Test duplicate references, same-PIT/clock parity with equivalent feed queries, relative-time boundary, saved-query edits during requests, name reuse, preset-delete/save races, same-value retries, stale revision/draft preservation, exact zero versus failed/partial results, purge and maintenance generation races, index switch, access loss during paused/fullscreen/dirty views, responsive/keyboard layouts, threshold integer boundaries and deleted-history retention. Include counts/render observations in existing visibility measurements without storing sensitive query text in metrics. No additional dashboard-specific availability promise supersedes reliability objectives.
+Verify the 2026-10-08 inline dashboard flow: name-click/pen editing; one-panel
+Create/Edit dialogs with Cancel/Escape and focus restoration; each panel's options
+including Delete; main-board drag/resize and keyboard alternatives; Save disabled
+while clean, enabled for all definition changes, disabled after reverting or saving.
+Keep CRUD/layout changes local until one complete expected-revision save. Cover
+conflicts, uncertain exact-command retries, remote saves/deletion, access loss,
+saved count failures and narrow layouts without responsive repacking of desktop
+columns/sizes; vertical compaction applies equally across viewport sizes.
+
+Verify the later fluid-motion/top-compaction correction: sub-cell pointer movement
+and resizing follow pixels, with a valid compacted placeholder and smooth neighbor
+settling. Cover rapid pickup during a settling animation, reduced motion,
+Escape/pointer cancellation, unchanged snapped drops remaining clean, dropping
+into empty columns, vertical reorder, gap closure after shrink/delete, sparse
+saved layouts opening clean, viewer/fullscreen compaction, and explicit Save of
+compacted coordinates. Horizontal blocker order, allowed sizes, non-overlap,
+identity/metadata and the final 100-unit bound remain required.
+
+Verify the 2026-10-09 toolbar correction: one editor-only Discard changes button
+replaces Pause updates, stays disabled while clean/locked, confirms before reload,
+and restores focus correctly on cancel/discard. No pause/resume or draft-count
+preview control/request remains. Automatic foreground refresh, hidden-tab
+suspension, manual refresh, saved count context checks and fullscreen focus/navigation
+continue. Uncounted draft preset references ask users to Save.
+
+Verify the later removal of visible dashboard helper/status text on ordinary,
+narrow and fullscreen views. Dirty drafts retain working Save/Discard controls
+without the extra reminder; accessible handle descriptions and hidden count status
+remain. Following the subsequent same-day correction, Count provenance has no
+button, details panel or reserved action row; internal revision/context checks remain.
+Count refresh, suppression/lag completion and unavailable/stale feedback must
+continue without moving panel positions.
+
+Test duplicate references, same-PIT/clock parity with equivalent feed queries, relative-time boundary, saved-query edits during requests, name reuse, preset-delete/save races, same-value retries, stale revision/draft preservation, exact zero versus failed/partial results, purge and maintenance generation races, index switch, access loss during hidden/fullscreen/dirty views, responsive/keyboard layouts, threshold integer boundaries and deleted-history retention. Include counts/render observations in existing visibility measurements without storing sensitive query text in metrics. No additional dashboard-specific availability promise supersedes reliability objectives.
 
 ## Tenants and access
 
@@ -239,3 +276,26 @@ existing Python/CLI deployment entrypoints, including execution from a wheel
 without a source checkout. Reject arbitrary stamp, downgrade and offline paths.
 Run affected API/identity/maintenance/search SQL compatibility cases. Existing
 Kafka/scheduler cutover prerequisites and production qualification remain separate.
+
+## Isolated cluster initialization and serving proof
+
+Exercise initial development search activation on real isolated PostgreSQL and
+the supplied HTTPS Elasticsearch version. Require strict mapping, external
+version protection, refresh-visible exact totals/counts, native CEL equivalence,
+tenant isolation, PIT pagination, tombstone replay and atomic alias checks.
+Verify worker-role SQL permissions, fresh activation, matching repeated execution,
+crashes after reservation/index creation, cleanup uncertainty, target/config/epoch
+conflicts, populated authority, active writers, stale clocks and restore fences.
+Failures must not open the initial gate; retries must not adopt unrelated data.
+
+Exercise the private operator helper's actual caller/response contract with
+selected active/prepared keys and credential-ID-only old/revoked policy proof.
+Require fresh nonce, all exact serving members, policy digest/generation, tenant,
+expiry, current operation/lease/binding and before/after checks. Reject wrong
+secrets, unknown/duplicate/missing nodes, redirects, malformed/oversized replies,
+partial timeouts and concurrent invalidation. Verify no alert is admitted and no
+credential is reflected in errors/logs. Execute real Kong/Grafana lifecycle checks
+against the eventual supplied binding before claiming that integration qualified.
+Verify OpenShift restricted execution, private routing, direct member TLS/DNS,
+startup order and replacement/requalification. Record local and target-cluster
+evidence separately.

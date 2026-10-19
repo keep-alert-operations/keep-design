@@ -22,6 +22,25 @@ Use a 12-column desktop grid. Panel width is 3, 4, 6 or 12 columns; height is 2,
 
 Below 1,024 CSS pixels, render two equal columns; below 640, one. Order is saved y, x, then panel UUID. Responsive display does not write the shared desktop layout. Provide keyboard Move up/down and width/height controls with the same packing preview, focus retention and announcements. Counts remain readable at 200% zoom and controls do not require dragging.
 
+**Later user correction — 2026-10-08:** dragging and resizing should feel fluid,
+like Grafana panels. Panels stick to the top: no panel may leave empty vertical
+space above it unless another panel in an overlapping column blocks upward movement. The
+frontend compacts upward after placement, resizing, creation, deletion and
+reordering. Existing sparse definitions also display compacted, including viewer
+and fullscreen views; opening alone does not enable Save or write a revision.
+The next explicit changed-definition Save includes compacted coordinates.
+This supersedes preserving empty vertical gaps in earlier layout guidance.
+
+Assistant-selected presentation follows the pointer in CSS pixels while a
+placeholder shows the valid compacted drop destination. Neighbor movement and
+release settle smoothly; reduced-motion preference skips settling animations.
+Stored widths/heights remain the allowed grid choices. Vertical gravity keeps
+x/width/height and panel identity, processes y/x/UUID order, and stops beneath
+earlier horizontally overlapping panels; it does not pass through a blocker.
+Collision displacement still prioritizes the edited rectangle, followed by
+compaction and validation of the complete 100-unit layout. Escape/cancel restores
+the pre-gesture draft. Count refresh does not rearrange the layout.
+
 ## 5. Colors and thresholds
 
 Default is neutral for every value, avoiding an implied incident-severity mapping. A panel may define up to three increasing, distinct, nonnegative integer lower bounds with selected palette colors (`blue`, `green`, `amber`, `red`); the largest bound <= count applies. Bounds use exact integer arithmetic and the JSON decimal-string count representation. No arbitrary CSS, gradients, blinking, sounds or automatic action is accepted. A threshold is presentation only and never creates an incident, changes alert severity or sends a notification.
@@ -40,13 +59,35 @@ Clicking a ready panel opens its saved preset in the same tenant, with empty fre
 
 ## 8. Shared editing, copying and conflicts
 
-Editing creates a memory-only per-tab draft. Explicit Save commits the complete name/panel/layout definition in one transaction; Discard reloads the current saved revision. Preview draft layout/counts does not save or affect other users. Warn before voluntarily leaving a dirty draft; access loss clears protected state immediately. No autosave, collaborative cursor, field merge or forced overwrite.
+Editing creates a memory-only per-tab draft. Explicit Save commits the complete name/panel/layout definition in one transaction; Discard reloads the current saved revision. Read-only candidate validation/count APIs do not save or affect other users. Warn before voluntarily leaving a dirty draft; access loss clears protected state immediately. No autosave, collaborative cursor, field merge or forced overwrite.
+
+**Later user decision — 2026-10-08:** edit directly on the regular dashboard
+screen, without a separate dashboard editing modal or screen. Clicking the name,
+with an adjacent pen icon, opens inline name editing. Create panel opens a dialog
+for one panel; each panel's options offers Edit panel and Delete panel. Drag and
+resize operate on the ordinary dashboard grid. Panel dialog Apply/Create updates
+only the tab's draft. Save is enabled only when the complete definition differs
+from the saved baseline, including name, panel creation/edit/deletion and layout.
+Canceling a dialog leaves the dashboard draft unchanged; reverting all changes
+leaves Save disabled. Saving restores
+the saved baseline and disables Save again. These controls require edit access;
+fullscreen hides editing controls. Existing draft, revision, conflict, access and
+history contracts continue to apply.
+
+**Later user correction — 2026-10-09:** replace Pause updates with Discard changes
+in the main dashboard toolbar. Discard requires edit access and is enabled only
+for an unsaved draft while commands are unlocked; its existing confirmation and
+current-saved-revision reload remain. Remove Preview draft counts from the UI.
+The ordinary screen, new/history drafts and fullscreen expose no pause control;
+count updates remain automatic, with manual Refresh counts available. Uncounted
+draft preset references require explicit Save before displaying counts. The
+existing read-only backend preview/validation contracts are unchanged.
 
 Use expected dashboard revision and command UUID. Preserve the draft on 409 and offer Reload/compare or Save as new with an explicitly chosen unique name. A clean open dashboard loads remote saves; a dirty one keeps its base revision and shows the newer shared revision. Duplicate uses the current saved definition or the explicitly selected draft, new dashboard/panel IDs, and the same currently active preset references, revalidated at save. Historical revision reuse is also a draft followed by a new validated save, never history mutation or undelete.
 
 ## 9. List, fullscreen and refresh controls
 
-List dashboards by name then UUID, with name search, updated-at sorting, panel count and updated-by/time. Pages default 50/max 200, 15-minute live keyset cursor; collection change prompts refresh rather than mixing a frozen snapshot claim. Open a stable tenant/dashboard URL. The default is live, using the shared SSE/invalidation and relative-clock refresh; offer Refresh now and Pause updates. Pause/fullscreen are transient tab state. Paused views show their captured time and still enforce permission/deletion changes; pause never pauses security checks.
+List dashboards by name then UUID, with name search, updated-at sorting, panel count and updated-by/time. Pages default 50/max 200, 15-minute live keyset cursor; collection change prompts refresh rather than mixing a frozen snapshot claim. Open a stable tenant/dashboard URL. Updates are live, using the shared SSE/invalidation and relative-clock refresh; offer Refresh now. Fullscreen is transient tab state. Hidden-tab behavior and permission/deletion rechecks continue; no pause control is exposed following the 2026-10-09 correction.
 
 Assistant-selected query spelling: `sort=name|updated_at` and
 `direction=asc|desc`, defaulting to name ascending; UUID ties remain ascending
@@ -118,6 +159,17 @@ counts, threshold colors and captured time while refreshing; an in-flight reques
 alone does not mark every panel stale or add warning banners. Failed or invalidated
 observations still show their unavailable/stale state. No animation or added
 refresh delay is needed.
+
+**Later user correction — 2026-10-09:** remove the visible draft reminder,
+preset-opening hint, drag/resize help paragraph and tenant/live/captured-time/
+dashboard-revision status line. This supersedes the visible status-line
+presentation above. Unsaved state remains clear through its chip and Save/Discard
+controls. Preserve keyboard help through accessible handle descriptions and
+visually hidden count status. The subsequent same-day user correction removes
+the Count provenance button, details panel and reserved action row. Batch metadata
+and revision/context checks remain internal to count processing. Count refresh
+must keep panels steady. Visible count failures and stale/unavailable indicators
+remain.
 
 Use the system's selected light or dark palette, tabular numerals, visible focus, labeled count cards and text status alongside color. The visual reference and theme behavior are governed by [shared system section 3](spec-system-completion.md#3-navigation-and-visual-system). Announce an aggregated “Dashboard updated” politely after a batch; do not announce every second or every changed digit. Reduced-motion preference removes count transitions; do not animate counting through intermediate false values. A screen reader can read panel title, exact count, preset, freshness and threshold. Keyboard users can enter/exit fullscreen, open presets and operate all editing controls.
 
