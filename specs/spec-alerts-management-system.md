@@ -115,7 +115,7 @@ Alert feeds/counts query Elasticsearch under tenant scope, CEL, transient text f
 
 Mutations carry command identity and expected revisions, commit authoritative results and history atomically, and return those results immediately. A retry never invents a new command after an uncertain timeout. Queued source work does not block manual commands and may change an alert again afterward. Authorization guards precede domain locks; external service calls occur outside transactions.
 
-Navigation starts at the last accessible tenant from the session, otherwise Global Alerts. Shared views refresh through SSE plus reconciliation. Drafts remain in tab memory across ordinary conflicts and are cleared when access is lost. Search outages, pending maintenance and indexing lag are visible rather than presented as empty results.
+Navigation starts at the last accessible tenant from the session, otherwise Global Feed. The 2026-10-11 user correction names the alert-query page Feed; existing alert resource URLs and API contracts remain. Shared views refresh through SSE plus reconciliation. Drafts remain in tab memory across ordinary conflicts and are cleared when access is lost. Search outages, pending maintenance and indexing lag are visible rather than presented as empty results.
 
 ## Cross-system invariants
 

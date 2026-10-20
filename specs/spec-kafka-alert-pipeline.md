@@ -91,25 +91,40 @@ This partition key does not change either native logical-identity formula.
 Concurrent ingress replicas establish append order, not UTC order. Partition counts
 are immutable while the pipeline runs; changes require a fenced drain/cutover.
 
-The source group disables automatic offset commits and stores. For each input:
+The source group disables automatic offset commits and stores. **Assistant-selected
+batching (2026-10-18):** each turn takes at most 100 already-fetched inputs without
+waiting; only an idle consumer waits, up to 100 milliseconds, for a single input.
+Inputs are grouped by input partition and handled partition by partition in input
+order:
 
-1. Validate internal scope, schema, key and identity proof. Under the tenant
-   coordinator, recognize an existing delivery UUID or apply the source mutation.
-2. Commit current state, source/history/maintenance proof, and a source-result row
-   in one PostgreSQL transaction. The row retains input digest, first topic /
-   partition / offset, result and exact immutable changed-event bytes. Allocate
+1. For each input, validate internal scope, schema, key and identity proof. Under the
+   tenant coordinator, recognize an existing delivery UUID or apply the source mutation.
+2. For each input, commit current state, source/history/maintenance proof, and a
+   source-result row in one PostgreSQL transaction. The row retains input digest, first
+   topic / partition / offset, result and exact immutable changed-event bytes. Allocate
    application order here solely for before/after proof; it is not receive order.
-3. Begin a Kafka transaction, publish changed keyed by tenant UUID bytes, send the
-   consumed offset plus one with group metadata, then commit the Kafka transaction.
-4. Record confirmation/progress in PostgreSQL. This last record is diagnostic and
-   retention bookkeeping; the committed broker group offset remains offset authority.
+3. Close the partition batch at its last fetched input or once 100 milliseconds of
+   application have elapsed. Begin one Kafka transaction, publish the batch's changed
+   events in input order keyed by tenant UUID bytes, send the last applied offset plus
+   one with group metadata, then commit the Kafka transaction.
+4. Record the batch's confirmation/progress in one PostgreSQL transaction. This last
+   record is diagnostic and retention bookkeeping; the committed broker group offset
+   remains offset authority.
+
+The Kafka transaction begins only after its inputs are committed in PostgreSQL. A
+transaction carries zero or more changed events; rejections and replays at another
+coordinate emit none. Downstream consumers treat each changed record independently
+and never assume one event per transaction. When an input fails in step 1 or 2,
+complete steps 3–4 for the inputs before it, record the fault, then retain the failed
+offset for that partition while other partitions continue.
 
 Stable transactional IDs include environment, source protocol and input partition.
 On assignment initialize that producer first, fencing the previous owner and
 settling its uncertain transaction, then read committed offsets. On an uncertain
-outcome recreate/rejoin; never blindly publish again on a stale assignment. Both
-downstream groups use read_committed. A PostgreSQL commit is never described as
-atomic with Kafka.
+outcome recreate/rejoin; never blindly publish again on a stale assignment. The
+uncertainty covers the whole batch: its inputs remain unconfirmed in PostgreSQL and
+the next owner replays them from the committed offset. Both downstream groups use
+read_committed. A PostgreSQL commit is never described as atomic with Kafka.
 
 Replay at the original input coordinate returns the original immutable bytes,
 even after intervening manual edits. The same delivery UUID at another coordinate
@@ -120,7 +135,9 @@ without fresh correlation evidence.
 
 Fixed-severity and other validated source business conflicts are terminal internal
 post-202 rejections: retain a controlled reason and advance the input. Transient
-authority/broker failures retain the offset. Malformed internal records and unknown
+authority/broker failures retain the offset. A receipt ahead of the tenant clock
+within the clock-health bound is transient but records no fault; section 5 retains
+its offset only for the measured lead. Malformed internal records and unknown
 proof fence the partition for explicit repair; do not silently skip them.
 
 ## 4. Manual changes and correlation
@@ -169,6 +186,15 @@ blocked. These are application thresholds to qualify, not infrastructure guarant
 Even healthy clocks leave near-boundary uncertainty of the combined clock error;
 UTC timestamps do not prove exact cross-service order. Kafka lag alone is not a
 clock-health failure.
+
+**Assistant-selected receipt lead (2026-10-19):** no source is applied before the
+tenant decision clock reaches its receipt, so a later control boundary cannot precede
+an applied receipt. When the clock read under the coordinator is earlier than the
+receipt, the source processor rolls the application back before any write. Within the
+one-second clock-health bound this is ordinary clock difference, not a fault: only
+that input partition waits for the measured lead plus 10 milliseconds, and leads above
+100 milliseconds log a warning. A larger lead records the `source_receive_time_ahead`
+fault and uses the normal partition retry. Receipt is never replaced or moved.
 
 Retain maintenance controls and full per-alert before/after lineage. Reduce field
 chains in application order and compare each receipt to UTC coverage independently.
@@ -302,3 +328,33 @@ ingress, Kafka-down retries, queued-source/manual races, lost search notificatio
 inline maintenance provenance, saved-rule migration, purge/restore/rebuild, clock
 faults, serving-pool propagation and retention gaps. Actual results belong in delivery
 evidence; passing local tests does not establish production readiness.
+
+## 9. Isolated cluster initialization tools
+
+**User request — 2026-10-05:** implement the initial search activation and operator
+proof helpers required for the isolated private OpenShift load-test deployment.
+This adds deployable tooling under the existing search/provisioning contracts;
+it does not qualify a production environment or reintroduce deferred workers.
+
+**Assistant-selected search boundary:** initial activation is an explicit,
+development-only command owned by the indexer. Require verified HTTPS, current
+host/database clock evidence, an explicit index/alias allocation, exclusive
+alias-writer agreement, stopped ingestion/writers and a fresh empty authority.
+Execute live disposable capability probes on the configured ES target and bind
+their observations to the deployment, physical index, epoch, mapping and binding.
+Reserve a durable exact intent before creating the serving index. Resume only
+matching owned resources, and refuse populated/conflicting/restored state.
+Recheck authority/progress under write-excluding SQL locks before atomically
+recording empty-tenant visibility and enabling the initial search gate. Existing
+rebuild/restore procedures retain their separate prerequisites.
+
+**Assistant-selected proof packaging:** a private request-driven HTTPS helper
+uses the API image and a bounded read-only SQL pool. It validates the configured
+fixed member set against the API's operator binding, checks current operation,
+lease and policy evidence before/after direct member calls, and returns only
+validated nonsecret proof. Supplied selected-key material must match the SQL
+verifier and traverse real Key Auth; unavailable plaintext for an old/revoked
+credential permits only explicitly identified policy proof. No request admits an
+alert or starts background provisioning. In the isolated test bundle, singleton
+Kong uses ordinal DNS; replacement/scaling requires renewed node inventory and
+binding verification. These choices do not establish fleet/HA guarantees.

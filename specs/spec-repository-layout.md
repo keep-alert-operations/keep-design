@@ -49,9 +49,12 @@ Assistant-selected implementation details:
   verification. Active worker templates use the service entrypoints. REV-34–36
   deferrals and Product API live publishing remain authoritative.
 - Internal Python requirements carry immutable Git commit references. Each project
-  commits its own `uv.lock`; frontend locks the contracts Git revision in npm.
+  commits its own `poetry.lock`; frontend locks the contracts Git revision in npm.
   Local editable overrides do not alter release pins. A contract change requires
   compatible producer and consumer checks before downstream pins are advanced.
+  The user selected Poetry for all Python repositories on 2026-10-12; current
+  commands and the preserved resolution constraints are documented in delivery's
+  [workspace setup](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/repository-workspace.md).
 - Contracts owns the checked schema artifacts. Delivery generates product and
   ingestion OpenAPI from their separate installed producers, then merges the
   compatible documents for frontend type generation. Producers never load their

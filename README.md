@@ -6,8 +6,13 @@ See [system design](https://github.com/appchi-alert-operations/appchi-design), [
 
 ## Reading order
 
-Start with [system design](specs/spec-alerts-management-system.md) and
-[current worker scope](specs/spec-worker-scope.md). Domain supplements are in
+Start with the [task map](context/map.md) and [context guide](context/README.md).
+Choose the sources applicable to the task and expand when dependencies or
+uncertainty emerge. Behavior, architecture and cross-repository changes require
+the relevant [system design](specs/spec-alerts-management-system.md),
+[current worker scope](specs/spec-worker-scope.md), contracts and acceptance
+requirements. Read introductory scope corrections with selected sections.
+Domain supplements are in
 `specs/`, decisions in `decisions/`, architecture artifacts in `architecture/`,
 and acceptance requirements in `verification/`. Implementation evidence is owned
 by delivery. Preserve issue IDs and distinguish user choices, assistant-selected

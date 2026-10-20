@@ -1,0 +1,712 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "appearance-only",
+      "task": "Adjust dashboard spacing with no saved-layout or behavior change.",
+      "paths": [
+        "appchi-frontend/src/app/styles/dashboards.css"
+      ],
+      "routes": [
+        "ui-appearance"
+      ],
+      "must_include_routes": [
+        "ui-appearance"
+      ],
+      "must_exclude_routes": [
+        "behavior",
+        "shared-views",
+        "database"
+      ],
+      "must_include_sources": [
+        "shared-ui-contract",
+        "frontend-guide"
+      ]
+    },
+    {
+      "id": "css-path",
+      "task": "Tighten the visual gap. ",
+      "paths": [
+        "appchi-frontend/src/app/styles/incidents.css"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "ui-appearance"
+      ],
+      "must_exclude_routes": [
+        "behavior",
+        "incidents"
+      ],
+      "must_include_sources": []
+    },
+    {
+      "id": "incident-baseline",
+      "task": "Add a feature to incidents; first establish the affected behavior.",
+      "paths": [],
+      "routes": [
+        "incidents"
+      ],
+      "must_include_routes": [
+        "incidents",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "database",
+        "correlation",
+        "search"
+      ],
+      "must_include_sources": [
+        "incident-baseline",
+        "scope-core",
+        "verify-incidents"
+      ]
+    },
+    {
+      "id": "incident-keyword",
+      "task": "Investigate an incident display issue.",
+      "paths": [],
+      "routes": [],
+      "must_include_routes": [
+        "incidents",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "database"
+      ],
+      "must_include_sources": [
+        "incident-baseline"
+      ]
+    },
+    {
+      "id": "incident-notes",
+      "task": "Edit incident notes without changing membership.",
+      "paths": [],
+      "routes": [
+        "incident-mutations"
+      ],
+      "must_include_routes": [
+        "incidents",
+        "incident-mutations",
+        "shared-commands",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "correlation",
+        "incident-membership"
+      ],
+      "must_include_sources": [
+        "incident-mutations",
+        "shared-command-contract"
+      ]
+    },
+    {
+      "id": "incident-reopening",
+      "task": "Fix ownership conflicts when reopening a resolved incident.",
+      "paths": [],
+      "routes": [
+        "incident-mutations",
+        "incident-membership"
+      ],
+      "must_include_routes": [
+        "incident-membership",
+        "incident-mutations",
+        "shared-commands"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "correlation-membership",
+        "scope-core"
+      ]
+    },
+    {
+      "id": "incident-membership-path",
+      "task": "Fix atomic moves.",
+      "paths": [
+        "appchi-frontend/src/components/incident-membership.tsx"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "incidents",
+        "incident-membership",
+        "shared-commands"
+      ],
+      "must_exclude_routes": [
+        "database"
+      ],
+      "must_include_sources": [
+        "incident-membership"
+      ]
+    },
+    {
+      "id": "incident-list-path",
+      "task": "Fix cursor ordering.",
+      "paths": [
+        "appchi-api/src/appchi/incidents/listing.py"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "incident-search",
+        "incidents"
+      ],
+      "must_exclude_routes": [
+        "search"
+      ],
+      "must_include_sources": [
+        "incident-search",
+        "incident-http-storage",
+        "shared-collections"
+      ]
+    },
+    {
+      "id": "incident-tags-boundaries",
+      "task": "Design editable searchable incident tags and inspect persistence and API impact.",
+      "paths": [],
+      "routes": [
+        "incident-mutations",
+        "incident-search",
+        "database",
+        "http-contract",
+        "ui-behavior"
+      ],
+      "must_include_routes": [
+        "incidents",
+        "shared-commands",
+        "database",
+        "http-contract"
+      ],
+      "must_exclude_routes": [
+        "event-contract",
+        "correlation"
+      ],
+      "must_include_sources": [
+        "incident-http-storage",
+        "migration-rollout",
+        "shared-contract-generation"
+      ]
+    },
+    {
+      "id": "incident-inactivity-deferred",
+      "task": "Investigate why a 30-day-inactive incident has not automatically resolved.",
+      "paths": [],
+      "routes": [
+        "incidents"
+      ],
+      "must_include_routes": [
+        "behavior",
+        "incidents"
+      ],
+      "must_exclude_routes": [
+        "delivery"
+      ],
+      "must_include_sources": [
+        "scope-core",
+        "system-baseline",
+        "verify-incidents"
+      ]
+    },
+    {
+      "id": "maintenance-after-end",
+      "task": "Investigate an alert remaining suppressed after its window ended.",
+      "paths": [],
+      "routes": [
+        "maintenance"
+      ],
+      "must_include_routes": [
+        "maintenance",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "correlation"
+      ],
+      "must_include_sources": [
+        "scope-maintenance",
+        "maintenance-semantics",
+        "verify-maintenance"
+      ]
+    },
+    {
+      "id": "maintenance-correlation-handoff",
+      "task": "Change genuine source-driven maintenance release eligibility.",
+      "paths": [],
+      "routes": [
+        "maintenance",
+        "correlation"
+      ],
+      "must_include_routes": [
+        "maintenance",
+        "correlation"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "scope-maintenance",
+        "pipeline-maintenance",
+        "correlation-evaluation"
+      ]
+    },
+    {
+      "id": "directory-polling-deferred",
+      "task": "Investigate directory changes waiting for explicit trusted publication.",
+      "paths": [],
+      "routes": [
+        "identity-access"
+      ],
+      "must_include_routes": [
+        "identity-access",
+        "behavior"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "scope-core",
+        "identity-session",
+        "tenant-access"
+      ]
+    },
+    {
+      "id": "operator-synchronous",
+      "task": "Fix partial operator provisioning and explicit retries.",
+      "paths": [],
+      "routes": [
+        "operators"
+      ],
+      "must_include_routes": [
+        "operators",
+        "shared-commands"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "scope-operators",
+        "operators-management",
+        "verify-operators"
+      ]
+    },
+    {
+      "id": "live-path",
+      "task": "Repair lost invalidation hints.",
+      "paths": [
+        "appchi-api/src/appchi/live.py"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "live-updates",
+        "behavior"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "scope-live",
+        "live-protocol"
+      ]
+    },
+    {
+      "id": "native-event",
+      "task": "Add a native input field and check event compatibility.",
+      "paths": [],
+      "routes": [
+        "event-contract"
+      ],
+      "must_include_routes": [
+        "event-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "database",
+        "delivery"
+      ],
+      "must_include_sources": [
+        "native-contract",
+        "pipeline-events",
+        "event-encoding",
+        "verify-events"
+      ]
+    },
+    {
+      "id": "http-only",
+      "task": "Change a Product API response schema without touching native events.",
+      "paths": [],
+      "routes": [
+        "http-contract"
+      ],
+      "must_include_routes": [
+        "http-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "event-contract"
+      ],
+      "must_include_sources": [
+        "shared-contract-generation",
+        "contracts-guide"
+      ]
+    },
+    {
+      "id": "migration-path",
+      "task": "Add an index using the forward migration chain.",
+      "paths": [
+        "appchi-migrations/src/appchi/migration_sql/0051_example.sql"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "database",
+        "behavior"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "migration-rollout",
+        "migration-guide",
+        "verify-database"
+      ]
+    },
+    {
+      "id": "alert-search",
+      "task": "Fix alert searchable-watermark reconciliation.",
+      "paths": [],
+      "routes": [
+        "search"
+      ],
+      "must_include_routes": [
+        "search",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "incident-search"
+      ],
+      "must_include_sources": [
+        "search-progress",
+        "pipeline-search",
+        "verify-search"
+      ]
+    },
+    {
+      "id": "alert-ownership",
+      "task": "Change assignment-based alert status.",
+      "paths": [],
+      "routes": [
+        "alerts",
+        "shared-commands",
+        "identity-access"
+      ],
+      "must_include_routes": [
+        "alerts",
+        "shared-commands",
+        "identity-access"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "alert-lifecycle",
+        "tenant-access",
+        "verify-alerts"
+      ]
+    },
+    {
+      "id": "dashboard-counts",
+      "task": "Change exact dashboard count batching and visible stale states.",
+      "paths": [],
+      "routes": [
+        "shared-views",
+        "search",
+        "ui-behavior"
+      ],
+      "must_include_routes": [
+        "shared-views",
+        "search",
+        "ui-behavior"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "dashboards",
+        "verify-shared-views",
+        "shared-collections"
+      ]
+    },
+    {
+      "id": "dependency-path",
+      "task": "Update an internal package pin.",
+      "paths": [
+        "appchi-api/poetry.lock"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "dependencies"
+      ],
+      "must_exclude_routes": [
+        "behavior",
+        "database"
+      ],
+      "must_include_sources": [
+        "repository-boundaries",
+        "release-identity",
+        "workspace-development"
+      ]
+    },
+    {
+      "id": "documentation-only",
+      "task": "Repair context layer navigation.",
+      "paths": [],
+      "routes": [
+        "documentation"
+      ],
+      "must_include_routes": [
+        "documentation"
+      ],
+      "must_exclude_routes": [
+        "behavior",
+        "delivery"
+      ],
+      "must_include_sources": [
+        "design-guide",
+        "workspace-instructions"
+      ]
+    },
+    {
+      "id": "delivery-evidence",
+      "task": "Assess release qualification without deploying.",
+      "paths": [],
+      "routes": [
+        "delivery"
+      ],
+      "must_include_routes": [
+        "delivery",
+        "behavior"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "delivery-readiness",
+        "implementation-checkpoint",
+        "release-identity",
+        "verify-system"
+      ]
+    },
+    {
+      "id": "restore-fences",
+      "task": "Verify restore safety for retired incident references.",
+      "paths": [],
+      "routes": [
+        "recovery",
+        "incidents"
+      ],
+      "must_include_routes": [
+        "recovery",
+        "incidents",
+        "behavior"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "recovery-proofs",
+        "restore-runbook",
+        "scope-core"
+      ]
+    },
+    {
+      "id": "resume-current-authority",
+      "task": "Resume incident mutation work from a checkpoint that cites older automatic cleanup algorithms.",
+      "paths": [],
+      "routes": [
+        "incident-mutations"
+      ],
+      "must_include_routes": [
+        "incident-mutations",
+        "incidents",
+        "behavior"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "scope-core",
+        "incident-baseline",
+        "verify-incidents"
+      ]
+    },
+    {
+      "id": "unmatched-fallback",
+      "task": "Investigate a new zephyr capability with unclear ownership.",
+      "paths": [],
+      "routes": [],
+      "must_include_routes": [],
+      "must_exclude_routes": [
+        "behavior",
+        "documentation",
+        "database",
+        "delivery",
+        "incidents"
+      ],
+      "must_include_sources": []
+    },
+    {
+      "id": "path-separators",
+      "task": "Fix cursor ordering.",
+      "paths": [
+        "appchi-api\\src\\appchi\\incidents\\listing.py"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "incidents",
+        "incident-search"
+      ],
+      "must_exclude_routes": [
+        "search"
+      ],
+      "must_include_sources": []
+    },
+    {
+      "id": "correlation-management",
+      "task": "Change correlation rule edit validation.",
+      "paths": [],
+      "routes": [
+        "correlation",
+        "shared-commands"
+      ],
+      "must_include_routes": [
+        "correlation",
+        "shared-commands"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "correlation-management",
+        "correlation-persistence",
+        "shared-command-contract"
+      ]
+    },
+    {
+      "id": "preset-references",
+      "task": "Change saved preset deletion conflict handling.",
+      "paths": [],
+      "routes": [
+        "shared-views",
+        "shared-commands"
+      ],
+      "must_include_routes": [
+        "shared-views",
+        "shared-commands"
+      ],
+      "must_exclude_routes": [],
+      "must_include_sources": [
+        "presets",
+        "verify-shared-views"
+      ]
+    },
+    {
+      "id": "product-openapi-path",
+      "task": "Inspect the changed artifact.",
+      "paths": [
+        "appchi-contracts/schemas/product.openapi.json"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "http-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "event-contract"
+      ],
+      "must_include_sources": [
+        "shared-contract-generation"
+      ]
+    },
+    {
+      "id": "combined-openapi-path",
+      "task": "Inspect the changed artifact.",
+      "paths": [
+        "appchi-contracts/schemas/openapi.json"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "http-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "event-contract"
+      ],
+      "must_include_sources": [
+        "shared-contract-generation"
+      ]
+    },
+    {
+      "id": "ingestion-openapi-path",
+      "task": "Inspect the changed artifact.",
+      "paths": [
+        "appchi-contracts/schemas/ingestion.openapi.json"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "http-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "event-contract"
+      ],
+      "must_include_sources": [
+        "shared-contract-generation"
+      ]
+    },
+    {
+      "id": "received-event-schema-path",
+      "task": "Inspect the changed artifact.",
+      "paths": [
+        "appchi-contracts/schemas/alerts.received.v2.schema.json"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "event-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "http-contract"
+      ],
+      "must_include_sources": [
+        "event-encoding"
+      ]
+    },
+    {
+      "id": "changed-event-model-path",
+      "task": "Inspect the changed artifact.",
+      "paths": [
+        "appchi-contracts/src/appchi/event_models.py"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "event-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "http-contract"
+      ],
+      "must_include_sources": [
+        "event-encoding"
+      ]
+    },
+    {
+      "id": "native-input-model-path",
+      "task": "Inspect the changed artifact.",
+      "paths": [
+        "appchi-contracts/src/appchi/ingestion/native.py"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "event-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "http-contract"
+      ],
+      "must_include_sources": [
+        "native-contract"
+      ]
+    },
+    {
+      "id": "shared-http-model-path",
+      "task": "Inspect the changed artifact.",
+      "paths": [
+        "appchi-contracts/src/appchi/models.py"
+      ],
+      "routes": [],
+      "must_include_routes": [
+        "http-contract",
+        "behavior"
+      ],
+      "must_exclude_routes": [
+        "event-contract"
+      ],
+      "must_include_sources": [
+        "shared-command-contract"
+      ]
+    }
+  ]
+}

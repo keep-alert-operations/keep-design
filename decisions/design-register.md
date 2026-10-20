@@ -297,6 +297,17 @@ both ledgers from runtime roles. Forward-only execution and the dedicated
 before-writer job retain existing cutover and rollback requirements. Original
 issue IDs and decision numbers are unchanged. Executed evidence belongs in delivery.
 
+## Private-cluster initialization implementation — 2026-10-05
+
+User requested implementation of the two remaining load-test bootstrap gaps.
+Assistant-selected details under the existing REV-33/34 contracts are recorded in
+[pipeline section 9](../specs/spec-kafka-alert-pipeline.md#9-isolated-cluster-initialization-tools):
+development-only explicit search initialization with fresh live ES checks and
+durable owned retry, plus an API-owned private serving-pool proof helper with
+fixed direct members and read-only SQL fences. This is implementation scope for
+the isolated cluster; it changes no original issue/decision numbering and grants
+no production readiness, automatic retries or infrastructure guarantees.
+
 ## Scalability and code review observations — 2026-10-06
 
 The user requested a system-wide review against 5,000 deliveries/minute,
@@ -336,3 +347,79 @@ audit's starting point. Initial epoch verification remains a complete authority
 pass; background audit progress itself never advances that watermark. Database
 setup statements may use ordered wire pipelining while preserving separate SQL
 snapshots, recovery lock acquisition/check order and transaction boundaries.
+
+## Inline dashboard editing — 2026-10-08
+
+Later explicit user correction removes the separate dashboard editor. The ordinary
+board provides inline name editing with a pen icon, a single-panel Create/Edit
+dialog, panel options including deletion, and direct dragging/resizing. Save is
+enabled only for a changed complete draft and commits it together. See
+[dashboard section 8](../specs/spec-dashboard-operations.md#8-shared-editing-copying-and-conflicts).
+Original issue IDs and numbered decisions remain unchanged. Existing revision,
+permission, count and memory-only draft contracts continue. Executed evidence
+belongs in delivery.
+
+
+## Fluid dashboard layout and upward compaction - 2026-10-08
+
+Later explicit user correction requests fluid dragging/resizing like Grafana and
+panels sticking to the top without unsupported vertical gaps. This supersedes
+preserving sparse placement. Assistant-selected pixel-following presentation,
+drop placeholder, settling animations and vertical gravity are specified in
+[dashboard section 4](../specs/spec-dashboard-operations.md#4-layout-and-responsive-behavior).
+Opening an older sparse layout displays compacted while remaining clean; only a
+subsequent explicit changed-definition Save persists compacted coordinates.
+API sizes, identities, permissions, revisions and count contracts continue.
+Original issue and numbered decision identifiers remain unchanged. Executed
+evidence belongs in delivery.
+
+## Context navigation implementation — 2026-10-12
+
+The user requested implementation of a task-based context layer and linked map.
+Assistant-selected implementation details are a design-owned JSON catalog of
+exact source sections, mandatory and conditional route edges, a delivery-owned
+standard-library reader, and generated Markdown pages that can be browsed in
+Obsidian. See the [context guide](../context/README.md). These are navigation
+choices, not changes to product requirements or authorization boundaries.
+The concise workspace entrypoint retains universal constraints and links the
+preserved detailed engineering policies. Scope corrections accompany extracted
+sections; keyword matches and routing fixtures never establish complete context
+or agent understanding. Original issue IDs and REV numbering are unchanged.
+
+## Source partition batching — 2026-10-18
+
+The user approved correcting a throughput review finding: the source processor ran
+one Kafka transaction and separate PostgreSQL bookkeeping for every input. The
+assistant-selected change in [pipeline section 3](../specs/spec-kafka-alert-pipeline.md#3-kafka-keys-fencing-and-two-independent-commits)
+takes at most 100 already-fetched inputs per turn. Each input keeps its own
+PostgreSQL replay-proof transaction, and each input partition then publishes its
+applied inputs in one Kafka transaction: their changed events in input order plus the
+next offset. A batch closes after 100 milliseconds of application, the existing yield
+bound. Confirmation and position bookkeeping takes one PostgreSQL transaction per
+batch. A failed input first lets the inputs before it commit; its own offset is then
+retained. Unchanged under REV-33: stable per-partition transactional IDs, assignment
+fencing, read_committed consumers, rejoin on uncertain outcomes, per-partition order,
+replay at the original coordinate and fault recording. This is an implementation
+choice, not a capacity claim. Original issue IDs and REV numbering are unchanged.
+Executed evidence belongs in delivery.
+
+## Source receipt ahead of the tenant clock — 2026-10-19
+
+An integration run found an ingress receipt about 10 milliseconds ahead of the
+PostgreSQL tenant clock. Maintenance proof correctly refused an effective time after
+its application time, and the source processor recorded a fault and held the
+partition for 5 seconds. Healthy clocks can differ by more than pipeline latency, so
+this recurs as latency falls. The user chose to wait out the lead rather than accept
+a tolerance, clamp receipt to processing time or keep the strict hold.
+Assistant-selected details in [pipeline section 5](../specs/spec-kafka-alert-pipeline.md#5-utc-maintenance-and-bounded-inline-effects):
+the processor compares receipt with the clock it reads under the tenant coordinator,
+before any write. A receipt ahead of that clock rolls back the whole application,
+including the allocated order. Within the one-second clock-health bound it is not a
+fault: only that input partition waits for the measured lead plus 10 milliseconds, an
+idle poll is bounded by that deadline, and leads above 100 milliseconds log a
+warning. A larger lead records the `source_receive_time_ahead` fault and keeps the
+existing 5-second retry. Unchanged: receipts are never replaced by processing time,
+no input is applied before the tenant clock reaches its receipt, maintenance and
+correlation proof checks, equal-time control precedence and clock-health fencing.
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
+delivery.
