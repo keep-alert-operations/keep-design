@@ -433,8 +433,8 @@ process start, module import and the compile itself, took 0.35–0.85 seconds on
 runs). With every core busy, 12 of 12 misses overran the one-second compile
 deadline and reported CEL unavailable. The contract in
 [alert history technical section 5](../specs/spec-alert-history-technical.md#5-limits-cost-and-failure-handling)
-requires one-second compiler jobs in a replaceable worker process; options A and B
-are implementation choices within it. Because they change process isolation,
+requires one-second compiler jobs in a replaceable worker process; options A–C
+are implementation choices within it. Because A and B change process isolation,
 resource use and lifecycle, the user is asked to choose:
 
 - **A. Persistent compiler worker.** A long-lived process per Appchi process takes
@@ -454,9 +454,9 @@ Assistant recommendation: B, after measuring miss latency on the supported Linux
 image. Until a choice is recorded, each miss keeps a disposable spawned process
 with the one-second deadline.
 
-Assistant-selected under the existing CEL contracts: test, validation, search and
-count handlers keep fresh compiled instances, because they build no native handle
-or one per request. Alert, incident and admin mutation handlers already prepare
+Assistant-selected under the existing CEL contracts: test, validation, search,
+count and configuration save handlers keep fresh compiled instances, because they
+build no native handle or one per request. Alert, incident and admin mutation handlers already prepare
 inline with reused programs on each server thread, as the workers do.
 `APPCHI_CEL_CACHE_ENTRIES` keeps its 4096 default with documented sizing guidance;
 evictions log a rate-limited warning without source text. See the domain
