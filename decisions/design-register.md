@@ -423,3 +423,35 @@ no input is applied before the tenant clock reaches its receipt, maintenance and
 correlation proof checks, equal-time control precedence and clock-health fencing.
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
 delivery.
+
+## CEL cold compilation process — 2026-10-21
+
+**Open decision; nothing is selected.** Performance item #10 found that each
+checked-data cache miss starts a spawned compiler process. Process start and module
+import took about 0.35–0.8 seconds on an idle 12-core Windows development machine.
+With every core busy, 12 of 12 misses overran the one-second compile deadline and
+reported CEL unavailable. The user is asked to choose:
+
+- **A. Persistent compiler worker.** A long-lived process per Appchi process takes
+  compile requests from a queue and is restarted after a crash or deadline. Open
+  questions: one process would see sources from many tenants in turn, so recycling
+  after N compiles or any error; concurrency and pool size; memory limits; eager or
+  lazy start and shutdown. The deadline would no longer include process start.
+- **B. Preloaded fork server.** Python's `forkserver` start method on Linux, with the
+  compiler modules preloaded. Each compile still runs in a fresh child forked from a
+  server that never sees expression text, so per-compile isolation and the deadline
+  measurement stay as they are. Open questions: accepting one long-lived helper
+  process per Appchi process; Windows development keeps `spawn`; behaviour of the
+  native CEL module after fork must be qualified on the Linux image.
+- **C. Keep spawn.** Rely on cache sizing; misses stay slow.
+
+Assistant recommendation: B, after measuring miss latency on the supported Linux
+image. Until a choice is recorded, each miss keeps a disposable spawned process
+with the one-second deadline.
+
+Assistant-selected under the existing CEL contracts: request handlers keep fresh
+compiled instances, because they build no native handle or one per request;
+`APPCHI_CEL_CACHE_ENTRIES` keeps its 4096 default with documented sizing guidance;
+evictions log a rate-limited warning without source text. See the domain
+`docs/cel-implementation.md`. Original issue IDs and REV numbering are unchanged.
+Executed evidence belongs in delivery.
