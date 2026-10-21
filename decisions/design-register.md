@@ -423,3 +423,26 @@ no input is applied before the tenant clock reaches its receipt, maintenance and
 correlation proof checks, equal-time control precedence and clock-health fencing.
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
 delivery.
+
+## Live invalidation merge window — 2026-10-22
+
+**Assistant-selected (performance item #22), at the user's request to lengthen the
+window.** The browser merged live `invalidate` changes for a fixed 250 milliseconds,
+and each merged change reloaded the visible feed (a new search snapshot) and then
+the quick-view counts. A tenant receiving a steady stream of changes therefore
+reloaded several times a second per open tab. [Technical baseline section 19](../specs/spec-alert-history-technical.md#19-browser-refresh-reconnect-and-relative-time)
+now selects a trailing window: the refresh runs once changes have been quiet for one
+second, and at most two seconds after the first change it has not yet refreshed, so a
+continuous stream still refreshes every two seconds. A single change is visible
+about 0.75 seconds later than before; under a continuous stream the browser adds at
+most two seconds instead of 250 milliseconds. Two seconds was chosen as the largest
+cap that leaves most of the normal five-second incoming/maintenance visibility p99
+objective for admission, processing, indexing, the hint, the two-second p99 feed
+request and rendering. That objective is still measured end to end in
+qualification; this choice is not evidence that it is met. Unchanged: reconnect,
+return to a visible tab and the user's own refresh reload immediately (and drop the
+pending merge); hidden tabs schedule nothing; one request in flight per visible
+resource with one pending refresh; the two-second disconnected polling and SSE
+reconnect policy. It complements performance item #12, which stops idle
+reconciliation passes from producing invalidations. Original issue IDs and REV
+numbering are unchanged. Executed evidence belongs in delivery.
