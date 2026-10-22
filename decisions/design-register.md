@@ -462,3 +462,24 @@ inline with reused programs on each server thread, as the workers do.
 evictions log a rate-limited warning without source text. See the domain
 `docs/cel-implementation.md`. Original issue IDs and REV numbering are unchanged.
 Executed evidence belongs in delivery.
+
+## Clock-health evidence reuse — 2026-10-21
+
+**Assistant-selected (performance item #6).** A long-running worker loop reuses
+parsed clock-health evidence between file changes instead of reading both files on
+every turn. Each check stats the file; the parse is reused only while the file's
+identity (device, inode or file ID, size, modification and change times) is
+unchanged and the parse is less than one second old. Atomic replacement, including
+the Kubernetes ConfigMap symlink swap, changes the identity and is seen on the next
+check. An in-place rewrite that a coarse file timestamp leaves indistinguishable is
+seen within one second. The one-second offset bound and `synchronized` are validated
+before any evidence is reused, and age (at most 60 seconds old and at most 1 second in
+the future) is evaluated on every check from the cached `measured_at`, so cached
+evidence is never accepted past its own validity. Missing, unreadable, oversized,
+malformed, unsynchronized or out-of-bound-offset evidence is never cached and fails
+closed on that check; stale or future evidence is rejected on every check, and its
+replacement is seen at once when the file identity changes, otherwise within one
+second. The source processor's turn no longer repeats the worker loop's
+check. HTTP mutation and ingress checks still read the files on each request until
+they opt in. Section 5 of the Kafka pipeline specification is unchanged. Original
+issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
