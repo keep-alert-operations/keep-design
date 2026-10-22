@@ -423,3 +423,23 @@ no input is applied before the tenant clock reaches its receipt, maintenance and
 correlation proof checks, equal-time control precedence and clock-health fencing.
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
 delivery.
+
+## Idle reconciliation waits for due work — 2026-10-22
+
+**Assistant-selected (performance item #15).** The search indexer's reconciliation
+no longer takes a physical-index writer lease, inserts missing reconciliation rows
+and runs a claim transaction on every worker turn. It first reads, in one
+read-only statement, whether the search gate is open, whether any view state lacks
+a reconciliation row, and the earliest time a tenant matches the unchanged claim
+predicate (unfinished or audit pass, two seconds after a completed pass, claim
+expiry, `retry_after`). When nothing is due it issues no statement until that time,
+rechecking at least once a second so new tenants, rebuild epochs and gate changes
+are seen within a second. Due work keeps the existing writer lease, per-tenant
+30-second claims, ownership rechecks, audit selection and failure backoff, so
+paused or rebound writers remain fenced. Kafka hints keep the consumer's bounded
+poll on every loop. Without a Kafka transport, the shared worker loop waits until
+the scan's next due time, bounded to one second, instead of 10 milliseconds. The
+two-second pass spacing of [Kafka pipeline section 6](../specs/spec-kafka-alert-pipeline.md#6-search-reconciliation-progress-and-rebuild)
+is unchanged; REV-34–36 worker scope is unchanged and no sweep or polling worker is
+added. Original issue IDs and REV numbering are unchanged. Executed evidence belongs
+in delivery.
