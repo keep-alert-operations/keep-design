@@ -506,3 +506,19 @@ separate transaction, still failing the input while the gate is closed. See [Kaf
 pipeline section 3](../specs/spec-kafka-alert-pipeline.md#3-kafka-keys-fencing-and-two-independent-commits).
 The PostgreSQL-before-Kafka replay protocol, original issue IDs and REV numbering are
 unchanged. Executed evidence belongs in delivery.
+
+## HTTP checks reuse clock-health evidence — 2026-10-22
+
+**Assistant-selected (performance item #19).** This supersedes the sentence in
+"Clock-health evidence reuse" saying that HTTP mutation and ingress checks still
+read the files on each request. Each HTTP application now keeps one evidence cache,
+and its ingress and mutation checks use it under the same rules as the worker loop.
+The check stays off the event loop, because every call still stats the file. A
+fresh cache hit therefore still runs in a worker thread. One behaviour changes: an
+in-place rewrite to unhealthy evidence that a coarse file timestamp leaves with the
+same identity now fails ingress and mutations up to one second later than before.
+Atomic replacement is still seen on the next request. Age is still judged on every
+request, so evidence is never accepted past its 60-second validity. Missing,
+unreadable, malformed, unsynchronized or out-of-bound evidence still fails closed on
+that request. Original issue IDs and REV numbering are unchanged. Executed evidence
+belongs in delivery.
