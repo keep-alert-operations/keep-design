@@ -458,8 +458,8 @@ offset. If the shared request fails (including a partially failed bulk), nothing
 from it is committed; if it fails or does not reach the head partition, that
 partition is handled alone through the existing single-partition path, so faults
 stay isolated and fenced per partition. After a failed shared request, every
-non-head partition it included is left out of shared requests until it has run
-alone once and its own batch succeeded (or it was fenced or revoked), and no
+non-head partition it included is left out of shared requests until it has handled
+every input it had in that request alone (or was fenced, revoked or lost), and no
 shared request is made while such a partition is the head. Per-partition order,
 lost and revoked partition fencing and `external_gte` idempotency are unchanged.
 Authority scans keep 50-identity pages. Correlation keeps its 50-input default and single-partition

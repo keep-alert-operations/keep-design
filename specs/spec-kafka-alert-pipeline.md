@@ -240,8 +240,8 @@ prefix after that bulk is acknowledged and search-visible. When the request fail
 does not reach the head partition, nothing from it is committed and the head
 partition is handled alone, which keeps per-partition fault isolation and retries.
 After a failed shared request, every non-head partition it included is left out of
-shared requests until it has run alone once and its own batch succeeded (or it was
-fenced or revoked), and no shared request is made while such a partition is the head.
+shared requests until it has handled every input it had in that request alone (or was
+fenced, revoked or lost), and no shared request is made while such a partition is the head.
 
 At pass start capture committed projection sequence S. Keyset-scan UUID identities
 and load each page's current alert, notes, links and owner under repeatable read.
