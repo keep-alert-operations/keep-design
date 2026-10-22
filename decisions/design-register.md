@@ -488,11 +488,14 @@ issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery
 
 **Assistant-selected (performance item #7).** The correlation and search changed
 consumers no longer commit the broker offset and write `kafka_consumer_positions`
-after every input. A handled input's offset is committed only after its PostgreSQL
-transaction has committed, so the committed offset never runs ahead of durable state;
-commits are batched to every 100 handled inputs or 100 milliseconds, whichever comes
-first, and are also flushed before a revocation, after a failed input (its offset
-stays uncommitted) and on shutdown. Positions remain diagnostics and are written in
+after every input. A handled input's offset is committed only after its handler's
+durable writes complete (the correlation PostgreSQL transaction; the search
+Elasticsearch bulk acknowledgement), so the committed offset never runs ahead of
+durable state. The broker commit is batched to the next consumer turn after 100
+handled inputs or 100 milliseconds; it is not a hard time bound, because a long
+handler or a search reconciliation page between turns delays it. Pending offsets are
+also flushed before a revocation, after a failed input (its offset stays uncommitted)
+and on shutdown. Positions remain diagnostics and are written in
 one statement after each broker commit. Partitions reported lost belong to a fenced
 generation: their uncommitted progress is dropped without a commit and the next owner
 replays from the committed offset. Replay after a crash between the PostgreSQL and
