@@ -424,6 +424,105 @@ correlation proof checks, equal-time control precedence and clock-health fencing
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
 delivery.
 
+## CEL cold compilation process — 2026-10-21
+
+**Open decision; nothing is selected.** Performance item #10 found that each
+checked-data cache miss starts a spawned compiler process. An idle miss, including
+process start, module import and the compile itself, took 0.35–0.85 seconds on a
+12-core Windows development machine (medians about 0.4 and 0.6 seconds in two
+runs). With every core busy, 12 of 12 misses overran the one-second compile
+deadline and reported CEL unavailable. The contract in
+[alert history technical section 5](../specs/spec-alert-history-technical.md#5-limits-cost-and-failure-handling)
+requires one-second compiler jobs in a replaceable worker process; options A–C
+are implementation choices within it. Because A and B change process isolation,
+resource use and lifecycle, the user is asked to choose:
+
+- **A. Persistent compiler worker.** A long-lived process per Appchi process takes
+  compile requests from a queue and is restarted after a crash or deadline. Open
+  questions: one process would see sources from many tenants in turn, so recycling
+  after N compiles or any error; concurrency and pool size; memory limits; eager or
+  lazy start and shutdown. The deadline would no longer include process start.
+- **B. Preloaded fork server.** Python's `forkserver` start method on Linux, with the
+  compiler modules preloaded. Each compile still runs in a fresh child forked from a
+  server that never sees expression text, so per-compile isolation and the deadline
+  measurement stay as they are. Open questions: accepting one long-lived helper
+  process per Appchi process; Windows development keeps `spawn`; behaviour of the
+  native CEL module after fork must be qualified on the Linux image.
+- **C. Keep spawn.** Rely on cache sizing; misses stay slow.
+
+Assistant recommendation: B, after measuring miss latency on the supported Linux
+image. Until a choice is recorded, each miss keeps a disposable spawned process
+with the one-second deadline.
+
+Assistant-selected under the existing CEL contracts: test, validation, search,
+count and configuration save handlers keep fresh compiled instances, because they
+build no native handle or one per request. Alert, incident and admin mutation handlers already prepare
+inline with reused programs on each server thread, as the workers do.
+`APPCHI_CEL_CACHE_ENTRIES` keeps its 4096 default with documented sizing guidance;
+evictions log a rate-limited warning without source text. See the domain
+`docs/cel-implementation.md`. Original issue IDs and REV numbering are unchanged.
+Executed evidence belongs in delivery.
+
+## Clock-health evidence reuse — 2026-10-21
+
+**Assistant-selected (performance item #6).** A long-running worker loop reuses
+parsed clock-health evidence between file changes instead of reading both files on
+every turn. Each check stats the file; the parse is reused only while the file's
+identity (device, inode or file ID, size, modification and change times) is
+unchanged and the parse is less than one second old. Atomic replacement, including
+the Kubernetes ConfigMap symlink swap, changes the identity and is seen on the next
+check. An in-place rewrite that a coarse file timestamp leaves indistinguishable is
+seen within one second. The one-second offset bound and `synchronized` are validated
+before any evidence is reused, and age (at most 60 seconds old and at most 1 second in
+the future) is evaluated on every check from the cached `measured_at`, so cached
+evidence is never accepted past its own validity. Missing, unreadable, oversized,
+malformed, unsynchronized or out-of-bound-offset evidence is never cached and fails
+closed on that check; stale or future evidence is rejected on every check, and its
+replacement is seen at once when the file identity changes, otherwise within one
+second. The source processor's turn no longer repeats the worker loop's
+check. HTTP mutation and ingress checks still read the files on each request until
+they opt in. Section 5 of the Kafka pipeline specification is unchanged. Original
+issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## Batched changed-consumer commits — 2026-10-22
+
+**Assistant-selected (performance item #7).** The correlation and search changed
+consumers no longer commit the broker offset and write `kafka_consumer_positions`
+after every input. A handled input's offset is committed only after its handler's
+durable writes complete (the correlation PostgreSQL transaction; the search
+Elasticsearch bulk acknowledgement), so the committed offset never runs ahead of
+durable state. The broker commit is batched to the next consumer turn after 100
+handled inputs or 100 milliseconds; it is not a hard time bound, because a long
+handler or a search reconciliation page between turns delays it. Pending offsets are
+also flushed before a revocation, after a failed input (its offset stays uncommitted)
+and on shutdown. Positions remain diagnostics and are written in
+one statement after each broker commit. Partitions reported lost belong to a fenced
+generation: their uncommitted progress is dropped without a commit and the next owner
+replays from the committed offset. Replay after a crash between the PostgreSQL and
+offset commits is idempotent: correlation recognizes `kafka_correlation_events`
+under the tenant coordinator before any decision. The correlation consumer also reads
+the capability gate under the coordinator in its consuming transaction instead of a
+separate transaction, still failing the input while the gate is closed. See [Kafka
+pipeline section 3](../specs/spec-kafka-alert-pipeline.md#3-kafka-keys-fencing-and-two-independent-commits).
+The PostgreSQL-before-Kafka replay protocol, original issue IDs and REV numbering are
+unchanged. Executed evidence belongs in delivery.
+
+## HTTP checks reuse clock-health evidence — 2026-10-22
+
+**Assistant-selected (performance item #19).** This supersedes the sentence in
+"Clock-health evidence reuse" saying that HTTP mutation and ingress checks still
+read the files on each request. Each HTTP application now keeps one evidence cache,
+and its ingress and mutation checks use it under the same rules as the worker loop.
+The check stays off the event loop, because every call still stats the file. A
+fresh cache hit therefore still runs in a worker thread. One behaviour changes: an
+in-place rewrite to unhealthy evidence that a coarse file timestamp leaves with the
+same identity now fails ingress and mutations up to one second later than before.
+Atomic replacement is still seen on the next request. Age is still judged on every
+request, so evidence is never accepted past its 60-second validity. Missing,
+unreadable, malformed, unsynchronized or out-of-bound evidence still fails closed on
+that request. Original issue IDs and REV numbering are unchanged. Executed evidence
+belongs in delivery.
+
 ## Idle reconciliation waits for due work — 2026-10-22
 
 **Assistant-selected (performance item #15).** The search indexer's reconciliation
