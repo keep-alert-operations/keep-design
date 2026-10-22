@@ -126,6 +126,18 @@ uncertainty covers the whole batch: its inputs remain unconfirmed in PostgreSQL 
 the next owner replays them from the committed offset. Both downstream groups use
 read_committed. A PostgreSQL commit is never described as atomic with Kafka.
 
+**Assistant-selected downstream commits (2026-10-22):** the correlation and search
+groups commit a changed input's offset only after its handler's durable writes complete
+(the correlation PostgreSQL transaction; the search Elasticsearch bulk acknowledgement),
+batching the broker commit to the next consumer turn after 100 handled inputs or 100
+milliseconds. Turns are not timed independently, so a long handler or a search
+reconciliation page between turns delays that commit. Pending offsets are also
+committed before a revocation, after a failed input and on shutdown. The
+observed-position row follows each broker commit in one statement. Lost (fenced)
+partitions drop their uncommitted progress and never commit; replay is idempotent
+through the consumed changed-event identity (`kafka_correlation_events`) and, for
+search, external-version (`external_gte`) writes.
+
 Replay at the original input coordinate returns the original immutable bytes,
 even after intervening manual edits. The same delivery UUID at another coordinate
 advances without reapplying or emitting another semantic changed event. Conflicting
