@@ -126,6 +126,18 @@ uncertainty covers the whole batch: its inputs remain unconfirmed in PostgreSQL 
 the next owner replays them from the committed offset. Both downstream groups use
 read_committed. A PostgreSQL commit is never described as atomic with Kafka.
 
+**Assistant-selected downstream commits (2026-10-22):** the correlation and search
+groups commit a changed input's offset only after its handler's durable writes complete
+(the correlation PostgreSQL transaction; the search Elasticsearch bulk acknowledgement),
+batching the broker commit to the next consumer turn after 100 handled inputs or 100
+milliseconds. Turns are not timed independently, so a long handler or a search
+reconciliation page between turns delays that commit. Pending offsets are also
+committed before a revocation, after a failed input and on shutdown. The
+observed-position row follows each broker commit in one statement. Lost (fenced)
+partitions drop their uncommitted progress and never commit; replay is idempotent
+through the consumed changed-event identity (`kafka_correlation_events`) and, for
+search, external-version (`external_gte`) writes.
+
 Replay at the original input coordinate returns the original immutable bytes,
 even after intervening manual edits. The same delivery UUID at another coordinate
 advances without reapplying or emitting another semantic changed event. Conflicting
@@ -231,6 +243,17 @@ of at most 50 permanent alert UUID identities, yielding between complete writes 
 later. This is a scheduling choice; full-pass duration and resulting latency require
 capacity measurement. Prioritize direct Kafka hints but keep scanning during Kafka
 outages. Scan authority, not pending projection-work flags.
+
+**Assistant-selected hint batching (2026-10-22):** one search-hint turn hands the
+first pending group of every busy changed partition, at most 500 hints in all, to
+one projection request, so a single bulk of at most 500 documents and 4 MiB and one
+refresh wait cover them. Each partition's offset advances only by its own covered
+prefix after that bulk is acknowledged and search-visible. When the request fails or
+does not reach the head partition, nothing from it is committed and the head
+partition is handled alone, which keeps per-partition fault isolation and retries.
+After a failed shared request, every non-head partition it included is left out of
+shared requests until it has handled every input it had in that request alone (or was
+fenced, revoked or lost), and no shared request is made while such a partition is the head.
 
 At pass start capture committed projection sequence S. Keyset-scan UUID identities
 and load each page's current alert, notes, links and owner under repeatable read.
