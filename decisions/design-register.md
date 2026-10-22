@@ -457,9 +457,12 @@ and visibility check, in one broker commit that carries every advanced partition
 offset. If the shared request fails (including a partially failed bulk), nothing
 from it is committed; if it fails or does not reach the head partition, that
 partition is handled alone through the existing single-partition path, so faults
-stay isolated and fenced per partition. Per-partition order, lost and revoked
-partition fencing and `external_gte` idempotency are unchanged. Authority scans keep
-50-identity pages. Correlation keeps its 50-input default and single-partition
+stay isolated and fenced per partition. After a failed shared request, every
+non-head partition it included is left out of shared requests until it has run
+alone once and its own batch succeeded (or it was fenced or revoked), and no
+shared request is made while such a partition is the head. Per-partition order,
+lost and revoked partition fencing and `external_gte` idempotency are unchanged.
+Authority scans keep 50-identity pages. Correlation keeps its 50-input default and single-partition
 turns. See [Kafka pipeline section 6](../specs/spec-kafka-alert-pipeline.md#6-search-reconciliation-progress-and-rebuild).
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
 delivery.
