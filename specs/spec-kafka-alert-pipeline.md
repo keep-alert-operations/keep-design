@@ -232,6 +232,14 @@ later. This is a scheduling choice; full-pass duration and resulting latency req
 capacity measurement. Prioritize direct Kafka hints but keep scanning during Kafka
 outages. Scan authority, not pending projection-work flags.
 
+**Assistant-selected hint batching (2026-10-22):** one search-hint turn hands the
+first pending group of every busy changed partition, at most 500 hints in all, to
+one projection request, so a single bulk of at most 500 documents and 4 MiB and one
+refresh wait cover them. Each partition's offset advances only by its own covered
+prefix after that bulk is acknowledged and search-visible. When the request fails or
+does not reach the head partition, nothing from it is committed and the head
+partition is handled alone, which keeps per-partition fault isolation and retries.
+
 At pass start capture committed projection sequence S. Keyset-scan UUID identities
 and load each page's current alert, notes, links and owner under repeatable read.
 Retired identities produce permanent versioned deletion markers. PostgreSQL mutations

@@ -443,3 +443,23 @@ two-second pass spacing of [Kafka pipeline section 6](../specs/spec-kafka-alert-
 is unchanged; REV-34–36 worker scope is unchanged and no sweep or polling worker is
 added. Original issue IDs and REV numbering are unchanged. Executed evidence belongs
 in delivery.
+
+## Search hints share one bulk across partitions — 2026-10-22
+
+**Assistant-selected (performance item #11).** The search indexer no longer indexes
+at most 50 changed hints from a single partition per turn, each behind its own
+refresh wait. A turn passes the first pending group of every busy partition, at most
+500 hints in all, to one projection request; identities are deduplicated and the
+projection writer's unchanged 500-document and 4 MiB limits and `refresh=wait_for`
+visibility proof apply to that one bulk. Each partition then records only its own
+covered prefix, and offsets are still committed only after the bulk acknowledgement
+and visibility check, in one broker commit that carries every advanced partition's
+offset. If the shared request fails (including a partially failed bulk), nothing
+from it is committed; if it fails or does not reach the head partition, that
+partition is handled alone through the existing single-partition path, so faults
+stay isolated and fenced per partition. Per-partition order, lost and revoked
+partition fencing and `external_gte` idempotency are unchanged. Authority scans keep
+50-identity pages. Correlation keeps its 50-input default and single-partition
+turns. See [Kafka pipeline section 6](../specs/spec-kafka-alert-pipeline.md#6-search-reconciliation-progress-and-rebuild).
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
+delivery.
