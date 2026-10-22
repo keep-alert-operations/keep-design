@@ -483,3 +483,26 @@ second. The source processor's turn no longer repeats the worker loop's
 check. HTTP mutation and ingress checks still read the files on each request until
 they opt in. Section 5 of the Kafka pipeline specification is unchanged. Original
 issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## Batched changed-consumer commits — 2026-10-22
+
+**Assistant-selected (performance item #7).** The correlation and search changed
+consumers no longer commit the broker offset and write `kafka_consumer_positions`
+after every input. A handled input's offset is committed only after its handler's
+durable writes complete (the correlation PostgreSQL transaction; the search
+Elasticsearch bulk acknowledgement), so the committed offset never runs ahead of
+durable state. The broker commit is batched to the next consumer turn after 100
+handled inputs or 100 milliseconds; it is not a hard time bound, because a long
+handler or a search reconciliation page between turns delays it. Pending offsets are
+also flushed before a revocation, after a failed input (its offset stays uncommitted)
+and on shutdown. Positions remain diagnostics and are written in
+one statement after each broker commit. Partitions reported lost belong to a fenced
+generation: their uncommitted progress is dropped without a commit and the next owner
+replays from the committed offset. Replay after a crash between the PostgreSQL and
+offset commits is idempotent: correlation recognizes `kafka_correlation_events`
+under the tenant coordinator before any decision. The correlation consumer also reads
+the capability gate under the coordinator in its consuming transaction instead of a
+separate transaction, still failing the input while the gate is closed. See [Kafka
+pipeline section 3](../specs/spec-kafka-alert-pipeline.md#3-kafka-keys-fencing-and-two-independent-commits).
+The PostgreSQL-before-Kafka replay protocol, original issue IDs and REV numbering are
+unchanged. Executed evidence belongs in delivery.
