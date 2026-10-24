@@ -129,6 +129,10 @@ python scripts/context.py check
 From `appchi-design`, the equivalent renderer is
 `python ../appchi-delivery/scripts/context.py render`. Generated files are
 reviewable artifacts; retain catalog and generated navigation together.
+Design's `python scripts/check_docs.py`, which also runs in design CI, checks that
+every catalog section in a design-owned source exists exactly once, so renaming
+or duplicating such a heading fails in this repository. Sources in sibling
+repositories and the remaining catalog checks still require the delivery gate.
 
 ## Authority, freshness and task memory
 

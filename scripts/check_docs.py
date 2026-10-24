@@ -1,5 +1,6 @@
-"""Check local Markdown targets, fences and decision-register identifiers."""
-from pathlib import Path
+"""Check local Markdown targets, fences, catalog sections and decision-register identifiers."""
+import json
+from pathlib import Path, PurePosixPath
 import re
 from urllib.parse import unquote
 
@@ -10,6 +11,34 @@ SIBLING_REPOSITORIES = {
         'domain', 'contracts', 'migrations', 'delivery',
     )
 }
+
+
+def heading_titles(lines):
+    """ATX/setext titles outside fenced code, matching appchi-delivery/scripts/context.py."""
+    titles, fence, previous = [], None, None
+    for line in lines:
+        marker = re.match(r'^ {0,3}(`{3,}|~{3,})(.*)$', line)
+        if fence:
+            if (marker and marker[1][0] == fence[0] and len(marker[1]) >= len(fence)
+                    and not marker[2].strip()):
+                fence = None
+            previous = None
+            continue
+        if marker:
+            fence, previous = marker[1], None
+            continue
+        atx = re.match(r'^ {0,3}(#{1,6})(?:[ \t]+(.*?)|[ \t]*)$', line)
+        if atx:
+            titles.append(re.sub(r'[ \t]+#+[ \t]*$', '', atx[2] or ''))
+        elif re.match(r'^ {0,3}(=+|-+)\s*$', line) and previous is not None:
+            titles.append(previous)
+        else:
+            previous = line.strip() if line.strip() and not line.startswith(('    ', '\t')) else None
+            continue
+        previous = None
+    return titles
+
+
 errors = []
 deferred = set()
 for path in ROOT.rglob('*.md'):
@@ -34,13 +63,33 @@ for path in ROOT.rglob('*.md'):
             continue
         if not target.exists():
             errors.append(f'{path.relative_to(ROOT)}: missing {link}')
+# The resolver selects sections by exact heading title. Check design-owned sources
+# here so a renamed heading fails in design CI; delivery checks sibling sources.
+catalog = json.loads((ROOT / 'context/task-map.json').read_text(encoding='utf-8-sig'))
+sections = 0
+for source_id, source in catalog['sources'].items():
+    parts = PurePosixPath(source['path']).parts
+    if parts[0] != 'appchi-design':
+        continue
+    target = ROOT.joinpath(*parts[1:])
+    if not target.is_file():
+        errors.append(f'context/task-map.json: {source_id} missing {source["path"]}')
+        continue
+    text = target.read_text(encoding='utf-8-sig').replace('\r\n', '\n').replace('\r', '\n')
+    titles = heading_titles(text.splitlines())
+    for title in source['sections']:
+        sections += 1
+        if (found := titles.count(title)) != 1:
+            errors.append(f'context/task-map.json: {source_id} heading {title!r} must exist '
+                          f'exactly once in {source["path"]} (found {found})')
 register = (ROOT / 'decisions/design-register.md').read_text(encoding='utf-8')
 ids = {int(value) for value in re.findall(r'^(?:\|\s*|##\s*)REV-(\d+)', register, re.M)}
 if ids != set(range(1, 39)):
     errors.append('Expected REV-01 through REV-38')
 if errors:
     raise SystemExit('\n'.join(errors))
-print('Local document targets, fences and review identifiers passed.')
+print(f'Local document targets, fences, {sections} design-owned catalog sections '
+      'and review identifiers passed.')
 if deferred:
     print(f'Deferred {len(deferred)} context links to absent sibling checkouts; '
           'run appchi-delivery/qualification/check_context.py in the complete workspace.')
