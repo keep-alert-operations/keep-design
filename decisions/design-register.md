@@ -604,3 +604,18 @@ in flight per visible resource with one pending refresh; the two-second disconne
 polling and SSE reconnect policy. It complements performance item #12, which stops
 idle reconciliation passes from producing invalidations. Original issue IDs and REV
 numbering are unchanged. Executed evidence belongs in delivery.
+
+## Current scope notes — 2026-10-24
+
+The user asked for section-level marking of later scope decisions. Specifications
+state the REV-33 to REV-37 corrections in their preambles while the superseded text
+stays in section bodies, so a reader who opens a section directly can take deferred
+behavior as current. Assistant-selected presentation: a one-sentence **Current
+scope** note directly under each affected heading names the decision, links the
+governing section and says what remains normative. Headings, anchors, issue IDs,
+REV numbering and the original text are unchanged; catalog sections still resolve.
+The preset and dashboard preambles gain the REV-34 correction their retention
+sections already depended on. The incident detail note records that stored
+inactivity and retention deadlines are not presented as upcoming automatic actions,
+matching the 2026-10-24 label removal. These are navigation and presentation
+choices, not changes to product requirements.
