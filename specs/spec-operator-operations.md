@@ -36,6 +36,8 @@ Current keys have no automatic age-based expiry in this initial release. Expiry 
 
 ## 5. Recoverable encrypted storage
 
+**Current scope (REV-34):** Provisioning runs inside Product API requests, so the Product API, not a provisioning worker, holds decryption access; see [worker scope](spec-worker-scope.md#3-request-owned-operator-provisioning). Encryption, wrapping and fail-closed rules below remain normative.
+
 Store each key encrypted in PostgreSQL using AES-256-GCM with a fresh random per-record data-encryption key and nonce. Bind operator ID, credential ID and format version as authenticated associated data. Wrap the data key under a versioned platform encryption key, also using authenticated encryption and unique nonces. Keep wrapping keys in restricted, mounted OpenShift Secrets, outside the database and application source. Restrict decryption to the credential-copy backend and provisioning workers; ingestion authorization does not decrypt keys.
 
 Require encryption at rest for the cluster secret store and for Grafana/Kong credential stores and backups, as deployment prerequisites. Rotate wrapping keys every 90 days and on suspected compromise; rewrap data keys without changing customer API keys. Retain old wrapping-key versions for live ciphertext and required backup recovery, then retire them under the platform backup policy. This selects the operator secret-storage approach; platform-wide backup media and retention remain N2/N3/R4. Missing wrapping keys cause copy/provisioning to fail without exposing plaintext or changing already-valid credential state.
@@ -174,9 +176,13 @@ Creation returns 201 after verified completion. Rename, deletion, rotation, revo
 
 ## 24. Platform credentials and configuration changes
 
+**Current scope (REV-34):** Platform credentials are mounted into the Product API for request-owned provisioning; there are no provisioning workers to switch; see [worker scope](spec-worker-scope.md#3-request-owned-operator-provisioning). Credential separation and migration rules below remain normative.
+
 Use separate restricted credentials for Grafana management, Kong management and application key wrapping. Rotate platform service credentials by installing and verifying a new secret version, switching workers, then retiring the old version; do not rotate tenant keys as a side effect. Tenants cannot select arbitrary remote hosts. Endpoint/organization/namespace changes are explicit global-super-admin migration operations: validate the destination, inventory owned resources, prepare/reconcile replacements and switch only with an audited plan. Ordinary retries must never silently create the fleet in another Grafana organization. Live migration orchestration belongs to platform deployment work, not a tenant operator feature.
 
 ## 25. Operational visibility
+
+**Current scope (REV-34):** Retry sweeps and five-minute reconciliation are not deployed; a failed operation waits for explicit retry; see [worker scope](spec-worker-scope.md#3-request-owned-operator-provisioning). Metrics, monitoring signals and secrecy rules below remain normative.
 
 Expose pending-job age, last successful reconciliation, setup/rotation/cleanup failure counts, rejected admissions by reason, Grafana mapping/truncation errors, and expired/revoked credential rejections without secrets. Create platform monitoring signals after 15 minutes of persistent failure and clear them on recovery; recurring attempts do not create endless duplicate incidents. Do not send email/Slack or notifications outside existing product/platform monitoring as part of this design. Tenant UI shows its own operation state and errors only. Retry sweeps and five-minute reconciliation are scheduling targets, not a system-wide availability SLO.
 

@@ -50,6 +50,8 @@ Assignee selection retains its existing separate contract: editors may search us
 
 ## 6. Directory identity lifecycle
 
+**Current scope (REV-34):** Automatic assignment eligibility cleanup is deferred; known-ineligible assignees are masked, not cleared; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Identity lifecycle and grant rules below remain normative.
+
 Renaming a directory user/team updates its current label without changing grants, assignments or identity. Historical audit keeps the label captured at the action. Deleted identities leave inactive, visibly orphaned grant references; they are not silently reassigned or deleted. A new object with the same name inherits nothing. Removing an orphaned grant is an explicit authorized operation subject to last-admin checks.
 
 A verified re-enable of the same immutable individual may restore its still-current grants after fresh authentication; revoked sessions stay revoked. Existing alert/incident eligibility cleanup remains in force and does not automatically recreate an old assignment when access returns. First observation establishes a current identity baseline, not a claim about historical LDAP membership.
@@ -149,6 +151,8 @@ Never record passwords, OTP material, session cookies, OAuth/API tokens, raw cre
 Commit successful local state changes and their audit/command receipt in the same PostgreSQL transaction. External log delivery may retry from an outbox but is not a prerequisite for local success. Publish verified directory changes and their product audit together. Failure to persist already-known revocation is an authorization-integrity failure: block affected authorization until it can be durably reconciled; do not apply the unavailable-source fallback to positively known revocation. Required integrity gates must survive recovery, as in the identity supplement.
 
 ## 17. Audit retention and cleanup
+
+**Current scope (REV-34):** The daily audit cleanup is not deployed and storage may grow; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). The 365-day read-time window and dependency rules below remain normative.
 
 Apply the user's **365 elapsed days** from each audit event's server recording time. Later views, tenant renames, role changes, directory-label changes and retries do not restart the clock. Late-discovered LDAP changes use their actual recording time and separately retain any verified source time. Current tenants, current grants, global-group configuration and active identity state persist independently of audit expiry.
 

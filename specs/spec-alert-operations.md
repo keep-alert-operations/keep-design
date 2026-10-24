@@ -150,6 +150,8 @@ Preserve all agreed transitions: source firing after resolution changes current 
 
 ### 16. Legacy suspension and independent causes
 
+**Current scope (REV-34):** Maintenance has no scheduler; after a window ends, its suppression clears on the alert's next source update, not at the end time; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Cause and re-evaluation rules below remain normative.
+
 V2 firing means lifecycle firing and removes the source-suspension cause. Suspended means lifecycle firing with an active source-suspension cause; it creates/reopens an occurrence just as firing does. Resolved means lifecycle resolved and removes the source cause. A change firing↔suspended alone does not create an occurrence. Maintain source suppression separately from each maintenance-rule cause; effective suppression is their OR. Removing one cause never removes another.
 
 V1 has no customer-supplied suppression field. Its native severity determines firing/resolved. The team-generated `to_show` is a compatibility projection: `return` while effectively suppressed, `suspend` otherwise; clear always determines resolution regardless of to_show. It is not accepted as an unauthenticated customer override. The initial system has no imported legacy snapshot/enriched-ingress interface; an adapter requiring historical to_show imports needs a separately designed trusted migration contract. This preserves the current literal meanings without inventing a third lifecycle status or permitting public v1 input to control maintenance.
@@ -157,6 +159,8 @@ V1 has no customer-supplied suppression field. Its native severity determines fi
 Manual status changes do not directly clear source or maintenance suppression causes. Re-evaluate maintenance against the resulting before/after state: a condition that becomes false closes its maintenance cause under the maintenance contract; source suppression remains controlled by source deliveries. A manual reopening is a new firing transition and must be evaluated for maintenance before correlation, using action time. Maintenance changes and source-cause removal use effective before/after suppression; only final effective unsuppression of a firing alert can supply fresh correlation evidence. Keep existing no-backfill/overlap/late-arrival rules, scheduled effective end times, links and active ownership. Record each cause's activation/release and effective suppression intervals with origin identity. [Maintenance](spec-maintenance-operations.md) sections 4–11 define scheduler recovery, temporal proof and control races.
 
 ### 17. Assignment and derived acknowledgement
+
+**Current scope (REV-34, REV-35):** Automatic `eligibility_lost` cleanup and five-minute LDAP propagation are deferred; known-ineligible assignees are masked at read time, not cleared; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Derived status and assignment rules below remain normative.
 
 **User decision, 2026-09-27 (REV-27):** assignment acknowledges responsibility. Remove the independent acknowledgement field and acknowledge/unacknowledge actions from current product views. The source lifecycle remains `firing`/`resolved`; the user-visible Status is derived from lifecycle and current assignee:
 
@@ -189,6 +193,8 @@ Record stable LDAP actor IDs plus display-name snapshots; source events identify
 
 ### 19. Alert inactivity
 
+**Current scope (REV-34):** No sweep resolves inactive alerts; the activity anchors below are stored for compatibility and future automation; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation).
+
 Use a fixed 30 elapsed days of source inactivity across tenants, without per-tenant override. Every successfully applied new source delivery, including an unchanged repeat, refreshes the alert's source-activity anchor to its original receipt time monotonically. Same-delivery Kafka duplicates, internal retries, rejected inputs and user assignment/notes do not refresh it. Manual reopening starts a new inactivity anchor at action time; the source may thereafter refresh it. Suppression does not pause expiry.
 
 An hourly sweep resolves firing alerts whose activity deadline has passed. Under the coordinator, first ensure earlier admitted inputs for that alert have been processed, then recheck firing state, activity and deadline atomically. Resolve at execution time with system cause inactivity, preserve time_created and severity, and perform the normal linked-incident transition activity and correlation effects. A later accepted source firing opens a new occurrence normally. Resolved alerts are not repeatedly expired. This intentionally differs from incident inactivity: unchanged source repeats keep their alert current but never refresh the incident timer.
@@ -205,11 +211,15 @@ Source state/history and immutable publication proof commit in PostgreSQL before
 
 ### 22. Alert retention
 
+**Current scope (REV-34):** Retention workers are not deployed, so resolved alerts are not retired at the 90-day deadline, which stays stored for future automation; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deadline and fence rules below remain normative.
+
 Retain a resolved alert and all its applied source history, occurrences, notes/revisions, activity, suppression history and successful command results for 90 elapsed days after its latest actual resolution, including a first-seen resolved row. Resolution repeats and resolved edits do not move this deadline. Reopening cancels the pending purge; later resolution starts a new 90-day period. No absolute creation-age cap and no manual Delete action. History remains available for the retained parent's lifetime; do not silently roll older occurrences out of a still-retained alert.
 
 Source rejection detail is retained for 90 days. Minimal delivery UUID/digest/first-coordinate/result fences and retired logical-key boundaries remain through replay and restore risk; they contain no source bodies after cleanup. Unconfirmed immutable changed proof cannot be purged. There is no application-owned pending inbox retention guarantee: Kafka can expire accepted unprocessed inputs. Command receipt retention remains unchanged. See Kafka pipeline section 8.
 
 ### 23. Purge and replay protection
+
+**Current scope (REV-34):** The hourly retention worker is not deployed; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Retirement fences, replay protection and the rules for references that survive a purge remain normative.
 
 The hourly retention worker, under the coordinator, rechecks resolved state/latest resolution, applied-but-unconfirmed source results and protected dependencies before purge. **Assistant-selected Kafka retirement boundary:** retain a logical-key UTC fence at committed retirement. A delayed receipt at or before that boundary is terminally rejected as retired_receipt; a later firing receipt may create a new UUID alert with the same logical key and occurrence number 1. Kafka inputs not yet applied cannot be enumerated by a PostgreSQL pending-target check. It is not a continuation of purged history. Technical supplement 23–24 refines the physical mechanism: purge atomically retires the alert and makes all parent-owned content inaccessible, releases live uniqueness/ownership records and writes the deletion snapshot plus immutable old-UUID/final-version fence.
 

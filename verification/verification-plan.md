@@ -41,6 +41,8 @@ Required acceptance cases for the selected design. Record executions, environmen
 
 ## Alerts
 
+**Current scope (REV-34):** Retention purge is deferred, so the purge-race row is future qualification; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other rows remain required.
+
 Following the 2026-10-11 user correction, verify Feed as the page title, sidebar
 label and breadcrumb on desktop and narrow views. Alert-detail return navigation
 uses Feed and existing `/alerts` URLs; saved-preset breadcrumbs remain contextual.
@@ -64,6 +66,8 @@ Implementation verification must cover these specified outcomes:
 | Elasticsearch/Kafka unavailable | PG history survives; Kafka failure prevents new acknowledged admission, and retained inputs resume through transactional replay. Search reconciles PG independently. Report retention loss explicitly and do not mistake lag for rollback. |
 
 ## Alert execution and recovery
+
+**Current scope (REV-34):** Retention-purge cases are future qualification while purge is deferred; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other execution, fault and load cases remain required.
 
 Require a differential query suite comparing native evaluation with Elasticsearch over every supported construct, null/negation, enums, Unicode case/normalization, literal wildcard characters, long messages, years 0001/9999, pre-1970 instants, microseconds, relative-time boundaries and incident membership. Include invalid syntax/types, cost bounds and all saved-resource profile migrations. A compiled query that differs between paths cannot ship.
 
@@ -90,6 +94,8 @@ Also verify mixed firing/resolved Grafana batches, required-field failures, time
 Verify implementation against at least: view-versus-edit separation; Global behavior; Unicode name collisions/reuse; transient filters never saved; suppressed/resolved count parity; all permitted sorts/columns and default tie-breaks; invalid/costly queries; stale environment handling; saved versus candidate preview isolation; no-op/retry/expired-receipt behavior; concurrent saves; delete versus panel-reference creation; historical-copy validation; deletion/name reuse without old-link rebinding; retention boundaries/holds; rollback resurrection protection; tenant/revision-bound cursors; late response rejection; role loss with a dirty draft; Elasticsearch/Redis/PostgreSQL outages; and shared count changes without false zero values.
 
 ## Maintenance
+
+**Current scope (REV-34):** Lease and expiry-latency cases are future qualification; source-driven release acceptance is in the [worker scope correction](#worker-scope-correction). Other cases remain required.
 
 Required tests cover both DST ambiguities and gaps, timezone-only edits, tzdata upgrades, disabled-at-start locking, create/edit at exact boundaries, late creation, repeats/retained matches, real false-to-true and true-to-false changes, manual refiring, first-seen resolved, two overlapping windows plus v2 source suspension, simultaneous ends, disable/re-enable, shorten/extend versus stale leases, deletion versus new causes, delayed input before/after controls, late history corrections, missing proof, crash after every transaction boundary, revision/no-op/retry behavior, tenant/role loss, retained deleted explanation, dependency holds and rollback restore. Verify exactly one effective unsuppression and no expired correlation evidence revival. Execute the selected sustained load and concentrated expiry scenarios before asserting latency.
 
@@ -139,15 +145,21 @@ Test duplicate references, same-PIT/clock parity with equivalent feed queries, r
 
 ## Tenants and access
 
+**Current scope (REV-34):** Physical audit cleanup is deferred; verify the 365-day read-time boundary rather than protected cleanup; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other cases remain required.
+
 Qualify canonical-name collisions, reserved Global/name reuse, atomic creation, duplicate/reordered retries, expired receipts, stale revisions and concurrent last-admin removals. Cover self-demotion, empty/nested/cyclic groups, alternate membership paths, orphaned/recreated principals, unknown versus cached directory evidence and every matrix capability. Verify tenant switching, delayed responses, hidden-resource lookups, audit reader loss, secret redaction, LDAP baseline/diff events, no-op deduplication, 365-day boundaries/protected cleanup and permission-safe restore.
 
 ## Reliability
+
+**Current scope (REV-34):** Maintenance windows do not expire on a timer; test edits and deletion against end-time validation and source-driven release instead; see [worker scope](../specs/spec-worker-scope.md#1-maintenance-without-a-scheduler). Other cases remain required.
 
 Run the primary 250/second concentrated-tenant workload for 24 hours, including retained data growth, and larger representative cases for four hours each. Repeat the primary path for v1 and v2 and characterize Grafana adapter overhead. Exercise the selected mixes, valid maximum sizes/batches, UI views and combined rules. Record a ten-minute startup period separately, without hiding subsequent growing backlog. Verify per-logical-key source append order and per-tenant changed order, headroom and all applicable latency objectives.
 
 Appchi owns application load/correctness tests. Coordinate dependency fault injection and recovery in approved environments: owning teams perform infrastructure failover/restoration and Appchi verifies resulting application behavior. Also test the sixty-second overload burst; two-hour durable backlog and 500/second recovery; tenant fairness; post-commit disconnects; duplicate/reordered messages; leader loss and dependency outages; maintenance expiry racing edits/deletion; restored revoked credentials; deletion/replay protection; and full search rebuild. Require zero cross-tenant effects, duplicate internal effects or application-caused loss of retained acknowledged inputs or revoked-key activation. Assess infrastructure disaster-loss behavior against supplied service contracts rather than assuming a zero-loss capability. A profile is qualified only if its correctness and applicable objectives pass. Executed local checks are recorded separately in implementation status.
 
 ## Cross-system acceptance
+
+**Current scope (REV-34):** Scheduled maintenance expiry, maintenance fan-out and maintenance-visibility latency are future qualification; see the [worker scope correction](#worker-scope-correction). Other scenarios and objectives remain required.
 
 The implementation must exercise each supplement's acceptance cases, with requirement IDs and failing evidence traceable to the preserved register. Add cross-subject scenarios: LDAP role loss during a dirty dashboard or key copy; permission edit versus command commit; scheduled maintenance expiry during source backlog and correlation reset; dashboard preset save/delete/count race; incident move/reopen versus source processing; operator deletion versus admitted batch; current source-suspended plus overlapping maintenance; all Global traffic; deleted-resource restoration; and old-worker/new-schema interoperation.
 
@@ -157,9 +169,13 @@ Inject process crashes at commit/ack boundaries and coordinate real dependency f
 
 ## Incidents
 
+**Current scope (REV-34):** Hourly inactivity-expiry cases are future qualification while auto-resolution is deferred; see the [worker scope correction](#worker-scope-correction). Other cases remain required.
+
 The implementation must demonstrate: manual creation without alerts; explicit immutable severity; atomic rollback of a conflicting multi-alert selection; linking a suppressed/resolved alert to an active incident; rejecting membership edits on a resolved incident; an atomic move without dual ownership; reopening conflicts leaving all state intact; lifecycle cycles preserving previous timestamps; repeated deliveries not refreshing inactivity; genuine linked-alert transitions using original accepted times; activity updates taking effect without waiting for the hourly check; an hourly check selecting only due active incidents without rereading activity history; concurrent activity defeating a stale expiry job; expiry preserving alert statuses while releasing ownership/resetting evidence; idempotent retries creating no duplicate history/activity; note revision/deletion affecting current search while preserving history; post-resolution edits not extending retention; and tenant isolation across search, conflicts, assignment and relationship references.
 
 ## Identity
+
+**Current scope (REV-35, REV-34):** LDAP-change propagation timing (item 2) and assignee cleanup (item 4) are future qualification; verify explicit publication instead; see [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Other items remain required.
 
 1. First and returning login with username/password only (including users with previously enrolled OTP), incorrect-password rejection, no application OTP enrollment/challenge, SSO return, idle expiry, 24-hour expiry, foreground dashboards and multiple-tab refresh races. Verify separate Keycloak console MFA/recovery.
    Expired, consumed and missing callback transactions offer browser retry without

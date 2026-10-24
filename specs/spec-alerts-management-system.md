@@ -10,6 +10,8 @@ This specification set defines the initial release. Application implementation a
 
 ## Specification map
 
+**Current scope (REV-35):** The identity row's five-minute access-enforcement target is deferred with directory polling; see [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). The document ownership in this map remains normative.
+
 Each contract has one authoritative home. Read the relevant domain document together with shared contracts when implementing a feature. Domain-specific rules override generic defaults where explicitly stated; illustrative examples and decision history never expand an input schema.
 
 | Document | Authoritative content |
@@ -131,6 +133,8 @@ Navigation starts at the last accessible tenant from the session, otherwise Glob
 - Service outages isolate affected capabilities. PostgreSQL failure blocks processing/commands but not healthy Kafka admission; Kafka failure blocks acknowledged admission. Search/Redis failures isolate their affected capabilities.
 
 ## Capacity and ownership
+
+**Current scope (REV-34):** The five-second render objective no longer covers maintenance expiry, because ending a window releases nothing; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Other capacity objectives and ownership below remain normative.
 
 The sustained ingestion requirement is 250 deliveries/second company-wide, including all traffic in one tenant or Global; normal traffic is about 66.7/second. Selected normal-operation p99 objectives are one second for admission and authoritative commands, two seconds for searches/counts, and five seconds for incoming/maintenance changes to render. Path availability targets are 99.9% over rolling 30 days. [Reliability](spec-reliability-operations.md) defines eligibility, measurement, stress/recovery workloads and Kafka admission safeguards.
 

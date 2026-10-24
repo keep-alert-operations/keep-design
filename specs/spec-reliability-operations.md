@@ -10,6 +10,8 @@ Application service objectives, capacity, backpressure, failure handling and rec
 
 ## 1. Preserved requirements and ownership
 
+**Current scope (REV-34):** The five-second maintenance-expiry visibility target no longer applies because windows release no alerts on a timer; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Throughput, acceptance, incoming-visibility and ownership requirements below remain normative.
+
 Preserve the user-selected sustained requirement of 15,000 deliveries/minute (250/second), including concentration in one tenant or Global. Normal traffic is about 4,000/minute; peak duration is unknown. Preserve p99 normal-operation targets of one second for durable ingestion acceptance, five seconds for incoming alert/status UI visibility and five seconds for maintenance-expiry UI visibility. Preserve broker acknowledgement before 202, original ingress/effective times, per-key source order, tenant changed order and occurrence semantics. Acknowledged unprocessed inputs remain subject to Kafka retention.
 
 Appchi owns application objectives/instrumentation, processing correctness, tenant isolation, retries, idempotency, degraded-state UX, logical lifecycle rules, application backpressure and safe post-restore checks. Each technology team owns its service's operation, infrastructure retention, backups, HA, failover, maintenance, capacity and recovery. Appchi supplies workload and safety requirements; both sides agree supported integration settings, allocations and recovery handoff.
@@ -57,6 +59,8 @@ Use provisional 1, 4 and 16 KiB payload profiles and the largest valid member wi
 Define the primary profile as 50 correlation rules, 20 maintenance windows, 50 clients, an initial 5,000 unresolved rows, 4 KiB source members and a 50/50 new-row/update mix, exercised both as single requests and ten-member batches. Include valid resolutions in the updates to keep the primary unresolved population near its starting level while retained resolved rows/history accumulate. The 80/20 new-heavy profile deliberately permits unresolved population growth; 5,000/10,000 are starting populations, not an instruction to delete or suppress newly created rows. Other scenarios vary these inputs separately and in the combined stress case, with their achieved envelope reported explicitly.
 
 ## 7. UI measurement and low-volume treatment
+
+**Current scope (REV-34):** Maintenance-expiry observations are not required because no expiry-visibility objective applies; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Incoming-event sampling and acknowledgement rules below remain normative.
 
 Use complete backend outcome counters, deterministic 10% sampling of real incoming-event/view observations, 100% of maintenance-expiry observations and 100% UI observation in qualification tests. Report sampling coverage, missing acknowledgements and exclusions. UI percentiles estimated from samples must be labelled as estimates. A rendered projection/version acknowledgement establishes visible state; a hint alone does not. Server receipt of that acknowledgement supplies a conservative completion bound without trusting the browser clock.
 
@@ -119,6 +123,8 @@ Kafka may expire an acknowledged unprocessed receipt; the user explicitly accept
 
 ## 15. Scheduler cadence and clock protection
 
+**Current scope (REV-34):** The maintenance due scan, inactivity sweeps and the operator job sweep and reconciliation are not deployed; see [worker scope](spec-worker-scope.md#5-nice-to-have-components). Clock-health thresholds and untrusted-clock fencing below remain normative.
+
 Select a one-second due scan for maintenance transitions and recovery of missed pipeline wakeups. Use durable job claims with ten-second leases, renewed every three seconds, and generation/ownership fences checked at commit. Recheck the current maintenance revision and end under the selected tenant coordination boundary so extensions cannot expire early. Maintenance completion 4–11 now selects detailed proof/state ordering.
 
 Preserve hourly alert/incident inactivity sweeps and the existing operator thirty-second job sweep/five-minute reconciliation. Startup recovery finds overdue work while preserving original effective times and checking current eligibility. Use clock-health observations to warn Appchi above 100 milliseconds and escalate above one second through the owning team; host/database clock synchronization and repair belong to that team. A confirmed backward/untrusted authoritative clock fences timestamp-dependent admission and automatic/control transitions until trusted time catches up; do not rewrite historical times to recover.
@@ -156,6 +162,8 @@ Observability/technology teams own telemetry storage/retention and infrastructur
 Appchi redacts secrets/alert bodies from diagnostics, avoids high-cardinality source values as metric labels and scopes tenant-visible health. Already selected product alert/incident/operator history and audit lifetimes remain product contracts, distinct from infrastructure logs. Send application recovery/privileged-action audit events to the agreed destination; its infrastructure retention is not prescribed here.
 
 ## 21. Operational alerting
+
+**Current scope (REV-34):** Maintenance execution-lag alerts assume the deferred maintenance scheduler and do not apply; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Burn-rate, probe, escalation and operator failure signals below remain normative.
 
 For each SLO separately, compute burn rate as observed bad fraction divided by its allowed fraction: 0.001 for availability, 0.01 for the p99 latency threshold. Require both windows to breach: 14.4 times budget burn over one hour and five minutes, or six times over six hours and thirty minutes, triggers urgent response; one times over three days and six hours creates a non-urgent work item. This follows the [Google SRE multiwindow burn-rate approach](https://sre.google/workbook/alerting-on-slos/).
 

@@ -32,6 +32,8 @@ Every coverage-changing control retains immutable revision, database UTC boundar
 
 ## 5. Qualification and before/after proof
 
+**Current scope (REV-34):** Automatic assignee cleanup is deferred, so no cleanup mutation reaches this evaluation; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Qualification and before/after rules below remain normative.
+
 For each accepted source/manual/system mutation of rule-visible fields, evaluate the historical applicable expression against its validated before/after rule-field snapshots. Use ingress source receipt UTC for coverage and PostgreSQL application order for its field chain, or authoritative manual/system action time/order. Never substitute source `time_created` or processing time for receipt eligibility. This includes verified assignee cleanup; a note-only change cannot alter a maintenance expression because notes are excluded from its catalog. Qualification is a new logical alert, a resolved-to-firing transition, or a real permitted false-to-true condition transition on a firing alert. A first-seen resolved logical alert may have historical/current maintenance coverage if it matches; it remains resolved and supplies no correlation evidence. This resolves the new-alert edge case without inventing a firing occurrence.
 
 Repeated true matches, missing prior state, starting/enabling/editing a rule and changing a display field are not qualifying alert transitions. Evaluate both sides using the same expression selected for that input. A pre-start expression edit therefore cannot manufacture a field transition. Reconstruct a before snapshot from the immediately preceding authoritative alert state in tenant source order; do not compare against an Elasticsearch result or an arbitrary earlier history event. Missing required proof blocks unsafe processing visibly, with the admitted item retained for repair.
@@ -66,6 +68,8 @@ Extensions still validate authoritative current time; no scheduler is needed to
 reject extending or re-enabling a window whose configured end has passed.
 
 ## 11. Maintenance storage and constraints
+
+**Current scope (REV-34):** New controls create no fan-out jobs; existing `maintenance_fanout_jobs` rows remain only as preserved pre-cutover evidence; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Other tables, constraints and lock order below remain normative.
 
 Use PostgreSQL tables `maintenance_windows` (UUID, tenant, current revision, name/reason, CEL source/profile/digest, UTC schedule, timezone evidence, enabled intent, irreversible started lock, deleted-at), `maintenance_revisions` (window/revision immutable snapshots), `maintenance_controls` (window/control UUID, tenant order/time, old/new revision, control kind), and `maintenance_segments` (window/segment UUID, activation proof, expression revision, end/deactivation proof and generation).
 
@@ -111,17 +115,23 @@ Commands retain results for 90 days from completion; protected pending operation
 
 ## 16. Deletion and cleanup
 
+**Current scope (REV-34):** Daily retention cleanup is not deployed; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion semantics, read-time hiding of expired content and protected deletion evidence below remain normative.
+
 Deletion requires expected revision and serializes with create-cause/control writes. Close its coverage segment at the deletion boundary, mark deleted, and preserve the final definition/history; do not queue release work for existing alerts. Active URL returns 404 after deletion; explicit retained-history routes remain available. An idempotent retry returns its original deletion receipt without restarting retention. There is no undelete; copying a retained definition creates a new UUID with new future coverage.
 
 Daily cleanup checks the 90-day deadline, retained alert references, retained Kafka replay/retention proof, pending control/reducer/correlation evidence and recovery holds. Kafka-mode cleanup stays held until that replay boundary is verified. Expired unprotected content is hidden from reads even before physical cleanup. Retire content through independently protected deletion intent/final evidence, then delete bounded chunks using the technical baseline's 24-hour normal cleanup target. Keep only minimal UUID/tenant/version/deletion/replay proof afterward. Ended but non-deleted windows remain configurations until explicitly deleted; they do not consume active evaluation quota.
 
 ## 17. Failure, capacity and recovery behavior
 
+**Current scope (REV-34):** No expiry or control fan-out runs and overdue boundaries are not processed on a timer; ended coverage is released by later source input; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Blocking, capacity-reservation and proof-replay rules below remain normative.
+
 Unknown rule state, timeline gaps, corrupt before/after proof or maintenance CEL failure never mean no suppression. Mark the affected window/processing health blocked and retain admitted work; stop unsafe affected source/manual transitions and automatic decisions while allowing independent reads and unaffected processing where proof permits. Do not remove existing causes on evaluation error. Since tenant source order is retained, a blocked earliest item can delay that tenant's later source work; expose that consequence. Explicit disable/delete can establish a trusted future boundary but does not guess missing historical truth for earlier accepted items. Platform repair restores proof or records a reviewed corrective event through the common repair workflow.
 
 Use capacity-profile limits for concurrently evaluated windows and maintenance work bytes/fan-out derived by the qualification procedure in system completion. Reject a new/extended/enabled reservation exceeding a measured budget with 409 before changing state; never drop already admitted events or truncate causes. Future scheduled coverage reserves overlapping-interval capacity, so a later start cannot unexpectedly violate its allocation. The reservation includes disabled windows until explicitly removed or ended if they could be re-enabled; a disabled window may release its reservation only when subsequent enablement performs a fresh capacity check. Recovery replays retained control/source proof, processes overdue boundaries at original effective times, and uses current-time correlation checks.
 
 ## 18. Live views and visibility proof
+
+**Current scope (REV-34):** There is no fan-out completion record or scheduled-end visibility objective; reads use persisted suppression state; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Stale-count labelling below remains normative.
 
 Each coverage control advances tenant maintenance generation and creates its fan-out completion record. Per-alert reconciliation advances projection sequence; completion records the highest required sequence after all existing affected causes are reconciled. A search/count claims maintenance current only when the applicable fan-out generation is complete and its sequence is searchable, including any newly applied delayed source work. The ordinary two-second state reconciliation and SSE invalidations carry this status. A newer control cannot be marked covered by an older completion.
 

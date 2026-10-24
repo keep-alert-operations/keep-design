@@ -126,6 +126,8 @@ Publish a complete verification generation atomically in PostgreSQL, including s
 
 ## 8. Applying access changes
 
+**Current scope (REV-34):** Automatic assignment cleanup is deferred; known-ineligible assignees are masked, not cleared; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Authorization, session and administrator rules below remain normative.
+
 Every Product API authorization combines the valid local session, accepted directory evidence and current Appchi grants. Do not maintain an independently stale effective-role cache. Permission edits committed in Appchi affect subsequent authorization checks immediately. Guard mutation authorization against concurrent changes to grants and identity revisions; re-evaluate if the decision changes before commit. Do not undo already committed work retroactively.
 
 SSE subscriptions use the same authority. Stop delivery for lost tenants, including counts and invalidation messages that reveal their data. If view remains after loss of edit/admin, preserve permitted reads and remove write actions. Positively confirmed account disablement terminates all that principal's local sessions. Losing the global-super-admin group removes only that privilege and leaves other valid access, including Global edit for an otherwise eligible user.
@@ -135,6 +137,8 @@ Filter tenant listings, search, selectors, resource lookups and subscriptions th
 Recompute initial/last administrator checks from the same accepted membership revision, counting eligible people once. Known loss of every local administrator leaves the tenant operating and raises a repair condition visible to global super-admins. A directory timeout alone does not create that condition. On positively confirmed assignee ineligibility, immediately expose the alert/incident as unassigned and run the existing idempotent cleanup/history contracts; do not wait for a later login, and do not clear assignments solely because verification is unavailable.
 
 ## 9. Outage behavior
+
+**Current scope (REV-35):** Automatic directory retry and polling, and assignment reconciliation, are deferred; identity updates come from explicit publication; see [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). The last-trusted-data outage policy below remains normative.
 
 Keep the user's selected policy: existing valid sessions retain normal read, write and administrative permissions from the last successfully verified identity data combined with current Appchi grants. No five-minute staleness cutoff, read-only downgrade or automatic privilege loss applies solely because LDAP or Keycloak is unavailable. Current known disablement, revocations and ordinary session deadlines remain effective.
 
@@ -154,6 +158,8 @@ Keep revocation fences for at least 24 hours and five minutes after the event, c
 
 ## 11. Cache lifetime, restart and recovery
 
+**Current scope (REV-34, REV-35):** Continuous synchronization and automatic cache eviction are deferred; see [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Checkpoint persistence, tombstones and the restore-integrity gate below remain normative.
+
 Persist the last verified identity checkpoint in PostgreSQL so ordinary process/pod restarts do not lose the accepted outage view. A restart preserves original verification times and negative evidence; loading the checkpoint does not make it fresh.
 
 Keep the current evidence while referenced by a grant, tracked group dependency, live session, assignment or retained product history. During an identity outage, pause identity-cache eviction. Under healthy synchronization, remove unreferenced cache-only records after 30 days without use; retain immutable principal references and display snapshots for as long as their owning product history requires. This selects cache cleanup, not a new audit-history retention policy. Purge unusable provider token material when a session expires or is revoked; retain only the minimal fences required by section 10.
@@ -171,6 +177,8 @@ If a verified directory change leaves the group empty or deleted, keep tenants a
 Validate a replacement group's complete eligible membership before switching mappings. Switch atomically, invalidate the old derived privilege and record operator, old/new immutable IDs, time and reason in protected operational change evidence. This deployment path is separate from tenant permission editing. Keycloak console recovery credentials do not themselves confer Appchi super-admin access.
 
 ## 13. Operation and qualification
+
+**Current scope (REV-35):** The five-minute propagation target and continuous synchronization metrics are deferred and are not release gates; see [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Configuration, upgrade and audit requirements below remain normative.
 
 Keep sanitized realm/client settings and mapping definitions under version control; inject secrets separately. Record the deployed Keycloak version and test this configuration on that version before release. Avoid custom Keycloak provider code in the initial baseline. When strengthening authentication requirements or changing identity bindings, invalidate affected existing provider/local sessions so old authentication cannot bypass the new policy. Rehearse version upgrades in staging, including LDAP mapping, refresh rotation and logout; use the team's Keycloak maintenance process and the database owner's recovery contract.
 

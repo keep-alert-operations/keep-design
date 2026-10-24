@@ -24,6 +24,8 @@ These formatting/validation decisions do not change rule matching or overwrite e
 
 ### 3. Assignment and permissions (I5)
 
+**Current scope (REV-34, REV-35):** Automatic assignee cleanup and the five-minute LDAP target are deferred; known-ineligible assignees are masked, not cleared; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Commit-time permission and eligibility checks below remain normative.
+
 Any user with effective tenant `edit` permission or higher may assign, reassign, or clear assignment on an active or resolved incident. Assignees must satisfy the already agreed effective-edit eligibility rule; picking a user grants no access. Offer an explicit Assign to me action and an unassigned option, with no automatic assignment on investigation or reopening. Reopening preserves the assignee if still eligible. Revalidate actor permission and assignee eligibility when the change is committed. On detected permission loss, clear only the still-ineligible current assignee, preserve history, and leave status and links unchanged. Automatic eligibility cleanup does not count as incident activity. Identity supplement 6–11 selects shared freshness, outage and eligibility-cleanup configuration; its five-minute normal-operation target and last-known-data policy apply here. Do not introduce a separate incident-specific polling interval.
 
 ### 4. Lifecycle cycles and timestamps (I2)
@@ -58,6 +60,8 @@ Record incident creation, effective content/status/assignment changes, note revi
 
 ### 10. Inactivity period and scope (I4)
 
+**Current scope (REV-34):** No sweep resolves inactive incidents; the 30-day period only sets stored deadlines kept for compatibility; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). The scope rules below define that stored state.
+
 Use a fixed incident inactivity period of **30 elapsed days (30 × 24 hours)** across tenants in the initial design, with no per-tenant, per-severity, or per-incident override. Start the timer at successful creation or reopening. It applies only to active incidents, including empty incidents and those with firing, resolved, or suppressed linked alerts. There is no pause or keep-open exemption. Alert supplement 19 separately selects 30 days of source inactivity; valid unchanged repeats refresh the alert timer but never the incident timer.
 
 ### 11. What resets incident inactivity (I4)
@@ -70,6 +74,8 @@ Resolved incidents have no active timer, and post-resolution edits do not reopen
 
 ### 12. Expiry and races (I4, I2)
 
+**Current scope (REV-34):** Automatic inactivity resolution and its hourly check are not deployed, so incidents resolve only by explicit command; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). This section is the design for future automation.
+
 An active incident becomes eligible for automatic resolution at `last qualifying activity + 30 days`, including that exact cutoff. At execution, recheck current status and last activity atomically; skip a stale expiry attempt if a qualifying action has extended the deadline. Resolve at the successful transaction's timestamp, with system actor and cause `inactivity`, retaining the deadline that caused the action in history. Apply the same ownership release, originating-rule/group evidence reset, fresh-transition boundaries, and unchanged alert statuses as manual resolution.
 
 A delayed job does not backdate resolution or reopen an already resolved incident. A late historical source transition cannot undo a committed expiry; explicit reopening must pass the normal conflicts. Resume overdue checks after downtime. Run the due-incident expiry check hourly. Query active incidents whose recorded last qualifying activity is at least 30 elapsed days old; do not reread their activity histories to discover activity. The hourly cadence controls only the delay after the 30-day deadline: under normal operation, resolution can occur roughly up to one hour later.
@@ -79,6 +85,8 @@ This is not an availability guarantee before N3 is designed. Qualifying activity
 ## Retention, search, and screens
 
 ### 13. Incident retention and deletion (I4–I5, R1–R4)
+
+**Current scope (REV-34):** Retention purge is not deployed, so resolved incidents are not purged at the 90-day deadline; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). The no-delete, deadline-recording and unavailable-reference rules below remain normative.
 
 Retain a resolved incident and its incident-owned notes, revisions, lifecycle cycles, and activity for **90 elapsed days from its latest successful resolution**; resolution by inactivity follows the same policy. Reopening before purge cancels the old deadline; the next resolution starts a new 90-day period. Post-resolution content edits do not extend retention. Before purge, atomically recheck that the incident is still resolved and its latest-resolution deadline is due; a stale job must never delete a reopened incident.
 
@@ -91,6 +99,8 @@ This resolves incident-specific durations and parent-owned history retention, no
 Default to active incidents, sorted by last qualifying activity descending, then immutable incident identifier as a deterministic tie-breaker. Support Active, Resolved, and All views; filters for status, severity, assignee (including unassigned/me), creation source, originating rule, linked alert identifier, and created/activity/resolved time ranges. Offer sorting by creation time, last activity, fixed severity rank, and resolution time. Support exact incident-identifier lookup and search current title/description and current non-deleted note text using case-insensitive ANDed text terms; no incident CEL, regex, fuzzy matching, or advanced query language in the initial design. Use cursor pagination, default 50 and maximum 200 rows. The list is a live view rather than a frozen cross-page snapshot; refresh from the first page to see reordered updates, preserve explicit selection by identifier, and do not promise snapshot pagination across concurrent changes.
 
 ### 15. Detail and mutation UX (I3, I5)
+
+**Current scope (REV-34):** Inactivity and retention deadlines are stored but not enforced, so do not present them as upcoming automatic actions; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other detail and mutation rules below remain normative.
 
 Detail includes editable title/description, read-only severity and origin, independent status/assignee controls, link totals/table, current notes and revision access, lifecycle cycles, and chronological activity. Show last qualifying activity and inactivity deadline for active incidents; show resolution cause/time and retention deadline for resolved incidents. Conflicting reopening links to the blocking rule/group incident and conflicting alert owners, as already agreed. Keep user drafts on conflict and require review/retry rather than silently overwriting. Apply successful authoritative mutation responses immediately and refetch affected lists/counts; do not wait for Elasticsearch. The preset and alert technical specifications define feed filtering, captured query clocks and SSE delivery.
 
@@ -119,6 +129,8 @@ A stale revision, invalid lifecycle/link target, or ownership conflict returns H
 Do not expose an incident deletion endpoint. System completion 5–10/20 now selects exact routes, shared envelopes and post-purge command fences; identity/session protection remains in its normative supplement.
 
 ### 19. Authorization changes and event delivery (I5, A2–A4, U4)
+
+**Current scope (REV-34, REV-35):** The permission-loss cleanup job and five-minute LDAP enforcement are deferred; authorization uses the last trusted published checkpoint; see [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Fail-closed checks and SSE refresh below remain normative.
 
 Check current product grants and the identity integration's trusted membership view for every incident mutation and assignment choice. Fail the write closed when a trustworthy authorization decision cannot be obtained. A permission-loss cleanup job rechecks current assignee and effective permission inside the transaction so it cannot clear a replacement assignee or a user who regained another sufficient grant. Commit cleanup/audit/outbox together. Refresh the incident after committed version changes; use the shared SSE invalidation/reconciliation channel selected in technical supplement 18–21, with mutation-response/refetch behavior already defined above.
 

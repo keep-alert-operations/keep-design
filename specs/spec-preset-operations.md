@@ -2,6 +2,8 @@
 
 **Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
+**Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
+
 Shared saved feeds: configuration, editing, queries, dashboard references, APIs and history.
 
 ## 1. Identity, ownership and permissions
@@ -134,6 +136,8 @@ Use the existing status distinctions: 400 malformed JSON/parameters; 401 absent/
 Keep a failed save's draft. Explain name conflicts and reference blockers beside the action that failed. For an uncertain mutation outcome, retry with the same command ID and body, then read the authoritative resource; never manufacture another create/save command automatically. Search failure does not imply save failure. Do not report a successful deletion until its PostgreSQL transaction commits.
 
 ## 18. Retention, purge and recovery
+
+**Current scope (REV-34):** The daily purge job is not deployed; expired history stays unreadable but is not physically removed; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Retention windows, fences and restore rules below remain normative.
 
 Current active definitions and their minimal current creator/last-editor metadata persist until deletion. Retain each superseded definition for 90 elapsed days from supersession; retain change-event details for 90 elapsed days from recording. Deletion starts a 90-day retention period for the final definition and deletion event. Do not restart the lifetime of already superseded revisions merely because the preset was deleted. Retain stable actor/display snapshots with their parent record, not indefinitely in a separate directory copy.
 

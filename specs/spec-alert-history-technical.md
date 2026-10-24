@@ -10,6 +10,8 @@ Shared CEL, PostgreSQL records, ordered processing, search, live updates and pro
 
 ## 1. Authority and implementation boundary
 
+**Current scope (REV-34, REV-37):** No scheduling or cleanup workload role is deployed, and each service has its own entrypoint and image; see [worker scope](spec-worker-scope.md#5-nice-to-have-components) and [repository layout](spec-repository-layout.md#package-and-runtime-boundaries). The authority and ownership rules below remain normative.
+
 Keep the Python backend, PostgreSQL authority, Elasticsearch current-alert projection, Kafka delivery and Redis/SSE live hints. No new independently operated query service, full-history search index or event-sourcing authority is introduced. PostgreSQL can reconstruct committed alert/search state; accepted but unprocessed Kafka inputs can be lost on retention expiry.
 
 Use separately deployable application workload roles for ingress, Product API, Kafka source processing, correlation, search projection and scheduling/cleanup, sharing versioned Python packages/images with role-specific entrypoints. Ingress publishes directly to Kafka; source processing and indexing remain separate workloads. Replica counts, resource placement and allocations follow the OpenShift team's supported model and measured profile.
@@ -136,6 +138,8 @@ alerts.received schema version 2 is self-contained and keyed by canonical JSON [
 
 ## 14. Relay, acknowledgements and retries
 
+**Current scope (REV-34, REV-36):** Operator background jobs and retention workers are deferred, and live hints are published inside the Product API; see [worker scope](spec-worker-scope.md#5-nice-to-have-components). The no-relay and proof rules below remain normative.
+
 The active alert path has no PostgreSQL inbox/outbox relay or CDC. Kafka is the source work trigger. PostgreSQL retains current state, before/after history, delivery/result/immutable-publication proof and consumption evidence. Do not poll those proofs as an alert dispatch queue. Other durable operator/configuration/retention jobs and live hint publication retain their contracts. Cleanup and restore must preserve required proof through the bounds in [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 8.
 
 ## 15. Projection ordering and deletion markers
@@ -248,6 +252,8 @@ Request no intermediary response buffering/cache/compression that delays flushes
 
 ## 21. Rendered acknowledgements and freshness
 
+**Current scope (REV-34):** Maintenance windows no longer release alerts on a timer, so maintenance-expiry observations have no visibility objective to sample; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Endpoints and incoming acknowledgement rules below remain normative.
+
 Add `GET /api/tenants/{tenant_id}/view-state` for the authorized durable vector and `POST /api/tenants/{tenant_id}/view-observations` for sampled render acknowledgements. The latter accepts at most 100 observations and 64 KiB per request, with session-bound server-issued observation IDs, resource/view/query digest, observed versions/generation and outcome. It uses normal CSRF/tenant checks. These endpoints do not update the user's activity clock.
 
 Return observation IDs with eligible view responses. The browser acknowledges after rendering the matching data or the confirmed nonmatching result for that query, not after merely receiving an SSE hint. Validate acknowledgements against server-issued scope/version bounds; duplicated or impossible future acknowledgements cannot manufacture success. Use server receipt time as the conservative completion bound. Preserve the reliability supplement's 10% incoming observation sampling, all maintenance-expiry observations and full qualification instrumentation. Missing acknowledgements remain misses/coverage gaps; the browser is not authority for alert state.
@@ -261,6 +267,8 @@ Select alert-detail sections Overview, Activity, Source events, Occurrences and 
 Show note revisions/deletions and actor snapshots under Notes/history while primary notes/search use current undeleted text. Source event detail renders escaped plain text/JSON and supplied-versus-defaulted time provenance; it never executes payload content or fetches runbook URLs. Distinguish loading, empty history, unavailable dependency, expired resource and late processing. User commands apply their authoritative response immediately and show search updating until the response's projection sequence is covered. Keep existing edit permissions and no manual alert Delete action.
 
 ## 23. Logical purge and bounded physical cleanup
+
+**Current scope (REV-34):** Retention and inactivity sweeps are not deployed, so nothing retires alerts at the 90-day deadline; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). The purge protocol, fences and proof holds below remain the design for explicit deletes and future automation.
 
 Keep the hourly retention eligibility scan, 30-day inactivity policy and 90-day post-resolution lifetime. Under the coordinator, recheck latest resolution, current revision, unconfirmed applied source results and protected dependencies. Unknown Kafka target inputs are governed by the retained logical-key UTC retirement fence, not an inbox scan. Prepare a versioned purge intent without releasing the live identity. Protect that minimal intent through decision 24, then reacquire the coordinator and recheck eligibility. If changed, cancel it; if still valid, atomically retire the alert, make parent-owned content inaccessible, release live key/ownership claims and commit the final tombstone, deletion snapshot, purge job and live generation. A later firing admission may create a new UUID under the same logical key, as already selected.
 

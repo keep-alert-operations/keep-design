@@ -78,11 +78,15 @@ Consume one tenant-ordered Kafka changed input, apply evidence and complete elig
 
 ## 15. Incident resolution, unlink and reopening (C3, C7–C8)
 
+**Current scope (REV-34):** No sweep resolves inactive incidents, so resolution here means explicit resolution; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Evidence and barrier rules for resolution, unlink, Move and reopening remain normative.
+
 Manual unlink, atomic Move, and manual/inactivity resolution update the relevant evidence and durable barriers inside their incident transaction under the same coordinator. Resolution clears the originating context's entire evidence and releases its active pointer, while establishing per-alert release barriers; it does not clear unrelated groups/rules. Resolving an incident from an older grouping generation cannot reset the current generation. Moving alerts includes the agreed manual unlink boundary but allows explicit destination attachment.
 
 Reopening atomically reacquires its original full context and retained alert claims, or fails without changes on either kind of conflict. Reopening does not replay old evidence. An old-generation or deleted/disabled-rule incident remains manually manageable but receives no automatic additions; a current-generation enabled-rule incident can receive subsequent qualifying additions. Missing/purged alert references remain historical, as decided for incidents.
 
 ## 16. Expiry and scheduling (C2, C8)
+
+**Current scope (REV-34):** Hourly incident inactivity expiry and scheduled maintenance transitions are not deployed; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Lazy correlation-evidence expiry below remains normative.
 
 Enforce start <= evaluation time < expiry in each decision and diagnostic read. Expired rows can never count just because a cleanup job is late. Time passing only removes evidence; deterministic conditions do not become true merely because a timer fires. Qualifying accepted inputs and durable pending candidate work drive arbitration. Remove obsolete/expired evidence lazily and through ordinary background storage cleanup; its physical cleanup interval is an operational setting, not a correctness timer or an incident-resolution action. Never scan alert history to refresh evidence. This does not change hourly incident expiry or maintenance's separate scheduled transitions.
 
@@ -117,6 +121,8 @@ Show rules in their actual arbitration order by default, with name, enabled inte
 Provide a read-only Test against a selected existing tenant alert, including an unsaved but validated draft. Report each condition result, group interpretation, firing/suppression/ownership exclusions and missing-field/error diagnostics from a consistent current snapshot. Clearly distinguish matching now from supplying a new eligible transition or satisfying every condition across a real window. Testing creates no evidence, incidents, links or history mutations and does not change an arrival/reset boundary. Test errors or cost-limit failures return diagnostics without blocking or otherwise changing a saved rule. No historical simulation, bulk overlap scan or automatic evaluation against recent alerts is included initially. Technical supplement 2–7 selects shared CEL compilation/cost mechanics and the typed vocabulary; system completion 9 completes general editor presentation.
 
 ## 24. Integration and acceptance boundaries (C1–C8)
+
+**Current scope (REV-34):** Incident inactivity expiry is not deployed and is not a current caller; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Coordinator and atomic-boundary requirements remain normative for the other callers.
 
 All callers that affect ownership or correlation input use the selected coordinator and atomic boundaries, including source processing, manual incident actions, maintenance effects and incident inactivity expiry. The maintenance producer must provide effective suppression transitions with their true times and current authoritative suppression state before correlation may act; maintenance completion 4–11 selects overlap/proof implementation design. Source identity/newer-event acceptance remains L1–L4. See [correlation acceptance cases](../verification/verification-plan.md#correlation).
 

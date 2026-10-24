@@ -12,6 +12,8 @@ and [the implementation record](https://github.com/appchi-alert-operations/appch
 
 ## 1. Authority and topology
 
+**Current scope (REV-34, REV-36):** Operator background and retention jobs are deferred, and live hints are published inside the Product API; see [worker scope](spec-worker-scope.md#5-nice-to-have-components). Topology and ingress rules below remain normative.
+
 ```mermaid
 flowchart LR
   Client[Native client / Grafana] --> Gateway[Kong Key Auth + Appchi policy for v2]
@@ -184,6 +186,8 @@ String literals containing the field's spelling do not count as field references
 
 ## 5. UTC, maintenance and bounded inline effects
 
+**Current scope (REV-34):** A window's end, disable or delete starts no release fan-out; the next source input received after the boundary closes the cause at its receive time; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Tie, clock-health, lineage and provenance rules below remain normative.
+
 **Assistant-selected tie rule:** UTC comparisons govern source eligibility. A source
 exactly equal to a control activation, reset, manual release, disable or delete
 boundary does not gain eligibility across that boundary. Scheduled coverage remains
@@ -279,6 +283,8 @@ mutations continue; the new serving reconciliation repairs changes beyond the fi
 boundary. Never replay source lifecycle or correlation actions during rebuild.
 
 ## 7. Kong policy and provisioning
+
+**Current scope (REV-34):** Provisioning and revocation finish inside the HTTP request and never return pending; revocation reports success only after verified remote denial; see [worker scope](spec-worker-scope.md#3-request-owned-operator-provisioning). Plugin, policy-generation and all-node proof rules below remain normative.
 
 **Assistant-selected implementation:** package the Lua appchi-policy plugin with
 Kong OSS Key Auth. Store a nonsecret operator policy in Kong's own PostgreSQL database,

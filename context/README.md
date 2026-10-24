@@ -28,8 +28,10 @@ repositories are missing inputs; do not create substitute specifications.
 ## Select a reading plan
 
 Start with the request, affected files, and the intended behavioral impact.
-Keywords and paths provide suggestions; they do not establish semantic coverage.
-Inspect the suggested route's `when` and `expand` conditions before accepting it.
+Choose routes by reading each route's `when` condition in the [map](map.md) or
+`list`, then pass them to `plan --route`. `--task` keywords and `--path` globs
+only suggest candidates; they do not establish semantic coverage and can miss
+routes a task needs. Inspect the `expand` conditions of every selected route.
 Select several routes when a feature crosses boundaries.
 
 From `appchi-delivery`, run:
@@ -54,7 +56,9 @@ Selection follows these rules:
 1. Combine the selected routes, close every `requires` dependency, and deduplicate
    source references. Required relationships form an acyclic graph.
 2. Read the selected sections **with their source preambles**. Corrections in a
-   preamble qualify historical text farther down a specification. A heading
+   preamble qualify historical text farther down a specification. A section that
+   a later decision changes also carries a **Current scope** note directly under
+   its heading, so a reader who lands on the section sees the correction. A heading
    selects its contents and subordinate headings; an empty section list selects
    the whole document. Whole documents are used deliberately for small guides.
 3. Inspect each `expand` condition. Add the named route when the condition holds;

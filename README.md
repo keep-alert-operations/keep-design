@@ -11,7 +11,8 @@ Choose the sources applicable to the task and expand when dependencies or
 uncertainty emerge. Behavior, architecture and cross-repository changes require
 the relevant [system design](specs/spec-alerts-management-system.md),
 [current worker scope](specs/spec-worker-scope.md), contracts and acceptance
-requirements. Read introductory scope corrections with selected sections.
+requirements. Read introductory scope corrections with selected sections; a
+section that a later decision changes also carries a **Current scope** note.
 Domain supplements are in
 `specs/`, decisions in `decisions/`, architecture artifacts in `architecture/`,
 and acceptance requirements in `verification/`. Implementation evidence is owned

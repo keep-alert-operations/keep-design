@@ -10,6 +10,8 @@ Cross-resource UI, HTTP, persistence, transactions, security and application dep
 
 ## 1. Application framework and module boundaries
 
+**Current scope (REV-34):** Operator provisioning runs inside Product API requests and retention workers are deferred, so no background job processes operator or retention work; see [worker scope](spec-worker-scope.md#5-nice-to-have-components). Framework, module and Kafka-path selections below remain normative.
+
 Select FastAPI with Uvicorn for Python HTTP APIs, Pydantic strict request/response models, Psycopg 3 pools and explicit parameterized SQL for transactional repositories. Use one Uvicorn process per API container; scale application containers through the platform's supported deployment model and qualified allocation. CPU-intensive CEL compilation/evaluation uses bounded isolated workers, not the event loop. Native input parsing preserves duplicate-key detection and exact object bytes before model validation; framework coercion must not weaken the strict v1/v2 contract. [FastAPI container guidance](https://fastapi.tiangolo.com/deployment/server-workers/) and [Psycopg concurrency](https://www.psycopg.org/psycopg3/docs/advanced/async.html) support these runtime choices.
 
 Use Next.js App Router with TypeScript for the frontend, a server-rendered non-sensitive shell and client-managed operational views. Python remains the sole business-command/authentication authority; no duplicate Next.js mutation backend or direct browser database/service access. Use the official Elasticsearch and Redis clients and `confluent-kafka` for Kafka. Select Authlib for OIDC protocol handling, `ldap3` for the read-only directory adapter, and the already selected `cel-expr-python` runtime. Pin tested package/runtime versions and native builds in lockfiles after capability qualification; floating latest tags are prohibited. These library selections do not assert compatibility with unprovided company versions. [Authlib](https://authlib.org/projects/authlib/), [Kafka Python client](https://docs.confluent.io/kafka-clients/python/current/overview.html), [ldap3](https://ldap3.readthedocs.io/en/latest/index.html).
@@ -72,6 +74,8 @@ Default raw decoded-body limit is 64 KiB for control endpoints; ingestion retain
 Responses contain `data` and `meta` (request ID, current revision/ETag, relevant freshness/query context); lists add `next_cursor`. Errors use decision 6. Use the ordered per-member acceptance/error representation in Kafka pipeline section 2 rather than replacing it with an all-or-nothing generic error. GET never mutates user state. Read-only POST validation/preview/count calls require same-origin/session safeguards but neither a command identity nor activity audit.
 
 ## 6. Errors and recovery
+
+**Current scope (REV-34):** Operator provisioning never returns 202; it returns 201 or 200 after verified completion, or 503/409 with retry details; see [worker scope](spec-worker-scope.md#3-request-owned-operator-provisioning). Other status rules below, including ingress responses, remain normative.
 
 Use `{error: {code, message, request_id, fields, conflicts, retry_after_seconds}}`, omitting inapplicable fields. `fields` contains stable JSON paths and CEL source spans; `conflicts` contains only currently accessible IDs/revisions and repair instructions. Never echo secret/body values, SQL, stack traces, directory rosters or inaccessible resource names. Translate database unique/check conflicts into the resource's stable errors.
 
@@ -142,6 +146,8 @@ Use `auth_sessions` keyed by hashed random handle with principal, provider bindi
 
 ## 13. Operator and provisioning physical records
 
+**Current scope (REV-34):** Provisioning runs within requests with no background due scan, and expired ciphertext is erased on the next successful operator mutation; see [worker scope](spec-worker-scope.md#3-request-owned-operator-provisioning). The record structure and fences below remain normative.
+
 Use `operators` (UUID, immutable tenant, display name, lifecycle, revision, integration health, admission-fence and desired generation), global `operator_name_claims`, `operator_credentials` (UUID, operator/tenant, state, verifier digest, encrypted material/wrapping-key version, activation/retirement/revocation times, Kong IDs), `operator_operations`, `operator_steps`, `remote_bindings`, `operator_activity` and command/denial fences. Partial unique indexes enforce at most one current and one retiring credential per operator; unique verifier/remote credential binding; checks require retiring deadlines and erase invalidated ciphertext as part of revocation/expiry transactions. Prepared generations may exist only within the single serialized provisioning operation.
 
 Index pending operation/due/lease, operator tenant/name, credential ID/operator/deadline, alerts by operator and pending inputs by operator for deletion guards. Persist nonsensitive desired state, step fingerprint, observed remote version, acknowledgement/readback and uncertain outcome separately; never store secret-bearing remote response bodies. Use a dedicated global Grafana-writer coordination record, with the actual external CAS or controlled-writer prerequisite unchanged. Runtime service accounts accessing ciphertext are limited to copy/provisioning roles; ingestion checks IDs/verifiers/state without decrypting.
@@ -180,11 +186,15 @@ The Kafka alert path has no PG capacity reservation or backlog gate. Observe par
 
 ## 18. Non-alert events and background work
 
+**Current scope (REV-34, REV-36):** Maintenance fan-out, cleanup and operator background jobs are deferred, and live hints are published inside the Product API; see [worker scope](spec-worker-scope.md#5-nice-to-have-components). Outbox, generation and invalidation rules below remain normative.
+
 Every effective resource mutation appends a versioned application outbox event with event UUID, tenant/resource kind/UUID/revision, cause/command identity, recorded time, and affected resource-generation vector. Default payload is invalidation metadata, not full configurations, LDAP membership, alert bodies or keys. Durable domain consequences already reside in PG jobs/journal; Redis hints only prompt authorized refetch. No new Kafka topic per resource and no hidden dependence on Kafka delivery for a successful local configuration save.
 
 Use explicit consumer keys/delivery state in `application_outbox`; acknowledge a resource live hint after publication because generation reconciliation repairs loss. Required provisioning/cleanup/maintenance work has its own durable completion proof and is not deleted with a hint. UI mutation responses carry the committed generation for read-your-writes. Versioned worker job envelopes contain immutable task identity, expected generation, scope, checkpoint and retry state; unsupported versions block visibly. Alert received schema 2 carries validated payload/routing/time; source changed events reference immutable committed proof. Neither uses a PG dispatch relay.
 
 ## 19. Unified retention and configuration history
+
+**Current scope (REV-34):** Retention sweeps are not deployed: no daily cleanup runs, and alerts and incidents are not retired 90 days after resolution; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). The read-time history and command-result access windows below remain normative.
 
 This matrix summarizes product retention; resource documents define hold and cleanup details. “Days” always means elapsed 24-hour days; holds extend only needed content/proof. No manual history editor/deleter is added.
 
@@ -203,6 +213,8 @@ This matrix summarizes product retention; resource documents define hold and cle
 A retained event holds its referenced before/after content for its lifetime. Actor display snapshots follow the owning record; current principals/caches follow identity rules. Daily dependency-aware cleanup targets removal within 24 hours of eligibility under qualified healthy capacity, with bounded work and rechecks. Expired unprotected history is hidden even if cleanup is delayed. Infrastructure logs, backups, Kafka and physical ES segments remain owner-managed; no product retention claim promises media erasure there.
 
 ## 20. Cross-resource deletion, replay and restore
+
+**Current scope (REV-34):** Retention-driven incident purge and history cleanup are deferred; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Explicit configuration deletion, protected recovery evidence and rollback-restore rules below remain normative.
 
 Generalize the technical baseline's protected intent → authoritative logical retirement → independently protected final fence → bounded physical deletion to incident purge and deletable configuration resources. For presets/dashboards/rules/maintenance, protect the deletion intent before successful logical deletion can erase its last independently recoverable identity; reconcile pending/cancelled intent after races. A remote evidence failure leaves the requested deletion pending/uncommitted with an explicit retry result, never a false successful delete. Configuration deletion does not depend on ES, but does depend on required recovery protection. No name is released before its resource's logical deletion/rename gate succeeds. Operator deletion retains its additional mandatory Grafana gate.
 
@@ -261,6 +273,8 @@ See [required cross-system acceptance checks](../verification/verification-plan.
 See [delivery delivery sequence and rollout](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#delivery-sequence-and-rollout).
 
 ## 29. Source processor repair API
+
+**Current scope (REV-33):** After the Kafka cutover the PostgreSQL processing/retry endpoint and dispatch relay are fenced, and a faulted partition keeps its offset for explicit repair; see [Kafka-first pipeline](spec-kafka-alert-pipeline.md#8-cutover-retention-and-diagnostics). The no-skip repair rules below remain normative.
 
 Preserve the existing source-head rule: ten consecutive processing failures block that tenant's source processor until an audited global-super-admin retry after repair. Expose `POST /api/admin/tenants/{tenant_id}/processing/retry` with command UUID, expected block generation and a required 1–1,000-code-point plain-text reason. Recheck current global privilege and unchanged head/proof condition; 200 resumes that same durable item without marking it applied or changing its event/time/order. A stale generation is 409; unrepaired required proof is 409 `repair_required`. Record the attempt/result in platform repair audit and current health. This action cannot skip/reject the item, reset correlation evidence or lower any retention/credential fence. Relay/index retries retain their automatic durable retry policy.
 

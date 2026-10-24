@@ -2,6 +2,8 @@
 
 **Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
+**Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
+
 Shared dashboards display preset alert counts. This document defines editing, layout, count consistency, APIs and history.
 
 ## 1. Identity, names and permissions
@@ -105,6 +107,8 @@ Recheck current dashboard/preset revisions, tenant access, purge generation, ind
 
 ## 11. Partial failures, stale values and atomic display
 
+**Current scope (REV-34):** Maintenance release fan-out and retention purges are deferred, so current automation does not produce the pending-fan-out or purged-alert cases below; see [worker scope](spec-worker-scope.md#5-nice-to-have-components). Batch provenance and stale/unavailable rules remain normative.
+
 Response includes a batch observation ID, dashboard revision, preset revision map, query clock, searchable position, index epoch and per-panel success/error. A timeout/partial shard response is never an exact total. Successful siblings may be shown with their common batch provenance; failed panels show unavailable or their previous value explicitly marked stale with its old time/revision. Do not label a mixed success/stale display “all current.” The client installs the new successful panel set in one render pass and rejects late responses for old tenant/dashboard/draft/request IDs.
 
 Assistant-selected response metadata: `relative` is a server-computed boolean
@@ -144,6 +148,8 @@ All paths use `/api/tenants/{tenant_id}`. Bodies have the common 64 KiB raw limi
 Counts read current saved queries, not client-supplied replacement CEL for a saved reference. Preview may use an unsaved layout but still only references saved presets; test new CEL through preset preview. History uses 50/default, 200/max and 15-minute watermark cursors. Common 400/401/403/404/409/413/422/429/503 distinctions apply. Same-value saves commit a receipt without a new revision/history event.
 
 ## 15. Deletion and history
+
+**Current scope (REV-34):** Daily history cleanup is not deployed; expired history stays unreadable without physical deletion; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion, retention windows and fences below remain normative.
 
 Deletion is editor-authorized, revision-checked and confirmed with “Delete this shared dashboard”; it removes its current panel references and name claim atomically, preserving presets and alerts. Active URL becomes 404; history remains readable through explicit retained-history routes. A clean open view returns to the list with a deletion message; a permitted dirty draft may be saved as a new UUID after reference validation. There is no restore/undelete action.
 
