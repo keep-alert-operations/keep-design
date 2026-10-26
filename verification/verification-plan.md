@@ -243,6 +243,22 @@ Verify the [normative Kafka pipeline](../specs/spec-kafka-alert-pipeline.md) sep
 
 Production capacity, multi-node failover/rebalance, clock-discontinuity and rollback-survival runs remain required even when focused local tests pass. Actual results and remaining gaps belong in [implementation evidence](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/kafka-first-implementation.md).
 
+## Kafka topic incarnation (REV-41)
+
+- Source: another delivery at a recorded coordinate rolls its application back and
+  records `source_coordinate_conflict`; only that partition is fenced, with no timed
+  retry, and unrelated partitions continue. Other retained failures log the
+  exception class and code, never exception text or payload.
+- Assignment: on a real broker, a received topic deleted and created again is refused
+  before any producer, offset or input, with `source_topic_identity_changed` per
+  assigned partition; an unrecorded identity also refuses. A full-width topic ID and
+  a Windows client's 32-bit halves of the same ID compare equal.
+- Cutover records both topic IDs. `--record-topic-identity` requires stopped pipeline
+  groups, refuses a partition that ends below a recorded position or source result or
+  holds another record at the last result, and commits no offsets.
+- Qualify topic ID support and a broker-storage loss drill on the supplied broker in a
+  disposable environment; local tests do not establish that.
+
 ## Worker scope correction
 
 - End/disable maintenance without another source input: detail, search and cause

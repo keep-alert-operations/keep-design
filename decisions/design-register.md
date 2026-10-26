@@ -134,7 +134,7 @@ Review validation checks documentation consistency, identifiers, local links and
 | REV-07 | U5 | Corrected the shared cursor implementation to return 409 for authenticated cursor context changes, as already required by system completion 6. Malformed cursor encoding remains 400; authorization is still checked before cursor use. |
 | REV-08 | M4, U2, U5 | Added a read-only saved maintenance tester using existing persisted UTC endpoints and expected revision, so ended windows remain testable without converting them into invalid new schedules. It preserves no-backfill and performs no activity, command or cause writes. |
 | REV-09 | U3, U5 | Dashboard list ordering uses explicit sort/direction and ascending UUID ties; deleted discovery orders by the newest retained recording time. Counts expose compiler-derived relative-clock metadata. Corrected string/integer generation comparison so unchanged configuration cursors page successfully. |
-| REV-10 | L4, D4 | Alert detail now derives suppression in one PostgreSQL repeatable-read snapshot and returns unavailable when a closed maintenance gate leaves a retained timeline unprovable. Independent maintenance CEL tests derive only permitted input fields. Alert note authors, revision actors and human activity capture display names; existing unknown historical names remain null rather than being reconstructed from today's directory. These implement existing contracts. |
+| REV-10 | L4, D4 | Alert detail now derives suppression in one PostgreSQL repeatable-read snapshot and returns unavailable when a closed maintenance gate leaves a retained timeline unprovable. Independent maintenance CEL tests derive only permitted input fields. Alert note authors, revision actors and human activity capture display names; existing unknown historical names remain null rather than being reconstructed from today's directory. These implement existing contracts. Superseded for maintenance by REV-39: there is no maintenance gate; detail is unavailable (`maintenance_proof_unavailable`) only when an alert has no current maintenance checkpoint. |
 | REV-11 | N2, U5 | Later user direction authorizes isolated local Keycloak users/groups in place of external LDAP for development. Identity configuration 14 defines the exception: immutable native UUID/sub binding, real OIDC and guarded directory publication, bounded read-only Admin API polling, and no restore-gate bypass. Production LDAP remains unchanged. |
 
 ## User visual direction — 2026-09-24
@@ -224,7 +224,7 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Decision / correction |
 |---|---|---|
-| REV-30 | C1–C8, N1 | User asked the assistant to make correlation rules creatable in the isolated local stack. Assistant-selected development preview uses explicit finite limits while keeping the profile unqualified. Code, local deployment epoch and disposable-PostgreSQL check evidence bind the preview; audited activation requires healthy source order and no maintenance windows or effects. Production/staging retain the fully measured profile requirement. The preview worker uses the normal PostgreSQL journal and incident transaction path; its limits are local safety ceilings, not release capacity claims. |
+| REV-30 | C1–C8, N1 | User asked the assistant to make correlation rules creatable in the isolated local stack. Assistant-selected development preview uses explicit finite limits while keeping the profile unqualified. Code, local deployment epoch and disposable-PostgreSQL check evidence bind the preview; audited activation requires healthy source order and no maintenance windows or effects. Production/staging retain the fully measured profile requirement. The preview worker uses the normal PostgreSQL journal and incident transaction path; its limits are local safety ceilings, not release capacity claims. Superseded for correlation/maintenance by REV-39: the preview, its activation and its preview profile flags are removed; correlation is always on. |
 
 ## Alert operator display — 2026-09-28
 
@@ -502,7 +502,8 @@ replays from the committed offset. Replay after a crash between the PostgreSQL a
 offset commits is idempotent: correlation recognizes `kafka_correlation_events`
 under the tenant coordinator before any decision. The correlation consumer also reads
 the capability gate under the coordinator in its consuming transaction instead of a
-separate transaction, still failing the input while the gate is closed. See [Kafka
+separate transaction, still failing the input while the gate is closed (superseded for
+correlation by REV-39: the consumer no longer reads a gate). See [Kafka
 pipeline section 3](../specs/spec-kafka-alert-pipeline.md#3-kafka-keys-fencing-and-two-independent-commits).
 The PostgreSQL-before-Kafka replay protocol, original issue IDs and REV numbering are
 unchanged. Executed evidence belongs in delivery.
@@ -619,3 +620,138 @@ sections already depended on. The incident detail note records that stored
 inactivity and retention deadlines are not presented as upcoming automatic actions,
 matching the 2026-10-24 label removal. These are navigation and presentation
 choices, not changes to product requirements.
+
+## REV-39 — Always-on correlation and maintenance (2026-10-24)
+
+User decisions: correlation rules and maintenance windows are always on in every
+environment, with no feature-level capability gate; per-rule and per-window
+Enable/Disable intent stays. Capacity limits are configurable numbers, and a limit
+that is not configured is unlimited. A database restore no longer turns correlation
+or maintenance off; the `human_auth`, `search`, `v2_ingress`, `recovery` and
+`audit_retention` gates still close on restore as before. The user stated that the
+single local stack on this workstation is the only environment, so no compatibility
+shims are needed and its local data may be fixed directly.
+
+Assistant-selected details:
+
+- Migration 0053 deletes the `correlation` and `maintenance` capability-gate rows. It
+  restarts rules stored `blocked` with `consumer_not_integrated` like a re-enable: a
+  new evaluation epoch, `last_reset_reason='always_on'`, a boundary at migration time
+  and a fresh tenant admission order, so changed events queued while the gate was
+  closed never count. Pre-0053 code reads those rows; stop every writer before
+  applying it.
+- No code reads those gates. The maintenance activation command, the REV-30 local
+  correlation preview and its profile flags (`correlation_preview`,
+  `scope: local-development`, `allow_local_preview`) are removed. Correlation and
+  maintenance budgets no longer need `qualified`. The API startup rule refusing an
+  unqualified capacity profile outside `development` is unchanged; it also covers
+  ingestion and search budgets.
+- The domain helper `appchi.shared.capacity` defines `UNLIMITED` as 2^53−1
+  (9,007,199,254,740,991), safe for PostgreSQL `LIMIT budget+1` and JSON. A missing
+  or null budget is unlimited; a configured value must be an integer from 1 to
+  `UNLIMITED`, otherwise the operation fails with `capacity_profile_invalid` (503).
+  This covers the correlation budgets for enabled rules, live groups and evidence,
+  condition/rule/tenant cost and digest bucket, the three top-level maintenance
+  work/input/segment budgets and `maintenance.max_overlap`/`max_work_bytes`. An
+  optional `correlation.cost_model` must equal the CEL cost model
+  (`correlation_cost_model_mismatch`). The development profile sets none of them.
+- Maintenance always prepares its catalog (`maintenance_catalog_required` when a
+  caller supplies none); there is no closed-gate write path. Alert reads keep the
+  strict rule: no current maintenance checkpoint fails with
+  `maintenance_proof_unavailable`. Alerts journaled before the upgrade are covered by
+  running the existing maintenance warmup once per tenant; alerts without a creation
+  baseline are reported to the user and then removed from the local data.
+- Correlation rules are created `healthy`; the correlation consumer checks no gate;
+  the API no longer returns `processing_ready`.
+- Maintenance window deletion still requires the `recovery` and `human_auth` gates and
+  the recovery evidence store, so it stays unavailable until protected recovery
+  exists. Create, edit, enable and disable work.
+- The local launcher always starts the correlation worker. Earlier load-test
+  baselines were measured with correlation and maintenance off and do not describe
+  the always-on default.
+- The disposable CEL compile process is started as a plain subprocess that imports
+  only `appchi.cel.compiler`. A spawned multiprocessing child re-imported the
+  calling service's entrypoint first (about 1.2 s for the processor and correlation
+  workers here), so every compile in those workers exceeded the unchanged
+  one-second deadline once maintenance windows were always compiled. Request,
+  reply, deadline and sanitized failure logging are unchanged.
+
+For correlation and maintenance this supersedes decision 23 and the local-preview
+entry in [design decisions](design-decisions-2026-09-22.md), REV-30, REV-10's
+closed-gate statement, the gate check in "Batched changed-consumer commits" and the
+missing-profile and no-unlimited-quota rules of
+[system completion section 23](../specs/spec-system-completion.md#23-measured-capacity-profile-and-readiness-rules).
+See also [correlation section 20](../specs/spec-correlation-rules.md#20-high-cardinality-and-resource-limits-c4-n1)
+and [maintenance section 17](../specs/spec-maintenance-operations.md#17-failure-capacity-and-recovery-behavior).
+Measured capacity remains a qualification output. Original issue IDs and REV
+numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-40 — Reviewed reset after lost local Kafka storage (2026-10-25)
+
+User decision: approve the local recovery plan of 2026-10-25 and re-enable the only
+enabled correlation rule afterwards so it starts a fresh epoch. The local Kafka broker
+kept its log in the container layer, so recreating the container on 2026-10-05 lost
+both application topics. The launcher recreated them empty, their offsets restarted
+under PostgreSQL replay proof, and the source stopped on a reused coordinate. This is
+the [reviewed reset](../specs/spec-kafka-alert-pipeline.md#8-cutover-retention-and-diagnostics)
+that section 8 requires for a loss interval.
+
+Assistant-selected details:
+
+- Stale coordinates are retired, never deleted: source-result rows from the lost topic
+  incarnation keep delivery UUID, digest, first offset, alert and changed-event
+  identity, and only their `topic` becomes `<topic>@lost-<date>`. This frees
+  `UNIQUE(topic,partition,input_offset)` for the live topic while the section 8
+  delivery and first-coordinate fences remain. Rejected: deleting the rows (removes
+  fences) and a topic-incarnation column (schema and processor change; open follow-up).
+- Diagnostic `kafka_consumer_positions` rows are set to the broker committed offsets;
+  broker offsets stay authoritative (section 3).
+- Correlation rules whose epoch spans the loss interval are disabled through the
+  normal command before the source resumes and re-enabled afterwards, which starts
+  a fresh epoch through the audited path.
+- Inputs admitted to the lost incarnation after PostgreSQL's last confirmed offset
+  are unrecoverable and recorded as such; search is repaired from PostgreSQL by
+  authority reconciliation.
+- The local launcher refuses to create application topics after the recorded cutover
+  and refuses to start workers when the broker ends below, or holds another delivery
+  at, an offset PostgreSQL recorded.
+
+Detection inside the processor (recording the topic identity at cutover and a
+specific coordinate-conflict fault) followed in [REV-41](#rev-41--kafka-topic-incarnation-detection-in-the-source-2026-10-26).
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-41 — Kafka topic incarnation detection in the source (2026-10-26)
+
+Follow-up to REV-40, requested so that environments without the local launcher also
+refuse a recreated topic. Assistant-selected details, recorded in
+[Kafka pipeline section 8](../specs/spec-kafka-alert-pipeline.md#8-cutover-retention-and-diagnostics):
+
+- Migration 0054 adds nullable `received_topic_id` and `changed_topic_id` to
+  `kafka_pipeline_control`, in Kafka's 22-character topic ID text. Cutover records
+  both. The source verifies the received topic on every assignment and refuses a
+  different or unrecorded ID before any producer, offset or input is used. The fault
+  is `source_topic_identity_changed` per assigned partition at its committed offset.
+- confluent-kafka 2.15.1 passes each 64-bit half of a topic ID through a C `long`,
+  which is 32 bits on Windows, where every local worker runs. IDs are compared by the
+  low 32 bits of each half, which every client reports correctly; on Linux the stored
+  text equals `kafka-topics.sh` output. Rejected: a content check of the last recorded
+  coordinate on every assignment (a record fetch per partition during rebalance) and
+  checking only on full-width clients (no protection in the only environment).
+- A source-result insert that violates `UNIQUE(topic,partition,input_offset)` is
+  `source_coordinate_conflict`. The tenant coordinator and READ COMMITTED make the same
+  delivery a replay first, so the violation means another delivery holds the
+  coordinate. The partition is fenced with no retry deadline; the conflict is detected
+  from the constraint, with no extra statement per input.
+- Every retained source failure logs partition, offset, reason, exception class and the
+  AppError code or SQLSTATE, in the message itself because no log handler is
+  configured. Exception text is never logged.
+- `python -m appchi.kafka_cutover --record-topic-identity` records the IDs for a
+  cutover from before 0054 and as the last step of a reviewed reset. It requires
+  stopped pipeline groups and refuses (`kafka_topic_history_mismatch`) unless each
+  partition ends at or beyond PostgreSQL's recorded positions and last source result
+  and still holds that result's input digest. It never commits offsets.
+- Open: the correlation and search groups do not verify the changed topic's identity;
+  their replay is idempotent by event identity or external version, while source
+  coordinates are replay proof.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

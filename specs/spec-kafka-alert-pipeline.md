@@ -351,6 +351,24 @@ correlation stop for audited recovery/reset; indexer can rebuild from PostgreSQL
 resume at available offsets. Do not claim zero acknowledged loss from Kafka retention
 expiry. Source history already committed in PostgreSQL remains authoritative.
 
+**Assistant-selected topic incarnation (2026-10-26, [REV-41](../decisions/design-register.md#rev-41--kafka-topic-incarnation-detection-in-the-source-2026-10-26)):**
+lost broker storage, or a topic deleted and created again, is a new incarnation whose
+offsets restart under the replay proof of the old one. Cutover records the Kafka topic
+ID of both topics. On every assignment, before it initializes producers, reads offsets
+or applies input, the source compares the received topic's ID with the recorded one.
+A different ID records `source_topic_identity_changed` for each assigned partition and
+refuses the assignment; no recorded ID refuses with `kafka_topic_identity_unrecorded`.
+Comparison uses the low 32 bits of each 64-bit half, the part every supported client
+reports (confluent-kafka on Windows reports no more); topic IDs are random, so these
+bits identify an incarnation. A broker without topic IDs keeps cutover closed. A
+source result that finds another delivery at its topic/partition/offset is unknown
+proof: record `source_coordinate_conflict` and fence the partition, with no timed
+retry, until explicit repair. A reviewed reset ends with `kafka_cutover
+--record-topic-identity`, which requires stopped source, correlation and indexer groups
+and records new IDs only when each partition ends at or beyond PostgreSQL's recorded
+positions and last source result and still holds that result's input digest. The
+correlation and search groups do not check the changed topic's identity yet.
+
 Qualification covers the crash matrix around both commits, unknown commits, rebalances,
 duplicate UUIDs at different offsets, resubmissions, source conflicts, PostgreSQL-down
 ingress, Kafka-down retries, queued-source/manual races, lost search notifications,

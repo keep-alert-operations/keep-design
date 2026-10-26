@@ -98,7 +98,7 @@ Details: [System completion 21–25](../specs/spec-system-completion.md#21-appli
 
 21. **Security:** same-origin HTTPS, strict trust/headers, escaped content, no arbitrary URL fetching, no protected shared cache, role-scoped versioned secrets and separate key purposes.
 22. **OpenShift runtime:** separate workload roles, migration job, least-privilege containers, capability-specific readiness, bounded pools and safe draining/fenced retries.
-23. **Capacity profile:** versioned measured combined budgets with an application safety margin and explicit enforcement; missing/unqualified limits gate affected capabilities instead of pretending capacity is known.
+23. **Capacity profile:** versioned measured combined budgets with an application safety margin and explicit enforcement; missing/unqualified limits gate affected capabilities instead of pretending capacity is known. *Superseded for correlation and maintenance by REV-39: they have no gate, and an unset limit is unlimited.*
 24. **Service handoff:** required version/endpoint/capability/allocation/ownership/recovery manifest; actual facts come from the service owners and incompatible capabilities gate release.
 25. **Keycloak operations:** the user's team owns controlled realm/client changes, individually accountable administrators, MFA, staged upgrade tests and recovery validation without changing other teams' infrastructure policies.
 
@@ -169,6 +169,8 @@ The user requested direct field names in CEL conditions, such as `application` i
 
 The user requested making correlation rules creatable in the running local stack. REV-30 records the assistant-selected bounded development preview: an explicitly unqualified profile with finite limits, bound to local code, epoch and check evidence, plus an audited gate opening after source-order and empty-maintenance checks. The normal PostgreSQL correlation worker processes local rules. This exception is limited to the isolated development stack; [shared system section 23](../specs/spec-system-completion.md#23-measured-capacity-profile-and-readiness-rules) retains full qualification for staging and production.
 
+*Superseded by REV-39 (2026-10-24): the preview and its gate activation are removed; correlation and maintenance are always on.*
+
 ## Later user decision: Kafka-first alert redesign — 2026-09-30
 
 REV-33 replaces the PG-first alert transport with the user-authorized Kafka-first flow. [Kafka-first pipeline](../specs/spec-kafka-alert-pipeline.md) is authoritative. Its explicitly labelled assistant-selected choices cover HTTP outcomes/legacy identifiers, two-commit replay and fencing, packaged Kong policy/propagation, UTC ties and clock health, bounded search reconciliation/rebuild, maintenance provenance and inline effects, saved correlation rule migration, and cutover/loss diagnostics. Preserve the original 68 decision numbers and 55 original issue identifiers. Implementation and production qualification are separate records.
@@ -203,3 +205,13 @@ checksums and recorded history, verifies adoption of existing databases, and
 retains dedicated migration execution and transaction/privilege safeguards.
 [Repository layout](../specs/spec-repository-layout.md#alembic-migration-execution-rev-38)
 is authoritative. The 68 original decision numbers remain unchanged.
+
+## Later user decision — 2026-10-24 always-on correlation and maintenance
+
+REV-39 makes correlation rules and maintenance windows always on in every
+environment, with no capability gate; per-rule and per-window Enable/Disable intent
+remains. Capacity limits are configurable, and an unset limit is unlimited. Restore
+no longer closes correlation or maintenance; the other restore gates are unchanged.
+This supersedes decision 23 for these two features and the local correlation
+preview. The [design register](design-register.md#rev-39--always-on-correlation-and-maintenance-2026-10-24)
+records the assistant-selected details. The 68 original decision numbers remain unchanged.
