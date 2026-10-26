@@ -141,7 +141,7 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Resolution |
 |---|---|---|
-| REV-12 | U1, U2, U3, U5 | User supplied a full-system visual reference and requested the entire UI adopt it. Shared system section 3 records its left rail, typography and original fixed light palette, which superseded automatic OS theme selection at the time. REV-20 later adds user-selectable dark mode while retaining this light reference as default. Assistant-selected adaptations retain responsive stacking, real API data, existing authorization and conflict/recovery controls; illustrative prototype counts and people are not application defaults. See [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md). |
+| REV-12 | U1, U2, U3, U5 | User supplied a full-system visual reference and requested the entire UI adopt it. Shared system section 3 records its left rail, typography and original fixed light palette, which superseded automatic OS theme selection at the time. REV-42 later replaces the colors with the Ocean palette and keeps the rest of the reference. REV-20 later adds user-selectable dark mode while retaining this light reference as default. Assistant-selected adaptations retain responsive stacking, real API data, existing authorization and conflict/recovery controls; illustrative prototype counts and people are not application defaults. See [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md). |
 | REV-13 | U1, U5, I4 | User reported gaps between the implemented UI and the reference and asked for an exact match. Every screen now uses the reference page frame, grid tables and controls (see [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md)). Assistant-selected read-time enrichment adds optional current-directory labels beside principal ids — `assignee_display_name`, `acknowledged_by_display_name`, `created_by_display_name`, `updated_by_display_name` — plus `active_incident_id`/`active_incident_title` on alerts and `origin_rule_id`/`origin_rule_name` on incidents. These are presentation labels for current records; recorded history keeps its captured labels per REV-10. **Open gap:** incident activity stores only `actor_id`, so the UI cannot show captured actor names there without new persisted evidence; historical names are not rebuilt from today's directory. |
 | REV-14 | Q4, U1, U5 | Continuation review found the redesigned table ignored saved/draft preset columns and always indicated descending last-received sorting. Corrected custom field order and actual sort indicators under the existing [preset column contract](../specs/spec-preset-operations.md#4-columns-and-sorting). Assistant-selected presentation adaptation retains the reference's compact default grouping and uses individual columns for custom selections; row navigation and suppression remain visible independently of Message. Added browser regressions, and scoped the saved-preview pagination assertion to its cursor request rather than the last concurrent count request. See [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md). |
 
@@ -174,7 +174,7 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Resolution |
 |---|---|---|
-| REV-20 | U1, U5 | User requested dark mode after the full-system light visual reference. Shared system section 3 now requires an explicit Light/Dark choice for Appchi-owned screens, superseding REV-12's fixed-light behavior. Assistant-selected behavior retains the reference light palette by default, independent of OS preference, and persists the user's choice locally across navigation and reloads without identity or tenant data. Both palettes keep readable controls, status text and focus. External Keycloak pages retain their separate theme. |
+| REV-20 | U1, U5 | User requested dark mode after the full-system light visual reference. Shared system section 3 now requires an explicit Light/Dark choice for Appchi-owned screens, superseding REV-12's fixed-light behavior. Assistant-selected behavior retains the light palette (the Ocean palette since REV-42) by default, independent of OS preference, and persists the user's choice locally across navigation and reloads without identity or tenant data. Both palettes keep readable controls, status text and focus. External Keycloak pages retain their separate theme. |
 
 ## Dashboard refresh correction — 2026-09-24
 
@@ -753,5 +753,31 @@ refuse a recreated topic. Assistant-selected details, recorded in
 - Open: the correlation and search groups do not verify the changed topic's identity;
   their replay is idempotent by event identity or external version, while source
   coordinates are replay proof.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-42 — Ocean palette on the existing design (2026-10-26)
+
+User decision after a full visual redesign round for the frontend. The user rejected two
+hands of bold directions, said the existing interface was the best so far because it is
+simple and easy on the eye, and asked for a real color palette rather than black and
+white. Five calmer palette prototypes were built on separate local frontend branches.
+After comparing them, the user kept the existing design and replaced only its colors
+with the Ocean palette, in light and dark.
+
+- Supersedes the color part of REV-12 (warm off-white backgrounds, warm gray rail, dark
+  primary actions) and the light palette REV-20 retains as default. Layout, the
+  76-pixel rail, Geist type, components, copy, behavior and the REV-20/REV-24 light
+  default with a persisted dark choice are unchanged. The REV-23 Keycloak theme uses
+  the same palette.
+- Assistant-selected details: every color is defined once per theme as a semantic
+  role; Ocean blue marks primary actions, the active rail item and selection; status
+  and severity keep their red, orange, amber and green meanings; text, placeholders
+  included, meets 4.5:1; selection, caret, scrollbars, focus rings and native control
+  accents follow the palette; shadows are navy-tinted. The values are recorded in the
+  [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md).
+- The four unchosen prototypes and Ocean's own structural changes (labelled sidebar,
+  Mulish type, firing-dot halo) are not adopted; their branches stay local until the
+  user decides.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
