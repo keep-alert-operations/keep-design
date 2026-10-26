@@ -259,6 +259,23 @@ Production capacity, multi-node failover/rebalance, clock-discontinuity and roll
 - Qualify topic ID support and a broker-storage loss drill on the supplied broker in a
   disposable environment; local tests do not establish that.
 
+## Quieter alert, preset and dashboard screens (REV-43)
+
+- Feed and saved-preset rows: the ⋯ menu offers Assign to me or Unassign and Resolve
+  or Reopen with the row's observed revision, closes on Escape and outside clicks,
+  returns focus to its button, opens upward near the bottom of the table and never
+  navigates; viewers see no menu. The message still opens the alert.
+- Healthy live delivery shows no header status; degraded or unavailable delivery
+  shows the notice with Refresh, and lagging search shows the catching-up notice.
+- No revision numbers on the saved-preset and dashboard headers, the presets list,
+  dashboard cards, alert detail or the dashboard newer-version notice; conflict
+  handling and history pages still use revisions.
+- Quick views: no Active view, a dot per severity and status view, counts intact.
+- Rows show coloured severity and status text without marks, no source line or New
+  chip; alert detail drops its source line. Relative times update while visible and
+  keep the exact time and timezone in the tooltip, in Light and Dark and at a narrow
+  viewport.
+
 ## Worker scope correction
 
 - End/disable maintenance without another source input: detail, search and cause

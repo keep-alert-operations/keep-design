@@ -84,8 +84,8 @@ for source_id, source in catalog['sources'].items():
                           f'exactly once in {source["path"]} (found {found})')
 register = (ROOT / 'decisions/design-register.md').read_text(encoding='utf-8')
 ids = {int(value) for value in re.findall(r'^(?:\|\s*|##\s*)REV-(\d+)', register, re.M)}
-if ids != set(range(1, 43)):
-    errors.append('Expected REV-01 through REV-42')
+if ids != set(range(1, 44)):
+    errors.append('Expected REV-01 through REV-43')
 if errors:
     raise SystemExit('\n'.join(errors))
 print(f'Local document targets, fences, {sections} design-owned catalog sections '

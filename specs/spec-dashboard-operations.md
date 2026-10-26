@@ -85,7 +85,7 @@ count updates remain automatic, with manual Refresh counts available. Uncounted
 draft preset references require explicit Save before displaying counts. The
 existing read-only backend preview/validation contracts are unchanged.
 
-Use expected dashboard revision and command UUID. Preserve the draft on 409 and offer Reload/compare or Save as new with an explicitly chosen unique name. A clean open dashboard loads remote saves; a dirty one keeps its base revision and shows the newer shared revision. Duplicate uses the current saved definition or the explicitly selected draft, new dashboard/panel IDs, and the same currently active preset references, revalidated at save. Historical revision reuse is also a draft followed by a new validated save, never history mutation or undelete.
+Use expected dashboard revision and command UUID. Preserve the draft on 409 and offer Reload/compare or Save as new with an explicitly chosen unique name. A clean open dashboard loads remote saves; a dirty one keeps its base revision and says that a newer shared version exists, without revision numbers (REV-43). Duplicate uses the current saved definition or the explicitly selected draft, new dashboard/panel IDs, and the same currently active preset references, revalidated at save. Historical revision reuse is also a draft followed by a new validated save, never history mutation or undelete.
 
 ## 9. List, fullscreen and refresh controls
 
@@ -176,6 +176,11 @@ the Count provenance button, details panel and reserved action row. Batch metada
 and revision/context checks remain internal to count processing. Count refresh
 must keep panels steady. Visible count failures and stale/unavailable indicators
 remain.
+
+**Later user correction — 2026-10-26 (REV-43):** the dashboard header loses its
+"Shared · revision · panels" subtitle and the standing Live pill; the Unsaved changes
+chip sits beside the name. Dashboard list cards show the editor and a time relative
+to now without a revision number, and a stale panel's captured time is relative too.
 
 Use the system's selected light or dark palette, tabular numerals, visible focus, labeled count cards and text status alongside color. The visual reference and theme behavior are governed by [shared system section 3](spec-system-completion.md#3-navigation-and-visual-system). Announce an aggregated “Dashboard updated” politely after a batch; do not announce every second or every changed digit. Reduced-motion preference removes count transitions; do not animate counting through intermediate false values. A screen reader can read panel title, exact count, preset, freshness and threshold. Keyboard users can enter/exit fullscreen, open presets and operate all editing controls.
 

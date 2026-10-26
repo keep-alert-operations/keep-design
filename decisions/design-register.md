@@ -781,3 +781,56 @@ with the Ocean palette, in light and dark.
   user decides.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-43 — Quieter alert, preset and dashboard screens (2026-10-26)
+
+User decision. The user listed changes that make the Feed, saved presets and dashboards
+easier on the eye, answered the open questions, and approved the result in a
+[UI cleanup mock](https://claude.ai/artifact/7vm914Lhop6uEBDoTw37Sz) before implementation.
+
+- **Row menu.** On Feed and saved-preset rows the ⋯ button opens a menu with Assign to
+  me or Unassign, and Resolve or Reopen, instead of navigating to the alert. The inline
+  Assign to me and Resolve buttons move into it; the message still opens the alert. The
+  detail page keeps its single Assign control ([alert operations 17](../specs/spec-alert-operations.md#17-assignment-and-derived-acknowledgement)).
+- **Live status.** The standing Live pill leaves the page header of every screen. This
+  supersedes "scoped update status remains visible" in [shared system section 3](../specs/spec-system-completion.md#3-navigation-and-visual-system).
+  Lost live delivery still shows a quiet notice with Refresh, as [preset section 14](../specs/spec-preset-operations.md#14-open-views-live-changes-and-access-changes)
+  and [technical baseline section 19](../specs/spec-alert-history-technical.md#19-browser-refresh-reconnect-and-relative-time)
+  require, and lagging search shows "Catching up · counts may lag". The saved-preset
+  footer drops its "updates live on page 1" text. Assistant-selected: the brief
+  Connecting and Reconciling steps show nothing, and below 1024 pixels, where the
+  header wraps, the routine catching-up notice is announced to assistive technology
+  but not drawn, so it never moves content; degraded notices stay visible and wrap.
+- **Revision numbers.** Removed from the saved-preset subtitle and the dashboard
+  subtitle (each whole line goes, including its editor, time and panel count; the
+  dashboard's Unsaved changes chip moves beside the name), the presets list's Revision
+  column, the dashboard list cards, the alert detail's Details panel and the dashboard's
+  newer-version notice, which now says "A newer shared version is available" without
+  numbers. This narrows the [dashboard section 8](../specs/spec-dashboard-operations.md#8-shared-editing-copying-and-conflicts)
+  wording that a dirty board "shows the newer shared revision" and shared system section
+  4's "display their base revision" for that notice. Revision-based commands and
+  conflicts, history pages and comparisons, and note revision history are unchanged.
+- **Quick views.** The user chose the lighter quiet-text style: smaller borderless
+  buttons, light counts, and a coloured dot for each severity and status view. The
+  Active view, which showed Firing and Acknowledged together, is removed. "Quick views
+  are not saved" moves into the group's tooltip and accessible name.
+- **Alert rows.** Feed and saved-preset rows show severity and status as coloured text
+  without their shape marks; the detail page and other lists keep the marks. The source
+  line under the message (application · component · node · site) is removed from these
+  rows and from the alert detail summary; the Details panel still lists those fields.
+  The New chip is removed.
+- **Relative times.** Feed and preset rows, the saved-preset "evaluated" footer, the
+  presets list, the dashboard list cards, stale dashboard panel captions and the alert
+  detail (its fields, history, notes, occurrences, source events and note revisions)
+  show time relative to now, such as "30 seconds ago", "2 hours ago" or "3 days ago".
+  This narrows, for those screens, the [shared system section 3](../specs/spec-system-completion.md#3-navigation-and-visual-system)
+  rule to show the selected date format and timezone labels. Assistant-selected
+  details: English wording with "just now" under five seconds; one shared display clock
+  that updates every five seconds while the tab is visible and requests no data; the
+  exact time, in the selected format with the browser timezone label, stays in the
+  tooltip, so the separate "Times in" labels go. Incidents, rules, maintenance, audit
+  and history screens keep exact times.
+- The Dashboards list remains its own page, reached from the rail; the mock's combined
+  board was only a layout shortcut.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
