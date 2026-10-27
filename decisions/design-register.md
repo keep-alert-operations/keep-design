@@ -880,3 +880,28 @@ implementation plan, and chose most-alerts-first ordering with a 1,000-value cap
   clears a preset's grouping.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-45 — Assigned to me, quick-view toggle and a shorter Reset (2026-10-27)
+
+User decision. The user asked for a quick filter for alerts assigned to them, for
+pressing a selected quick view again to return to All, and for the grouping toolbar's
+Reset to saved button to read just Reset.
+
+- **Assigned to me.** A quick view after the status views, past a divider, narrows the
+  Feed, saved-preset results and the preset editor preview to `assignee_id` equal to
+  the signed-in principal's ID. Like the other quick views it is transient and
+  single-choice, shows an exact count, composes with the applied CEL, text search and
+  Include suppressed, and is never saved
+  ([alert operations, Product API and screens](../specs/spec-alert-operations.md#product-api-and-screens)).
+  Assistant-selected: it carries no coloured dot, since REV-43's dots mark severity and
+  status, and the principal ID enters the CEL as an escaped string literal. The
+  quick-count batch gains one query, within its 24-query limit.
+- **Toggle.** Pressing the selected quick view again selects All, on the Feed,
+  saved-preset results and the preset editor preview; pressing All keeps All. Other
+  view choices behave as before.
+- **Reset.** On saved-preset results, the button that returns a temporary grouping
+  change to the saved field reads Reset, with "Back to the saved grouping" as its
+  tooltip. Behaviour is unchanged
+  ([preset section 4](../specs/spec-preset-operations.md#4-columns-and-sorting)).
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

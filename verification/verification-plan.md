@@ -93,7 +93,7 @@ Also verify mixed firing/resolved Grafana batches, required-field failures, time
 
 Verify implementation against at least: view-versus-edit separation; Global behavior; Unicode name collisions/reuse; transient filters never saved; suppressed/resolved count parity; all permitted sorts/columns and default tie-breaks; invalid/costly queries; stale environment handling; saved versus candidate preview isolation; no-op/retry/expired-receipt behavior; concurrent saves; delete versus panel-reference creation; historical-copy validation; deletion/name reuse without old-link rebinding; retention boundaries/holds; rollback resurrection protection; tenant/revision-bound cursors; late response rejection; role loss with a dirty draft; Elasticsearch/Redis/PostgreSQL outages; and shared count changes without false zero values.
 
-Grouping (REV-44) also requires: create/replace/no-op/history/conflict and retried-command fingerprints with and without `group_by`; rejected unknown grouping fields; exact per-group totals summing to the total on a multi-shard index; the missing-value group last; Status groups agreeing with the Status quick views; severity, status and most-alerts-first ordering; `too_many_groups` above 1,000 values; group row continuation without duplicates or gaps, and a cursor rejected for another group or query; group-list continuation on the same PIT; the temporary toolbar change with Reset to saved, cleared by a new revision or reopening; Feed grouping carried by Save as preset; unchanged dashboard counts with drill-through to grouped results; and one grouped request plus one quick-count request per invalidation while only first rows are shown.
+Grouping (REV-44) also requires: create/replace/no-op/history/conflict and retried-command fingerprints with and without `group_by`; rejected unknown grouping fields; exact per-group totals summing to the total on a multi-shard index; the missing-value group last; Status groups agreeing with the Status quick views; severity, status and most-alerts-first ordering; `too_many_groups` above 1,000 values; group row continuation without duplicates or gaps, and a cursor rejected for another group or query; group-list continuation on the same PIT; the temporary toolbar change with Reset, cleared by a new revision or reopening; Feed grouping carried by Save as preset; unchanged dashboard counts with drill-through to grouped results; and one grouped request plus one quick-count request per invalidation while only first rows are shown.
 
 ## Maintenance
 
@@ -277,6 +277,18 @@ Production capacity, multi-node failover/rebalance, clock-discontinuity and roll
   chip; alert detail drops its source line. Relative times update while visible and
   keep the exact time and timezone in the tooltip, in Light and Dark and at a narrow
   viewport.
+
+## Assigned to me and the quick-view toggle (REV-45)
+
+- Feed, saved-preset results and the preset editor preview send `assignee_id` equal to
+  the signed-in principal's ID, composed with the applied CEL, text search and
+  Include suppressed; All removes it and nothing is saved.
+- Its exact count comes from the same quick-count batch as the other views; it has
+  no dot and follows the status views after a divider.
+- Pressing the selected quick view again selects All and restores the unrestricted
+  result; pressing All keeps All.
+- A temporary grouping change on saved-preset results shows Reset, which returns to
+  the saved field.
 
 ## Worker scope correction
 
