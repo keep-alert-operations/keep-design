@@ -49,7 +49,7 @@ An **alert** is a logical identity, not a delivery. Source events update its per
 
 **Suppression** is independent of firing/resolved lifecycle. V2 source suspension and maintenance contribute separate causes. Suppressed alerts remain ingested, stored and available through explicit feed inclusion, but ordinary feed counts and automatic correlation exclude them.
 
-A **preset** saves tenant-shared CEL, sorting and columns. A **dashboard** contains panels referencing current saved presets and showing exact logical-alert counts. Neither saves an independent time range; time predicates use CEL. Resolved alerts remain eligible for feeds/counts unless the query excludes them.
+A **preset** saves tenant-shared CEL, sorting, columns and optional grouping. A **dashboard** contains panels referencing current saved presets and showing exact logical-alert counts. Neither saves an independent time range; time predicates use CEL. Resolved alerts remain eligible for feeds/counts unless the query excludes them.
 
 An **incident** has immutable severity, independent status and assignment, notes, cycles and links. An alert has at most one active incident owner; resolved links remain historical. Manual linking may include resolved or suppressed alerts. Resolving an incident does not resolve its alerts.
 

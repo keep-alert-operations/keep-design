@@ -834,3 +834,49 @@ easier on the eye, answered the open questions, and approved the result in a
   board was only a layout shortcut.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-44 — Group alert results by one field (2026-10-26)
+
+User decision. The user asked to group alerts by a field on the Feed and saved-preset
+pages, with each group shown as a mini table. They approved the
+[alert grouping mock](https://claude.ai/artifact/FhJsfdk4VB7kAXkjBfx9Dm) and the
+implementation plan, and chose most-alerts-first ordering with a 1,000-value cap.
+
+- **Control and fields.** A Group by button on the quick-view row offers No grouping,
+  Severity, Status (`display_status`), Application, Component, Node (`node_name`),
+  Site, Assignee (`assignee_id`) and Incident (`active_incident_id`). Times, the
+  message, the operator and the other columns are not offered.
+- **Groups.** Each value gets its own table: a collapse toggle, the value, an exact
+  alert count and a summary (status counts for severity groups, severity counts
+  otherwise), its own column headings and select-all for its shown rows. The grouped
+  column is hidden inside groups and rows follow the current sort. Five rows show,
+  then Show 5 more; ten groups show, then Show 10 more groups; Collapse all and Expand
+  all act on the shown groups. These choices are transient tab state.
+- **Order.** Severity groups run critical, high, warning, clear; Status groups run
+  Firing, Acknowledged, Resolved; other fields put the most alerts first, then the
+  value in Unicode scalar order. Alerts without a value form the last group, labelled
+  Unassigned, No incident or No value. Above 1,000 distinct values the request returns
+  `too_many_groups` and the page keeps its single table with that explanation.
+- **Feed.** Grouping is transient like the rest of the ad-hoc feed. Save as preset
+  carries it into the new preset draft.
+- **Presets.** `group_by` becomes an optional fifth saved definition field (null means
+  no grouping), set in the editor under Sort, with revisions, no-ops and history like
+  sort and columns. The results toolbar can change it for the current view only, with
+  Reset to saved; a new revision or reopening clears that change, like the temporary
+  sort ([preset section 4](../specs/spec-preset-operations.md#4-columns-and-sorting)).
+  Dashboards count presets as before, and drill-through opens grouped results.
+- **Search (assistant-selected).** Exact group counts come from one composite
+  aggregation on the rows' point-in-time snapshot. Status groups use the compiled
+  `display_status` predicates, so no mapping change, script or index rebuild is
+  needed. The first rows of the shown groups come from one batched search on that
+  snapshot, and continuation cursors bind the group
+  ([technical baseline section 17](../specs/spec-alert-history-technical.md#17-search-snapshots-counts-and-purged-ids)).
+  A grouped view refreshes on invalidations like a first page while only first rows
+  and groups are shown, with one grouped request plus one quick-count request.
+- **Compatibility (assistant-selected).** An omitted `group_by` in create or replace
+  means null, and a null value is left out of command fingerprints so retries of
+  commands sent before the upgrade still match. The column is additive; an older API
+  leaves it unchanged. During a frontend rollback, saving from the older screens
+  clears a preset's grouping.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
