@@ -1,12 +1,14 @@
 # Incidents
 
+**Later user decision — 2026-10-27 (REV-46):** an incident resolves automatically when all its linked alerts are resolved; see [section 4](#4-lifecycle-cycles-and-timestamps-i2) and the [register](../decisions/design-register.md#rev-46--resolve-an-incident-when-all-its-linked-alerts-resolve-2026-10-27). This supersedes the earlier "no automatic resolution merely because every linked alert resolved" rule.
+
 **Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
 **Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
 
 The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
 
-Severity cannot change after creation; status and assignment are independent; correlation-created incidents start unassigned; incidents have no owning team; one active incident may own an alert; reopening is blocked by ownership or originating-rule/group conflicts; resolving an incident leaves alert statuses unchanged and requires fresh transitions for later automatic reuse; suppression preserves links; unchanged repeats do not reset incident inactivity. There are no notifications, incident acknowledgements, or automatic resolution merely because every linked alert resolved.
+Severity cannot change after creation; status and assignment are independent; correlation-created incidents start unassigned; incidents have no owning team; one active incident may own an alert; reopening is blocked by ownership or originating-rule/group conflicts; resolving an incident leaves alert statuses unchanged and requires fresh transitions for later automatic reuse; suppression preserves links; unchanged repeats do not reset incident inactivity. There are no notifications or incident acknowledgements. An incident resolves automatically when a linked alert's resolution leaves every retained linked alert resolved (REV-46, section 4).
 
 ## Creation, content, assignment, and lifecycle
 
@@ -30,7 +32,9 @@ Any user with effective tenant `edit` permission or higher may assign, reassign,
 
 ### 4. Lifecycle cycles and timestamps (I2)
 
-Keep immutable creation time and a separate lifecycle cycle for initial creation and every successful reopening. Each cycle records opened time, first entry into `investigating` (nullable), resolution time (nullable), and resolution cause (`manual` or `inactivity`). Returning from investigating to open preserves that cycle's first-investigation time; investigating again does not overwrite it. Reopening starts a new cycle with fresh opened time and empty investigation/resolution values, while retaining earlier cycles. Keep the latest status-change time and append each real transition with actor and timestamp. A repeated request for the current status is a no-op. System expiry uses `resolved`, not a fourth lifecycle status. No resolution note is required; users may add one separately.
+Keep immutable creation time and a separate lifecycle cycle for initial creation and every successful reopening. Each cycle records opened time, first entry into `investigating` (nullable), resolution time (nullable), and resolution cause (`manual`, `inactivity` or `alerts_resolved`). Returning from investigating to open preserves that cycle's first-investigation time; investigating again does not overwrite it. Reopening starts a new cycle with fresh opened time and empty investigation/resolution values, while retaining earlier cycles. Keep the latest status-change time and append each real transition with actor and timestamp. A repeated request for the current status is a no-op. System expiry uses `resolved`, not a fourth lifecycle status. No resolution note is required; users may add one separately.
+
+**Resolution when all linked alerts resolve (REV-46).** When a currently linked alert's accepted firing-to-resolved transition (source, manual or bulk command, or source-inactivity expiry) leaves every retained linked alert of an active incident resolved, resolve that incident in the same transaction at its decision time, with system actor and cause `alerts_resolved`. Apply the same ownership release, originating-rule/group evidence reset, fresh-transition boundaries, retention deadline and unchanged alert statuses as manual resolution, and record the activity. Status alone decides; suppression and acknowledgement do not. Only an alert transition triggers it: unlink, Move, linking resolved alerts, creation and empty incidents leave the incident active, and unavailable references are ignored. A later re-firing alert does not reopen the incident.
 
 ## Alert links and moves
 
@@ -74,7 +78,7 @@ Resolved incidents have no active timer, and post-resolution edits do not reopen
 
 ### 12. Expiry and races (I4, I2)
 
-**Current scope (REV-34):** Automatic inactivity resolution and its hourly check are not deployed, so incidents resolve only by explicit command; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). This section is the design for future automation.
+**Current scope (REV-34):** Automatic inactivity resolution and its hourly check are not deployed, so incidents resolve by explicit command or when all linked alerts resolve (REV-46, section 4); see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). This section is the design for future automation.
 
 An active incident becomes eligible for automatic resolution at `last qualifying activity + 30 days`, including that exact cutoff. At execution, recheck current status and last activity atomically; skip a stale expiry attempt if a qualifying action has extended the deadline. Resolve at the successful transaction's timestamp, with system actor and cause `inactivity`, retaining the deadline that caused the action in history. Apply the same ownership release, originating-rule/group evidence reset, fresh-transition boundaries, and unchanged alert statuses as manual resolution.
 

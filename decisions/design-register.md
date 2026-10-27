@@ -69,7 +69,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | ID | Selected contract and reference |
 |---|---|
 | I1 | Manual/automatic creation, immutable origin/severity, optional initial links and fixed content rules remain incident operations 1–3; routes/schema in system completion 10/15. |
-| I2 | Independent status/assignment, lifecycle cycles, direct resolve, reopen conflicts and unchanged alert statuses remain incident operations 4/9/12/17–18. Physical claims and transactions are system completion 15–17. |
+| I2 | Independent status/assignment, lifecycle cycles, direct resolve, reopen conflicts and unchanged alert statuses remain incident operations 4/9/12/17–18; REV-46 adds resolution when all linked alerts resolve. Physical claims and transactions are system completion 15–17. |
 | I3 | Active-only manual link/unlink/Move, <=100 explicit distinct IDs, atomic ownership and unavailable counterpart references remain incident operations 5–7/17–18; exact routes and tables are system completion 10/15. |
 | I4 | 30-day qualifying inactivity/hourly expiry and 90-day latest-resolution retention remain unchanged. Source activity ordering and protected parent purge are complete in system completion 15/19–20. |
 | I5 | Incident list/detail/current text search, notes/history, assignment and counters are selected in incident operations. System completion 8/10/15 completes token lookup, API routes, physical records and consistent reads. |
@@ -903,5 +903,33 @@ Reset to saved button to read just Reset.
   change to the saved field reads Reset, with "Back to the saved grouping" as its
   tooltip. Behaviour is unchanged
   ([preset section 4](../specs/spec-preset-operations.md#4-columns-and-sorting)).
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-46 — Resolve an incident when all its linked alerts resolve (2026-10-27)
+
+User decision. The user asked that an incident resolve when all of its linked alerts
+are resolved. This reverses the earlier rule that incidents never resolve automatically
+merely because every linked alert resolved
+([incident operations](../specs/spec-incident-operations.md#4-lifecycle-cycles-and-timestamps-i2)).
+
+- **Trigger.** An accepted firing-to-resolved transition of a currently linked alert
+  (source, manual single or bulk command, or the deferred source-inactivity expiry)
+  resolves each active incident it is linked to whose retained linked alerts are then
+  all resolved. Suppression and acknowledgement do not matter; status alone decides.
+- **Effects.** Resolution happens in the same transaction as the alert transition, at
+  that transaction's decision time, with system actor and cause `alerts_resolved`. It
+  applies the same effects as manual resolution: correlation-context reset, ownership
+  release, per-alert fresh-transition boundaries, a 90-day retention deadline, an
+  `alerts-resolved` incident activity record and an `incident-alerts-resolved` alert
+  history entry. Alert statuses are unchanged.
+- **Assistant-selected boundaries.** Only an alert transition triggers it: unlinking or
+  moving the last firing alert away, linking resolved alerts, creating an incident from
+  resolved alerts and empty incidents leave the incident active. Unavailable (purged)
+  references are ignored, and an incident with only unavailable references stays
+  active. A later re-firing alert does not reopen the incident; it is unowned and
+  follows the normal correlation and reopening rules. A bulk command resolves
+  incidents after all its selected alerts are applied. `cause` remains free text, so
+  no migration or HTTP contract change is needed.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

@@ -80,9 +80,9 @@ Consume one tenant-ordered Kafka changed input, apply evidence and complete elig
 
 ## 15. Incident resolution, unlink and reopening (C3, C7–C8)
 
-**Current scope (REV-34):** No sweep resolves inactive incidents, so resolution here means explicit resolution; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Evidence and barrier rules for resolution, unlink, Move and reopening remain normative.
+**Current scope (REV-34):** No sweep resolves inactive incidents, so resolution here means explicit resolution or resolution when all linked alerts resolve (REV-46); see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Evidence and barrier rules for resolution, unlink, Move and reopening remain normative.
 
-Manual unlink, atomic Move, and manual/inactivity resolution update the relevant evidence and durable barriers inside their incident transaction under the same coordinator. Resolution clears the originating context's entire evidence and releases its active pointer, while establishing per-alert release barriers; it does not clear unrelated groups/rules. Resolving an incident from an older grouping generation cannot reset the current generation. Moving alerts includes the agreed manual unlink boundary but allows explicit destination attachment.
+Manual unlink, atomic Move, and manual, inactivity or all-alerts-resolved (REV-46) resolution update the relevant evidence and durable barriers inside their incident transaction under the same coordinator. Resolution clears the originating context's entire evidence and releases its active pointer, while establishing per-alert release barriers; it does not clear unrelated groups/rules. Resolving an incident from an older grouping generation cannot reset the current generation. Moving alerts includes the agreed manual unlink boundary but allows explicit destination attachment.
 
 Reopening atomically reacquires its original full context and retained alert claims, or fails without changes on either kind of conflict. Reopening does not replay old evidence. An old-generation or deleted/disabled-rule incident remains manually manageable but receives no automatic additions; a current-generation enabled-rule incident can receive subsequent qualifying additions. Missing/purged alert references remain historical, as decided for incidents.
 
