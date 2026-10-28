@@ -933,3 +933,35 @@ merely because every linked alert resolved
   no migration or HTTP contract change is needed.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-47 — Preset editor settings in tabs beside the preview (2026-10-28)
+
+User decision. The user found the preset create/update screen overloaded: every setting
+was stacked in one Definition panel beside the preview, the column list and sort rows
+were fiddly, and the filter area was noisy. From four mock directions the user chose
+option D of the [preset editor options canvas](https://claude.ai/artifact/CkERUg32kLwT2AuWdzSJML):
+keep the preview, and move the settings into a separate panel with tabs. The user kept
+the Validate CEL button.
+
+- **Layout.** The preview panel holds the draft status line, the quick views (Assigned to
+  me included, REV-45), Include suppressed and the results table. A Preset settings
+  panel beside it holds Name above four tabs, Filter, Columns, Sort and Group by, and
+  "Changes apply to everyone" at its foot. The newer-revision notice and save feedback
+  stay above both panels. Saved fields, defaults, validation, preview behaviour and
+  the Save, Save as new and Discard actions are unchanged
+  ([preset sections 3–9](../specs/spec-preset-operations.md#3-saved-definition-and-initial-defaults)).
+- **Assistant-selected details.** Filter opens first each time; all tab panels stay
+  mounted, so switching keeps the filter text, caret and validation. Tabs follow the
+  standard keyboard pattern. A tab shows a problem marker: Filter when the preview or
+  validation reports the filter invalid, Columns when none is chosen. A save rejected
+  for its filter switches to Filter and focuses the editor; Name stays outside the
+  tabs, so an empty name is always in view. The Insert field chips, the supported
+  fields and functions reference and the byte count move into one Supported fields
+  and functions popover in the Filter tab. Columns are an ordered list that can be
+  dragged, with Move up and Move down shown on hover and keyboard focus, plus an Add
+  columns checklist of the remaining columns that appends a ticked one. Group by is a
+  list of radio buttons. Below 1024 pixels, where the panels stack, the settings panel
+  sits above the preview. No "quick views are not saved" text is added; it stays in
+  the quick views' tooltip (REV-43).
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
