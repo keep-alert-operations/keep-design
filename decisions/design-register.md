@@ -965,3 +965,25 @@ the Validate CEL button.
   the quick views' tooltip (REV-43).
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-48 — Link an alert to an incident from the alert (2026-10-28)
+
+User decision. The user wanted to link an alert to an incident from the alert itself,
+not only from the incident's Link alerts dialog: a Link action on the alert page and in
+the alert row's ⋯ menu on the Feed. Membership rules, limits and commands are unchanged
+([incident operations 5–6](../specs/spec-incident-operations.md#5-linking-and-unlinking-i3)).
+
+- **Entry points.** The alert page shows Link to incident… beside Assign…; Feed and
+  preset result rows show Link to incident… after Assign and Resolve in their ⋯ menu.
+  Users with view access see neither, as with the other alert actions.
+- **Assistant-selected details.** Both open one dialog that lists active incidents
+  (search by text, 50 at a time) with severity, title and status; one is chosen with a
+  radio button and linked with the existing link command at that incident's revision.
+  When another active incident already owns the alert, the dialog says so, marks that
+  incident Linked here and not selectable, and the action becomes Move to incident,
+  using the existing explicit move with both incident revisions; ordinary Link never
+  takes the alert. Conflicts, stale revisions and uncertain outcomes use the shared
+  command messages and retry. A success closes the dialog and refreshes the page or
+  results. The action is for one alert; bulk linking from a selection is not added.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
