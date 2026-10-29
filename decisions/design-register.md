@@ -1022,3 +1022,25 @@ that a dismissed alert is suppressed rather than a status of its own
   not added. The command stays disabled until every writer runs this release.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-50 — Free panel width and height, sized on the grid only (2026-10-28)
+
+User decision. The user asked to remove the Width and Height settings from the panel
+create/edit dialog, remove the panel's maximum height, and let a panel's width grow one
+column at a time up to the full width of the page
+([dashboard operations 4](../specs/spec-dashboard-operations.md#4-layout-and-responsive-behavior)).
+
+- **Rules.** Width is any whole number of columns from 3 to 12, still with x+w <= 12.
+  Height is any whole number of grid units from 2, bounded only by the existing grid
+  limit y+h <= 100. Overlap, compaction, 24-panel and save rules are unchanged; layouts
+  saved under the old sizes remain valid.
+- **Assistant-selected details.** The minimums stay at the earlier smallest sizes, 3 by 2,
+  which is also the default for a new panel. Pointer resizing snaps to the nearest whole
+  column and unit; keyboard resizing on the corner handle steps by one. The Product API
+  contract replaces the width and height enums with integer ranges, and migration 0057
+  widens the matching `dashboard_panels` checks; it runs before the API that accepts
+  the new sizes. Below 1,024 pixels
+  the move and resize handles stay hidden, so panel size can no longer be changed in the
+  stacked responsive layout; the desktop layout is unaffected there.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
