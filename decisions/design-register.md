@@ -987,3 +987,38 @@ the alert row's ⋯ menu on the Feed. Membership rules, limits and commands are 
   results. The action is for one alert; bulk linking from a selection is not added.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-49 — Dismiss an alert for a time window (2026-10-28)
+
+User decision. The user wanted to dismiss an alert for some minutes or hours, or until a
+chosen date, after which it returns on its own. From the
+[dismiss mock canvas](https://claude.ai/artifact/Nvp1SJzsc29Y1HYSnfcK99) the user
+approved a Dismiss… action in the alert row's ⋯ menu and on the alert page, and decided
+that a dismissed alert is suppressed rather than a status of its own
+([alert operations 29](../specs/spec-alert-operations.md#29-timed-dismissal-rev-49)).
+
+- **Behaviour.** Editors dismiss one firing alert for a duration (15 minutes up to
+  1 week presets, or a custom number of minutes, hours or days) or until a date and
+  time, at most 30 days ahead, with an optional reason that is added as a note. While
+  dismissed the alert is suppressed: Include suppressed covers it, rows show their
+  ordinary status with a "Suppressed · until …" indicator, and correlation ignores it.
+  Change dismissal replaces the end time and Undismiss ends it at once. A new
+  occurrence ends it early; resolving alone does not. Assignment, incident links and
+  notes are unchanged.
+- **Return after the time passes (user decision, 2026-10-28).** The end time is checked
+  against the authoritative clock on every read, so the alert stops being suppressed
+  exactly at the end time without a scheduler. This is a deliberate exception for
+  dismissal only: maintenance suppression still needs a source update to release
+  (REV-34). The first source update after the end time may supply fresh correlation
+  evidence, as an ended maintenance window does; time passing, Undismiss and Change
+  never do.
+- **Assistant-selected details.** The dismissal is a separate cause stored on the alert
+  row; the stored `suppressed` flag keeps meaning the source and maintenance causes, so
+  maintenance proofs are unchanged. The next source update or alert command after the
+  end time records Dismissal ended with the system actor at the end time; until then
+  reads report the dismissal as expired. Feed and count responses report the next end
+  time among matching rows so a page refreshes when an alert returns. Durations are
+  measured from the server clock. Dismissal is one alert at a time; bulk dismissal is
+  not added. The command stays disabled until every writer runs this release.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

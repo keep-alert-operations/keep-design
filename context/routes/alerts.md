@@ -36,6 +36,7 @@ Include each source's preamble and scope corrections, plus the selected sections
   - [26. Commands, endpoints and errors](../../specs/spec-alert-operations.md#26-commands-endpoints-and-errors)
   - [27. Bulk alert actions](../../specs/spec-alert-operations.md#27-bulk-alert-actions)
   - [28. Acceptance](../../specs/spec-alert-operations.md#28-acceptance)
+  - [29. Timed dismissal (REV-49)](../../specs/spec-alert-operations.md#29-timed-dismissal-rev-49)
 - [pipeline-maintenance](../../specs/spec-kafka-alert-pipeline.md) — normative; preamble required.
   - [4. Manual changes and correlation](../../specs/spec-kafka-alert-pipeline.md#4-manual-changes-and-correlation)
   - [5. UTC, maintenance and bounded inline effects](../../specs/spec-kafka-alert-pipeline.md#5-utc-maintenance-and-bounded-inline-effects)
