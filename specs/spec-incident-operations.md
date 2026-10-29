@@ -42,7 +42,7 @@ Keep immutable creation time and a separate lifecycle cycle for initial creation
 
 Link changes are allowed only on active (`open`/`investigating`) incidents; reopen a resolved incident before changing its membership. Within the same tenant, users with edit permission or higher may manually link firing or resolved alerts, including acknowledged and suppressed alerts. Manual linking does not require a correlation-condition match. It cannot steal an alert from another active incident. Linking an already-linked alert or unlinking an absent link is a no-op. A successful unlink ends current membership but preserves the link/unlink history and establishes the previously agreed fresh-transition boundary for automatic correlation. It does not change alert status, suppression, assignment, or incident status; an empty incident remains available under the settled rules.
 
-Linking also starts from the alert (REV-48): the alert page and the Feed and preset row ⋯ menus offer Link to incident…, which chooses one active incident for that alert. When another active incident owns the alert, that action is an explicit Move under section 6, never an implicit one. See the [register](../decisions/design-register.md#rev-48--link-an-alert-to-an-incident-from-the-alert-2026-10-28).
+Linking also starts from the alert (REV-48): the alert page and the Feed and preset row ⋯ menus offer Link to incident, which chooses one active incident for that alert. When another active incident owns the alert, that action is an explicit Move under section 6, never an implicit one. See the [register](../decisions/design-register.md#rev-48--link-an-alert-to-an-incident-from-the-alert-2026-10-28).
 
 ### 6. Explicit moves and selections (I3)
 

@@ -1044,3 +1044,26 @@ column at a time up to the full width of the page
   stacked responsive layout; the desktop layout is unaffected there.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-51 — Plainer alert actions and a steadier dismiss dialog (2026-10-29)
+
+User decision. After trying REV-49 locally the user asked to drop the trailing "…" from
+Dismiss, Link to incident and Assign in the alert row's ⋯ menu and on the alert page,
+to give every alert-page action an icon like Dismiss, to stop the dismiss dialog from
+reporting an error as soon as the custom number is chosen, and to keep that dialog one
+size ([alert operations 29](../specs/spec-alert-operations.md#29-timed-dismissal-rev-49)).
+
+- **Labels.** The row menu reads Assign to me, Resolve, Link to incident and Dismiss, or
+  Change dismissal and Undismiss on a dismissed row. The alert page reads View alert,
+  Resolve alert, Dismiss, Assign, Link to incident and Open runbook; the dismissal band
+  reads Change and Undismiss. Bulk actions and incident pages keep their labels.
+- **Icons.** Each of those alert-page buttons shows a small line icon before its label,
+  drawn in the existing icon style; Open runbook's icon replaces its arrow character.
+- **Assistant-selected details.** Choosing the empty custom field keeps it highlighted
+  and shows "Enter how many minutes, hours or days to dismiss it for." without an error
+  or red border, and Dismiss stays disabled; a typed value that is not a whole number
+  above zero, or over 30 days, still shows the error. Both modes and the longest summary
+  share fixed grid cells, so switching modes, messages or a command error never resizes
+  the dialog at any width.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

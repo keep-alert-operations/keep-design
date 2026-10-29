@@ -328,9 +328,10 @@ a maintenance release while a dismissal is still active creates no qualifier.
 Feed, group and count responses report `next_change_at`, the earliest dismissal end
 after `evaluated_at` among rows matching the request apart from the suppression filter,
 or null. Open pages and count views start a fresh snapshot at that instant. The ⋯ menu
-of a firing row offers Dismiss…; a dismissed row offers Change dismissal… and
+of a firing row offers Dismiss; a dismissed row offers Change dismissal and
 Undismiss. The dialog offers duration presets, a custom number of minutes, hours or
 days, or a date and time in the viewer's zone, an optional reason and a summary of
-when the alert returns. Rows and the detail page show the ordinary status with a
+when the alert returns. An empty custom field waits for a number without an error, and
+the dialog keeps one size in every state (REV-51). Rows and the detail page show the ordinary status with a
 Suppressed indicator and the end time. The command is enabled only after every writer
 runs this release.
