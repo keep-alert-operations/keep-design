@@ -253,7 +253,7 @@ Their page size is 50/max 200 with stable order/ID cursors. This keeps delayed p
 
 Ordinary feeds and count requests use `include_suppressed=false` by default, as already agreed. Provide an explicit Include suppressed view/request switch outside CEL; with it enabled the caller's CEL determines which suppressed/unsuppressed rows match. A CEL expression alone cannot silently bypass the default exclusion. The same effective filter applies to page results and their total count, and counts always count logical rows, never events/occurrences.
 
-The switch is transient view/request state, not an added preset field; reopening a preset uses the ordinary default. Dashboard section 6 defines ordinary counts without a dashboard suppression switch. Incident details continue to show linked suppressed alerts with their suppression indicators. Do not exclude resolved alerts implicitly: lifecycle filtering comes from CEL/the selected view. Suppression does not conceal data from authorized explicit searches.
+The switch is transient view/request state, not an added preset field; reopening a preset uses the ordinary default. Dashboard section 6 defines ordinary counts without a dashboard suppression switch. Incident details continue to show linked suppressed alerts with their suppression indicators. Do not exclude resolved alerts implicitly: lifecycle filtering comes from CEL/the selected view. Suppression does not conceal data from authorized explicit searches. A timed dismissal (section 29) is a suppression cause evaluated at the snapshot clock, so it joins this filter and the switch without a separate control.
 
 ### 26. Commands, endpoints and errors
 
@@ -264,7 +264,7 @@ All routes below are relative to `/api/tenants/{tenant_id}/alerts`:
 | GET | collection root | Filtered feed under section 24. |
 | GET | `/{alert_id}` | Authoritative alert detail. |
 | GET | `/{alert_id}/history`, `/{alert_id}/occurrences`, `/{alert_id}/notes`, `/{alert_id}/source-events` | Alert-owned collections, never tenant-wide shorthand. |
-| POST | `/{alert_id}/commands` | `command_id`, `expected_revision`, `kind` and `value`. Kinds: `set_status`, `set_assignee`. |
+| POST | `/{alert_id}/commands` | `command_id`, `expected_revision`, `kind` and `value`. Kinds: `set_status`, `set_assignee`, `set_dismissal` (section 29). |
 | POST | `/{alert_id}/notes` | Note text plus command ID and expected alert revision. |
 | PATCH / DELETE | `/{alert_id}/notes/{note_id}` | Note update/removal with the same alert concurrency/idempotency metadata; DELETE carries command ID in `Idempotency-Key` and quoted revision in `If-Match`, without a JSON body. |
 | POST | `/bulk-commands` | Atomic explicit selection under section 27. |
@@ -282,3 +282,55 @@ Deduplicate the selection before counting. Validate all permissions, pending-sou
 ### 28. Acceptance
 
 See [required alerts checks](../verification/verification-plan.md#alerts).
+
+### 29. Timed dismissal (REV-49)
+
+**User decision, 2026-10-28 (REV-49):** an editor may dismiss one firing alert for a
+duration or until a chosen time. A dismissed alert is suppressed by a separate
+dismissal cause and returns by itself when the time passes.
+
+`set_dismissal` is an alert command kind under section 26. Its `value` is null, to
+end a dismissal, or an object with exactly one of `until` (an RFC 3339 instant) or
+`duration_seconds` (a positive integer), plus an optional `reason`. The server measures
+a duration from its authoritative PostgreSQL clock at application time and stores the
+resulting UTC end; a retry returns the stored result. The end must be after that clock
+and at most 30 days later. Only a firing alert may be dismissed or have its dismissal
+changed; ending one is allowed in any lifecycle state. A nonblank reason follows the
+note rules of section 18 and is added as a note in the same transaction. Invalid
+values, a resolved alert or an out-of-range end return 422; stale revisions return 409.
+Dismissing again replaces the end time; the same end, or ending an absent dismissal,
+is a no-op. Bulk commands do not accept this kind.
+
+The dismissal is stored on the alert row with its end, actor and start. The stored
+`suppressed` flag keeps meaning the source and maintenance causes of section 16, whose
+proofs and checkpoints are unchanged. Effective suppression is that flag or an end
+later than the evaluating clock: the detail clock for authoritative reads, the
+snapshot's `evaluated_at` for feeds, groups and counts, and the decision clock for
+correlation. Coverage is start-inclusive and end-exclusive. Feeds, counts, the
+Include suppressed switch of section 25, incident linked-alert views and the CEL
+`suppressed` field use this effective value. Rule and correlation profiles do not
+gain a clock-dependent field.
+
+A new occurrence, from a source transition or a manual reopening, ends the dismissal
+in the same transaction. Resolution alone keeps it. The first source input or alert
+command applied at or after the end records Dismissal ended with the system actor and
+the end as its effective time, then clears the stored dismissal; reads before that
+report the dismissal as `expired`. No read, timer, search scan or note edit writes
+this record.
+
+Dismissing removes active correlation evidence as other suppression does and keeps
+incident links, assignment and notes. Time passing, ending a dismissal and changing it
+never create correlation evidence or qualifiers. The first source input applied after
+the end may supply fresh eligibility exactly as a source-driven final maintenance
+release does in the [pipeline contract](spec-kafka-alert-pipeline.md#5-utc-maintenance-and-bounded-inline-effects);
+a maintenance release while a dismissal is still active creates no qualifier.
+
+Feed, group and count responses report `next_change_at`, the earliest dismissal end
+after `evaluated_at` among rows matching the request apart from the suppression filter,
+or null. Open pages and count views start a fresh snapshot at that instant. The ⋯ menu
+of a firing row offers Dismiss…; a dismissed row offers Change dismissal… and
+Undismiss. The dialog offers duration presets, a custom number of minutes, hours or
+days, or a date and time in the viewer's zone, an optional reason and a summary of
+when the alert returns. Rows and the detail page show the ordinary status with a
+Suppressed indicator and the end time. The command is enabled only after every writer
+runs this release.

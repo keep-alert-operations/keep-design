@@ -29,6 +29,11 @@ state. The window can correctly show Ended while some alerts remain suppressed.
 There is no pending fan-out or expiry-visibility SLO to imply future automatic
 release. Controls keep immutable coverage proof and no-backfill semantics.
 
+**Later user decision — 2026-10-28 (REV-49):** a timed alert dismissal is a
+separate cause evaluated against the clock at read time, so it ends at its end time
+without a scheduler; see [alert operations 29](spec-alert-operations.md#29-timed-dismissal-rev-49).
+Maintenance causes keep the source-update release above.
+
 **Assistant-selected migration:** 0046 records an immutable database UTC cutover.
 Coverage boundaries preceding it retain the old reduction rules, preserving old
 history/qualifiers; subsequent boundaries require source-driven release. Existing

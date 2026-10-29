@@ -439,7 +439,8 @@
         "25. Suppression controls and counts",
         "26. Commands, endpoints and errors",
         "27. Bulk alert actions",
-        "28. Acceptance"
+        "28. Acceptance",
+        "29. Timed dismissal (REV-49)"
       ],
       "include_preamble": true
     },

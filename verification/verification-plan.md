@@ -223,6 +223,14 @@ Verify same-alert multi-condition matches; independent condition windows; no-op 
 - Check sortable headings on All alerts and saved preset results cycle ascending, descending and regular order across server pages; changing sort restarts pagination and clears selection. Preset overrides replace the saved multi-field sort in read-only previews, and the third click restores the saved definition without a shared save. Unsupported derived/composite headings stay static.
 - Regenerate and check API types; record executed checks and any unavailable dependencies in implementation status. These checks do not establish production qualification.
 
+### Timed dismissal (REV-49)
+
+- Validate `set_dismissal` values: duration and until forms, server-clock durations, the 30-day bound, an end not after the clock, firing-only dismissal and change, ending in any state, no-ops, replayed and conflicting command IDs, stale revisions, view-only callers, the reason note and bulk rejection.
+- Verify effective suppression at the boundary: suppressed before the end and not at it, for detail, feed, groups, counts, Include suppressed, the hidden count, incident linked views and CEL `suppressed`, with page/count parity and an unchanged stored `suppressed` flag and maintenance proof.
+- Verify a new source or manual occurrence ends the dismissal, resolution keeps it, and the next source input or command after the end records Dismissal ended at the end time; reads before then report it expired and notes do not record it.
+- Verify correlation ignores a dismissed alert and removes its evidence, time passing, Undismiss and Change create no evidence or qualifier, a maintenance release during an active dismissal creates none, and the first source input after the end behaves as a source-driven final maintenance release.
+- Verify `next_change_at` on feed, group and count responses and that an open Feed shows the alert again at the end without another action; check the dialog's duration, custom and date forms, errors, Change dismissal, Undismiss and the Suppressed indicator in light and dark themes and at narrow width.
+
 ### Current alert JSON viewer (REV-28)
 
 Verify View alert is available to readers and editors on alert detail, shows the loaded detail response as formatted JSON without another request/mutation, scrolls long payloads on narrow screens, and closes via Close, Escape and backdrop while preserving keyboard focus and readable content in Light and Dark themes.
