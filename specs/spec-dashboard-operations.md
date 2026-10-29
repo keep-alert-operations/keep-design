@@ -20,9 +20,15 @@ Without a custom title, show the current preset name; a preset rename updates th
 
 ## 4. Layout and responsive behavior
 
-Use a 12-column desktop grid. Panel width is 3, 4, 6 or 12 columns; height is 2, 3 or 4 grid units, each unit 48 CSS pixels, with 12-pixel gaps following the user's 2026-09-24 visual reference. Default panel is 3 by 2. Store integer x/y/w/h, nonnegative x/y, x+w <= 12 and y+h <= 100. Reject overlapping rectangles or duplicate IDs on save. Add places a panel into the first fitting row-major gap. Editor drag/resize may preview deterministic downward displacement, but the submitted whole layout must already be valid; the server does not silently rearrange it.
+Use a 12-column desktop grid. Panel width is 3 through 12 columns in steps of one; height is 2 or more grid units with no maximum other than the grid bound, each unit 48 CSS pixels, with 12-pixel gaps following the user's 2026-09-24 visual reference. Default panel is 3 by 2. Store integer x/y/w/h, nonnegative x/y, x+w <= 12 and y+h <= 100. Reject overlapping rectangles or duplicate IDs on save. Add places a panel into the first fitting row-major gap. Editor drag/resize may preview deterministic downward displacement, but the submitted whole layout must already be valid; the server does not silently rearrange it.
 
-Below 1,024 CSS pixels, render two equal columns; below 640, one. Order is saved y, x, then panel UUID. Responsive display does not write the shared desktop layout. Provide keyboard Move up/down and width/height controls with the same packing preview, focus retention and announcements. Counts remain readable at 200% zoom and controls do not require dragging.
+Below 1,024 CSS pixels, render two equal columns; below 640, one. Order is saved y, x, then panel UUID. Responsive display does not write the shared desktop layout. Provide keyboard Move up/down and keyboard width/height resizing with the same packing preview, focus retention and announcements. Counts remain readable at 200% zoom and controls do not require dragging.
+
+**Later user decision — 2026-10-28 (REV-50):** panel width grows one column at a
+time from 3 to the full 12-column row, and height has no maximum beyond y+h <= 100.
+Width and height are set only by resizing on the grid; the panel create/edit dialog
+no longer has Width and Height fields. This supersedes the fixed 3/4/6/12 widths and
+2/3/4 heights above.
 
 **Later user correction — 2026-10-08:** dragging and resizing should feel fluid,
 like Grafana panels. Panels stick to the top: no panel may leave empty vertical
@@ -36,7 +42,7 @@ This supersedes preserving empty vertical gaps in earlier layout guidance.
 Assistant-selected presentation follows the pointer in CSS pixels while a
 placeholder shows the valid compacted drop destination. Neighbor movement and
 release settle smoothly; reduced-motion preference skips settling animations.
-Stored widths/heights remain the allowed grid choices. Vertical gravity keeps
+Stored widths/heights remain whole grid units within the allowed range. Vertical gravity keeps
 x/width/height and panel identity, processes y/x/UUID order, and stops beneath
 earlier horizontally overlapping panels; it does not pass through a blocker.
 Collision displacement still prioritizes the edited rectangle, followed by
