@@ -72,7 +72,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | I2 | Independent status/assignment, lifecycle cycles, direct resolve, reopen conflicts and unchanged alert statuses remain incident operations 4/9/12/17–18; REV-46 adds resolution when all linked alerts resolve. Physical claims and transactions are system completion 15–17. |
 | I3 | Active-only manual link/unlink/Move, <=100 explicit distinct IDs, atomic ownership and unavailable counterpart references remain incident operations 5–7/17–18; exact routes and tables are system completion 10/15. |
 | I4 | 30-day qualifying inactivity/hourly expiry and 90-day latest-resolution retention remain unchanged. Source activity ordering and protected parent purge are complete in system completion 15/19–20. |
-| I5 | Incident list/detail/current text search, notes/history, assignment and counters are selected in incident operations. System completion 8/10/15 completes token lookup, API routes, physical records and consistent reads. |
+| I5 | Incident list/detail/current text search, notes/history, assignment and counters are selected in incident operations. System completion 8/10/15 completes token lookup, API routes, physical records and consistent reads; REV-53 adds period reports in incident operations 20. |
 
 ## D. Persistence, events, consistency, and recovery
 
@@ -1088,5 +1088,42 @@ box and its Saved preset list into one input
   results. Focusing the field selects its text so typing starts a new search. The
   chosen preset is shown in bold in the list. Search, paging and the selected
   reference that stays available across pages are unchanged.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-53 — Incident reports by period (2026-10-30)
+
+User decision. Add a Reports page to the rail with an incident report for one tenant and
+a chosen period, as in the [incident reports mock](https://claude.ai/artifact/NxBWGUChKyvq1CnRJmxoky)
+([incident operations 20](../specs/spec-incident-operations.md#20-incident-reports-i5-n3-rev-53)).
+The user chose option A and the incident report only; noise reports are left for later
+(user decision, 2026-10-30).
+
+- **Location and access (user decision, 2026-10-29).** A Reports rail item after
+  Dashboards; every tenant reader (view, edit, admin) can open it, including the
+  breakdown by assignee.
+- **Periods (user decision, 2026-10-29).** 24 hours, 7, 30 and 90 days and a custom date
+  range, compared with the previous period of the same length.
+- **First response (user decision, 2026-10-29).** Time from a cycle opening to its first
+  assignment or first move to Investigating within that cycle, whichever comes first.
+- **Breakdowns (user decisions, 2026-10-29 and 2026-10-30).** Severity, origin,
+  correlation rule and assignee, in one panel with a switcher.
+- **Links and deleted rules (user decision, 2026-10-30).** With the plan the user approved
+  two proposals. A breakdown row links to the Incidents list filtered by that group and
+  by created time; the list's counts can differ, because it filters by creation and
+  current assignee. A deleted rule shows its last name tagged Deleted while its history
+  is retained, and "Deleted rule" otherwise.
+- **Assistant-selected details.** Figures count lifecycle cycles, so reopenings count as
+  opened; 24 hours is rolling and the other periods are calendar days in the viewer's
+  zone including today; reports reach back at most 90 days, the retention horizon, and
+  compare only when the previous period is within it; an assignee carried over a
+  reopening is not a response in the new cycle; the assignee of a resolved cycle is the
+  one at resolution; figures are computed at read time in PostgreSQL with no worker,
+  cache or stored counter; assignment history that cannot be read within its time
+  budget leaves first response and the assignee breakdown unavailable rather than
+  failing the report; the report refreshes only on request; there is no feature flag.
+  Migration 0058 indexes incident cycles by tenant and opened or resolved time and
+  assignment activity by incident; it runs in the stopped-writer migration window
+  before the API, which stays correct but slower without it.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

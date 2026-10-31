@@ -1,5 +1,7 @@
 # Incidents
 
+**Later user decision — 2026-10-30 (REV-53):** a Reports page shows how incidents were handled in a chosen period, computed on request from lifecycle cycles and assignment activity; see [section 20](#20-incident-reports-i5-n3-rev-53) and the [register](../decisions/design-register.md#rev-53--incident-reports-by-period-2026-10-30).
+
 **Later user decision — 2026-10-27 (REV-46):** an incident resolves automatically when all its linked alerts are resolved; see [section 4](#4-lifecycle-cycles-and-timestamps-i2) and the [register](../decisions/design-register.md#rev-46--resolve-an-incident-when-all-its-linked-alerts-resolve-2026-10-27). This supersedes the earlier "no automatic resolution merely because every linked alert resolved" rule.
 
 **Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
@@ -143,6 +145,26 @@ Check current product grants and the identity integration's trusted membership v
 The identity configuration defines five-minute normal-operation LDAP enforcement and last-known identity fallback during refresh outages. A cached membership view accepted under that policy can support a trustworthy authorization decision; absent required evidence still fails closed. Use the identity configuration and shared live-update protocol for enforcement.
 
 Correlation context and coordination are now defined in [Correlation rules](spec-correlation-rules.md); the incident product policies above remain unchanged.
+
+### 20. Incident reports (I5, N3; REV-53)
+
+The Reports rail item opens the incident report of the current tenant ([system completion 3](spec-system-completion.md#3-navigation-and-visual-system)). Every tenant reader (view, edit or admin) can open it, including the breakdown by assignee; it has no write actions. The period is the last 24 hours (rolling); 7, 30 (the default) or 90 calendar days in the viewer's time zone, including today; or a custom range of whole local days ending at most today. Compare with previous period, on by default, adds the period of the same length (the same number of local days, or 24 hours) just before it.
+
+Reports reach back at most 90 days, the incident retention horizon (section 13), although purge is not deployed. The horizon is the first local midnight at or after 90 days before the database clock. A period that starts earlier is reported from the horizon, and the page names the covered and requested ranges. Comparison is unavailable when the previous period would start before the horizon, so never for 90 days.
+
+Figures count the lifecycle cycles (section 4) of incidents whose identity is not retired, for the period `[from, to)`:
+
+- **Opened**: cycles opened in the period, split into new incidents and reopenings. **Resolved**: cycles resolved in the period, whatever the cause.
+- **Time to first response**: for cycles opened in the period, from opening to the earlier of the cycle's first move to Investigating and its first assignment to a user recorded within the cycle. An assignee carried over a reopening is not a response. Median and 90th percentile; cycles without a response yet are counted as waiting.
+- **Time to resolve**: for cycles resolved in the period, resolution time minus opening time; median and 90th percentile.
+- **Reopen rate**: the share of cycles resolved in the period that are followed by another cycle of the same incident opened before the period ends.
+- **Resolution cause**: Manual, All alerts resolved (`alerts_resolved`, REV-46) and Inactivity. Inactivity shows zero, with a note that it is off, while automatic inactivity resolution is not deployed (section 12; REV-34).
+- **Series**: opened and resolved per bin: an hour for periods of at most 25 hours, a local calendar day up to 45 days, and seven local days from the period start beyond that. Bin edges follow the viewer's IANA zone, so a daylight-saving day has 23 or 25 hours.
+- **Breakdowns**: by severity, origin (manual or correlation), correlation rule of the incident's context, or assignee, one at a time in one panel. Each row shows opened, resolved, median first response, median time to resolve and reopened, with the definitions above applied within the group. Rule and assignee rows are capped at 50 plus Other. A row links to the Incidents list (section 14) filtered by that group and created time; its counts can differ, because the list filters by creation and current assignee.
+- **Assignee of a cycle**: for a resolved cycle, the assignee left by the latest assignment or eligibility-loss activity at or before resolution, or Unassigned; for an open cycle, the current assignee with read-time eligibility masking (section 3).
+- **Deleted rules**: a deleted rule shows its last name tagged Deleted while its final revision is retained, and "Deleted rule" otherwise.
+
+`GET /reports/incidents` ([system completion 10](spec-system-completion.md#10-incident-routes-and-aggregate-contracts)) computes the report at read time from PostgreSQL (section 16) in one read-only repeatable-read transaction, under tenant row-level security plus explicit tenant predicates. It has no worker, timer, cache or stored counter ([worker scope](spec-worker-scope.md), REV-34) and records no activity. Migration 0058 indexes cycles by tenant and opened or resolved time and assignment and eligibility-loss activity by incident; the report is correct without them, only slower. When assignment history cannot be read within its time budget, the report returns everything else and marks first response and the assignee breakdown unavailable instead of failing. The page loads on open and when the period or comparison changes, and otherwise refreshes only when asked; live incident updates do not reload it. Its p99 response target is two seconds (N3; reliability operations 5).
 
 ### Verification scenarios
 
