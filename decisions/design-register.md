@@ -1067,3 +1067,26 @@ size ([alert operations 29](../specs/spec-alert-operations.md#29-timed-dismissal
   the dialog at any width.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-52 — One field to search and choose a panel's preset (2026-10-29)
+
+User decision. The user asked to merge the panel create/edit dialog's Search presets
+box and its Saved preset list into one input
+([dashboard operations 8](../specs/spec-dashboard-operations.md#8-shared-editing-copying-and-conflicts)).
+
+- **Field.** Saved preset is a single text field. Typing searches shared presets by
+  name, as the separate box did, and shows the loaded page as a list below the field;
+  clicking a row, or Enter on the highlighted row, chooses it and the field shows its
+  name. After trying it the user asked that the list overlay the dialog rather than
+  grow it, and that the field show it is a dropdown: the list floats over the dialog
+  and a chevron at the field's end opens and closes it. First page, Next page, the
+  loaded count and Retry loading presets sit at the bottom of the open list.
+- **Assistant-selected details.** The list opens on click, the chevron, typing or the
+  arrow keys, not when the dialog first focuses the field. Escape closes only the list and keeps
+  the dialog open; a second Escape closes the dialog as before. Leaving the field
+  without choosing restores the chosen preset's name and keeps the last search's
+  results. Focusing the field selects its text so typing starts a new search. The
+  chosen preset is shown in bold in the list. Search, paging and the selected
+  reference that stays available across pages are unchanged.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

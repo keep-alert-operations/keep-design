@@ -82,6 +82,13 @@ the saved baseline and disables Save again. These controls require edit access;
 fullscreen hides editing controls. Existing draft, revision, conflict, access and
 history contracts continue to apply.
 
+**Later user decision — 2026-10-29 (REV-52):** the panel dialog chooses its preset
+in one Saved preset field instead of a separate search box above a preset list.
+Typing in the field searches shared presets by name and lists the loaded page in a
+list that overlays the dialog below the field; a chevron marks it as a dropdown, and
+choosing a preset shows its name in the field. First page and Next page sit at the
+bottom of the open list. Preset paging, search and selected-reference rules are unchanged.
+
 **Later user correction — 2026-10-09:** replace Pause updates with Discard changes
 in the main dashboard toolbar. Discard requires edit access and is enabled only
 for an unsaved draft while commands are unlocked; its existing confirmation and
