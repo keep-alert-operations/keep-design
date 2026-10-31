@@ -65,6 +65,15 @@ Implementation verification must cover these specified outcomes:
 | Purge races with reopening or stale projection replay | Atomic recheck protects a reopened row; deleted UUID never returns through replay; a new external firing can create a new UUID. |
 | Elasticsearch/Kafka unavailable | PG history survives; Kafka failure prevents new acknowledged admission, and retained inputs resume through transactional replay. Search reconciles PG independently. Report retention loss explicitly and do not mistake lag for rollback. |
 
+### Alert name (REV-54)
+
+- Verify native v2 `name`: accepted when supplied; blank, whitespace-only, non-string, longer than 256 characters or control-character values rejected with field `name`; v1 still rejects it.
+- Verify identity: an unnamed delivery's `key_field` and material are byte-identical to identity format 1; a named delivery uses format 2 and creates a separate alert; the same name updates that alert; a changed name creates another and leaves the old one unchanged.
+- Verify the effective name in API detail, Feed, group and count responses, incident and maintenance alert lists: the supplied name, else the v2 `key_field`, else null for v1, including rows written without a stored name.
+- Verify Grafana maps `alertname` to `name`, rejects a member without it with an indexed item error and still admits the other members.
+- Verify `name` in Feed and preset CEL, sort, grouping and `q`, and in maintenance and correlation rules over inputs recorded before and after the change; alerts with earlier maintenance proof keep processing without snapshot or replay-digest errors, and existing rules and evidence are unchanged.
+- Verify the search rebuild adds `name` and `missing_name`, and that ingestion deployed after the processor admits named alerts end to end.
+- Check the browser: Feed rows show the name with the message under it and v1 rows the message; alert detail heading, dismiss and link dialogs; Group by Alert name; light and dark themes and narrow width.
 ## Alert execution and recovery
 
 **Current scope (REV-34):** Retention-purge cases are future qualification while purge is deferred; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other execution, fault and load cases remain required.
