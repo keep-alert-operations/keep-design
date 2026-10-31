@@ -74,6 +74,8 @@ Use explicit strict mappings and stored `_source`; do not depend on dynamic keyw
 
 **REV-54:** the strict mapping adds the effective `name` as a keyword with its `missing_name` flag, so documents carry the name a v2 alert reads as, including its `key_field` default. Existing indices need a rebuild under section 25 before an indexer with this mapping writes; until the switch, `name` predicates match nothing.
 
+**REV-55:** the strict mapping adds `provider` as a keyword enum and `alert_rule_url` with the same representation as `runbook_url`, each with its missing flag. Documents carry the provider an alert reads as: the stored value, else `api` for v1, else missing. Existing indices need a rebuild under section 25, as for REV-54.
+
 IDs/enums and bounded identifiers use keyword fields; booleans use boolean and counts/versions use long. Give sortable nullable fields an explicit missing flag, ascending in either sort direction. Severity uses a clear/missing-last flag followed by the selected urgency rank. Store a dedicated keyword alert ID for the final tie-break; do not sort on Elasticsearch `_id`.
 
 Map timestamp search/sort values to signed epoch-microsecond longs, with the original ISO UTC string retained for presentation. This preserves both microseconds and the admitted years 0001–9999; Elasticsearch's `date_nanos` has a narrower range and ordinary `date` has millisecond precision. See [Elastic's date documentation](https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/date_nanos).
@@ -299,6 +301,8 @@ Validate per-tenant live IDs, versions, representative query/count parity, mappi
 ## 26. Schema, event and application rollout
 
 Use forward migrations and the offline drain, group-offset initialization, partition-count and writer fences in [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 8. Retain old tables/history; do not mix the old relay/journal consumer with new protocol workers. A rollback after Kafka-first admission must drain new records with compatible consumers. Generated HTTP/event schemas and frontend contracts must match the selected protocol.
+
+**REV-55 provider rollout.** Migration 0060 adds nullable `alerts.provider` and `alerts.alert_rule_url` with checks and rewrites no rows. The source processor derives both from each received event's existing `adapter_version` and retained original bytes, so Kafka envelopes and ingestion are unchanged. After every source processor runs this release, a one-time backfill sets both on each alert still lacking a provider from its latest applied source event (`history_id`), in short batches under the tenant coordinator and alert row locks. It stores the row and publishes a non-semantic projection change with cause `provider-backfill`, so search and live views see the values without activity, correlation or maintenance input. It is idempotent and can be rerun. Rebuild the search index for the new mapping before or after the backfill.
 
 ## 27. Operational diagnostics and retention
 

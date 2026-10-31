@@ -74,6 +74,16 @@ Implementation verification must cover these specified outcomes:
 - Verify `name` in Feed and preset CEL, sort, grouping and `q`, and in maintenance and correlation rules over inputs recorded before and after the change; alerts with earlier maintenance proof keep processing without snapshot or replay-digest errors, and existing rules and evidence are unchanged.
 - Verify the search rebuild adds `name` and `missing_name`, and that ingestion deployed after the processor admits named alerts end to end.
 - Check the browser: Feed rows show the name with the message under it and v1 rows the message; alert detail heading, dismiss and link dialogs; Group by Alert name; light and dark themes and narrow width.
+
+### Alert provider (REV-55)
+
+- Verify native v1 and v2 reject `provider` and `alert_rule_url` as unknown fields, and that their alerts store `provider = api` with no rule URL.
+- Verify a Grafana alert stores `provider = grafana` and its `generatorURL` as `alert_rule_url`; a missing, empty, non-string, relative, non-HTTP(S), credential-bearing, whitespace-containing or over-2,048-character `generatorURL` stores no rule URL and still admits the alert.
+- Verify both fields follow the latest applied delivery, do not change `key_field`, identity material or the semantic revision, and leave maintenance proof and correlation evidence unchanged.
+- Verify migration 0060 rejects other provider values and a rule URL without `grafana`, and that rows written without a provider read as `api` for v1 and as no provider for v2.
+- Verify the backfill sets both fields from each alert's latest applied source event, publishes a non-semantic projection change, skips alerts that already have a provider and is a no-op when rerun.
+- Verify `provider` and `alert_rule_url` in Feed and preset CEL against native evaluation and Elasticsearch, and that the search rebuild adds both fields and their missing flags.
+- Check the browser: alert detail Provider and Alert rule link for Grafana and API alerts; the Provider column and editor field; light and dark themes and narrow width.
 ## Alert execution and recovery
 
 **Current scope (REV-34):** Retention-purge cases are future qualification while purge is deferred; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other execution, fault and load cases remain required.
