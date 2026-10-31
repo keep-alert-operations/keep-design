@@ -17,7 +17,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | ID | Selected contract and reference |
 |---|---|
 | L1 | Native v1/v2 validation, field catalog, managed/source separation and body/field limits are selected in alert operations 1–7; strict common models and wire conventions are completed in system completion 1/5. |
-| L2 | Tenant/schema/operator-specific identity, exact immutable material, collision handling, occurrences and no v1/v2 merging are selected in alert operations 5–9 and technical baseline 8–10. |
+| L2 | Tenant/schema/operator-specific identity, exact immutable material, collision handling, occurrences and no v1/v2 merging are selected in alert operations 5–9 and technical baseline 8–10. REV-54 adds identity format 2 for a supplied v2 name; unnamed keys are unchanged. |
 | L3 | REV-33 selects Kafka-confirmed admission, internal delivery UUID replay, per-logical-key append order and tenant-keyed changed order. Ingress UTC and PG application proof order are distinct. Kafka pipeline sections 2–5 and the revised alert/maintenance supplements govern. |
 | L4 | Only selected source fields mutate; manual revision guards remain, while REV-33 removes the pending-source guard and permits queued Kafka input after a manual commit (alert operations 5–7/13–18). Maintenance/correlation evaluate trustworthy before/after snapshots without inventing transitions. |
 | L5 | PG-authoritative source/activity/occurrence/note history, current-note-only search, snapshots and read-your-writes are complete in alert operations 20–27 and technical baseline 8–22. |
@@ -1125,5 +1125,39 @@ The user chose option A and the incident report only; noise reports are left for
   Migration 0058 indexes incident cycles by tenant and opened or resolved time and
   assignment activity by incident; it runs in the stopped-writer migration window
   before the API, which stays correct but slower without it.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-54 — Optional alert name on native v2 (2026-10-31)
+
+User decision. Native v2 alerts accept an optional `name`, and Grafana alerts take the
+alert rule name ([alert operations field inventory, 3, 5, 7 and 24](../specs/spec-alert-operations.md#native-field-inventory);
+[operator operations 18](../specs/spec-operator-operations.md#18-grafana-to-v2-field-mapping)).
+
+- **Default (user decision, 2026-10-31).** An unnamed v2 alert is named by its
+  `key_field`, the 64-character identity digest, after the user was told it is not a
+  readable value.
+- **V1 (user decision, 2026-10-31).** The v1 input schema is unchanged and v1 alerts
+  have no name.
+- **Title (user decision, 2026-10-31).** The name is the alert's title in the Feed,
+  preset and dashboard rows and alert detail, with the message under it.
+- **Rules (user decision, 2026-10-31).** The name can be used in Feed and preset search,
+  sort and grouping and in correlation and maintenance rules.
+- **Identity (user decision, 2026-10-31).** A supplied name is part of the v2 identity,
+  so a different name, including a renamed Grafana rule, is a different alert. This
+  supersedes the assistant's first proposal to leave it out of the hash.
+- **Assistant-selected details.** Unnamed deliveries keep identity format 1 byte for
+  byte and named deliveries use format 2 (prefix `alerts:v2:identity:2`, the name
+  appended), so no stored key is reinterpreted; the default cannot be a hash input
+  because it is the hash. The name follows the identifier rules (at most 256
+  characters, no control characters). Grafana's `alertname` label, which Grafana sets
+  to the mandatory rule title, is required. Only a supplied name is stored (migration
+  0059 adds a nullable `alerts.name` and rewrites no rows); readers resolve the
+  effective name, so rows written by older processors during rollout and recorded
+  proof read correctly. Maintenance proof omits an absent name, so proof recorded
+  before this change stays byte-identical. Free-text `q` matches the name. The
+  grouping and sort option is labelled Alert name and the title column Alert. The
+  search index needs a rebuild for its new mapping, and ingestion deploys after the
+  processor.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

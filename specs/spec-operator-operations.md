@@ -131,14 +131,15 @@ Validate the supported standard webhook envelope and iterate its `alerts` in ord
 |---|---|
 | application, component, severity, site | Same-named per-alert labels, required. |
 | node_name | Same-named per-alert label, optional only when absent. |
+| name | Per-alert `alertname` label, required. Grafana sets it to the alert rule's mandatory title (REV-54). |
 | message, impact, runbook_url | Same-named per-alert annotations, required. |
 | status | Per-alert status: firing or resolved. Ignore group status for lifecycle. |
 | time_created | Required per-alert startsAt, parsed as RFC3339, converted to UTC and truncated to seconds for the native format. |
 | operator, tenant, key_field, history_id, timestamp | System-derived exactly as native v2, never taken from Grafana metadata. |
 
-Require each member to contain the authenticated operator's expected `Appchi - {operator name}` label with the exact string value `true`. Do not require the superseded UUID routing label. During a recorded pending rename, accept the old or new label only as specified in section 16; after completion require the new label. Do not infer an operator or tenant from any label. This catches misconfigured contact points but does not replace key authentication. Apply existing required-field, severity, URL, size, hash and occurrence rules after mapping. No aliases or fallback from summary/title, no severity inference, and no additional identity fields. Extra Grafana transport fields/labels/annotations are retained only in source provenance and never added to the managed field catalog or hash. Grafana silence/muting is not a suspended alert event and does not create our source-suppression cause.
+Require each member to contain the authenticated operator's expected `Appchi - {operator name}` label with the exact string value `true`. Do not require the superseded UUID routing label. During a recorded pending rename, accept the old or new label only as specified in section 16; after completion require the new label. Do not infer an operator or tenant from any label. This catches misconfigured contact points but does not replace key authentication. Apply existing required-field, severity, URL, size, hash and occurrence rules after mapping. No aliases or fallback from summary/title, no severity inference, and no identity fields beyond the mapped name. Extra Grafana transport fields/labels/annotations are retained only in source provenance and never added to the managed field catalog or hash. Grafana silence/muting is not a suspended alert event and does not create our source-suppression cause.
 
-Teams must use stable labels/annotations for identity-bearing fields and repeat the original values on resolution. In particular, impact and runbook_url already participate in the v2 hash; changing them creates a separate logical alert. Grafana fingerprint/groupKey are not our logical key or a unique delivery ID. The adapter does not merge v1/v2 or reopen previous occurrences differently from native v2.
+Teams must use stable labels/annotations for identity-bearing fields and repeat the original values on resolution. In particular, impact, runbook_url and the rule name (`alertname`) participate in the v2 hash; changing them, including renaming the alert rule, creates a separate logical alert. Grafana fingerprint/groupKey are not our logical key or a unique delivery ID. The adapter does not merge v1/v2 or reopen previous occurrences differently from native v2.
 
 ## 19. Grafana delivery, limits and repeats
 
