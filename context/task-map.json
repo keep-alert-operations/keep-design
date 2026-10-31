@@ -1455,7 +1455,7 @@
         "projection"
       ],
       "path_globs": [
-        "appchi-indexer/src/appchi/*.py",
+        "appchi-indexer/src/appchi/search/*.py",
         "appchi-api/src/appchi/search_routes.py",
         "appchi-api/src/appchi/search_clients.py"
       ],
@@ -1878,7 +1878,6 @@
         "rule evaluation",
         "correlate",
         "correlation rule",
-        "grouping",
         "attach"
       ],
       "path_globs": [

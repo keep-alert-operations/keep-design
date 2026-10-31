@@ -69,7 +69,7 @@ None listed; use `context.py find` for dated evidence.
 - [appchi-domain instructions](../../../appchi-domain/AGENTS.md)
 - [appchi-indexer instructions](../../../appchi-indexer/AGENTS.md)
 - [appchi-api instructions](../../../appchi-api/AGENTS.md)
-- `appchi-indexer/src/appchi/*.py`
+- `appchi-indexer/src/appchi/search/*.py`
 - `appchi-api/src/appchi/search_routes.py`
 - `appchi-api/src/appchi/search_clients.py`
 

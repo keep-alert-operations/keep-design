@@ -89,8 +89,9 @@ Selection follows these rules:
 2. Combine the selected topics, close every `requires` dependency, and deduplicate
    sources. Required relationships form an acyclic graph. Sources are ranked:
    orientation (when the intent shows it), the requested topics' own sources,
-   intent additions, `background` from topics that are only required, then evidence
-   (when the intent shows it).
+   `scope` sources from required topics (current-scope corrections are never
+   background), intent additions, the remaining `background` from topics that are
+   only required, then evidence (when the intent shows it).
 3. Read the selected sections **with their source preambles**. Corrections in a
    preamble qualify historical text farther down a specification. A section that
    a later decision changes also carries a **Current scope** note under its heading.
@@ -224,9 +225,12 @@ real representative requests with the same model, client, repository revisions
 and inputs. Measure requirement coverage, missed dependencies, acceptance,
 unnecessary reading, tokens, time and human corrections across repeated trials.
 Include questions, deferred behavior and resume cases. No performance improvement
-is claimed by adding this catalog or passing its deterministic checks; the
+is claimed by adding this catalog or passing its deterministic checks. The
 [2026-10-24 planning trials](../../appchi-delivery/qualification/context-eval-2026-10-24/results.md)
-of the earlier route layer showed no token saving.
+of the earlier route layer showed no token saving, and the
+[2026-11-01 paired trial](../../appchi-delivery/qualification/context-eval-2026-11-01/results.md)
+of routes against topics showed level quality, fewer tool calls and slightly more
+tokens, with one run per cell.
 
 This approach applies the progressive-reading and repository-navigation ideas in
 [OpenAI's harness engineering account](https://openai.com/index/harness-engineering/)
