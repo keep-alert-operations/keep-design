@@ -1,5 +1,269 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
+  "default_intent": "question",
+  "areas": [
+    "System",
+    "Alert flow",
+    "Incidents",
+    "Product areas",
+    "Platform",
+    "UI",
+    "Engineering"
+  ],
+  "intents": [
+    {
+      "id": "question",
+      "title": "understand or answer",
+      "override": false,
+      "cues": [
+        "how",
+        "why",
+        "what",
+        "which",
+        "where",
+        "who",
+        "when",
+        "does",
+        "do",
+        "is",
+        "are",
+        "can",
+        "should",
+        "explain",
+        "describe",
+        "tell me",
+        "?"
+      ],
+      "show": [
+        "orientation",
+        "code",
+        "evidence",
+        "related"
+      ],
+      "sources": [],
+      "steps": [
+        "Read the orientation, then the authoritative sections with their preambles and scope corrections.",
+        "Separate what is specified, what the code does, what current scope defers and what was verified, with the evidence date.",
+        "Check the code under 'Where the code lives' before describing current behavior.",
+        "Cite `path › section` and `file:line`, and say what you did not check."
+      ],
+      "finish": "A cited answer separating specified, implemented, deferred and verified behavior; no edits.",
+      "skills": []
+    },
+    {
+      "id": "change",
+      "title": "add or modify",
+      "override": false,
+      "cues": [
+        "add",
+        "change",
+        "implement",
+        "build",
+        "create",
+        "remove",
+        "delete",
+        "rename",
+        "update",
+        "refactor",
+        "support",
+        "allow",
+        "introduce",
+        "replace",
+        "upgrade",
+        "migrate",
+        "move",
+        "extend",
+        "enable",
+        "disable",
+        "make",
+        "fix",
+        "improve",
+        "adjust",
+        "convert",
+        "edit",
+        "write"
+      ],
+      "show": [
+        "code",
+        "related",
+        "checks"
+      ],
+      "sources": [],
+      "steps": [
+        "Read the authoritative sections, then evaluate each 'read more when' condition and add the topics that apply.",
+        "Inspect callers, consumers, local changes and each affected repository's AGENTS.md.",
+        "Size the process to risk: a focused fix goes straight to implementation; consequential work gets a plan first.",
+        "Complete producer and consumer work together and update guidance the change makes inaccurate.",
+        "Run the repeatable verification workflow: smoke baseline plus impact-based checks, and browser journeys when UI is affected."
+      ],
+      "finish": "Checks ran on the final code, results and skipped checks are recorded, and affected documentation is current.",
+      "skills": [
+        "eng-plan",
+        "eng-verify",
+        "eng-deliver"
+      ]
+    },
+    {
+      "id": "review",
+      "title": "check a diff",
+      "override": true,
+      "cues": [
+        "review",
+        "critique",
+        "pull request",
+        "pr",
+        "this diff",
+        "the diff",
+        "code review"
+      ],
+      "show": [
+        "code",
+        "related",
+        "checks"
+      ],
+      "sources": [],
+      "steps": [
+        "Read the authoritative sections and acceptance scenarios for the areas the diff touches.",
+        "Trace callers and consumers outside the diff, including other repositories.",
+        "Report only reachable failures, each with file, line, scenario and evidence."
+      ],
+      "finish": "Findings ranked by severity with failure scenarios, or a clear statement that none survived verification.",
+      "skills": [
+        "eng-review"
+      ]
+    },
+    {
+      "id": "investigate",
+      "title": "unexpected behavior",
+      "override": true,
+      "cues": [
+        "bug",
+        "broken",
+        "fail",
+        "failing",
+        "failed",
+        "fails",
+        "error",
+        "errors",
+        "exception",
+        "crash",
+        "stuck",
+        "wrong",
+        "regression",
+        "flaky",
+        "unexpected",
+        "investigate",
+        "debug",
+        "diagnose",
+        "not working",
+        "doesn't",
+        "isn't",
+        "aren't",
+        "didn't",
+        "won't",
+        "no longer",
+        "stopped"
+      ],
+      "show": [
+        "orientation",
+        "code",
+        "evidence",
+        "related"
+      ],
+      "sources": [
+        "scope-core"
+      ],
+      "steps": [
+        "Check current worker scope and Current scope notes first: the behavior may be deferred, not broken.",
+        "Compare the authoritative sections with the code and recent evidence; `context.py find` returns dated status sections.",
+        "Reproduce with isolated fixtures before changing anything; inspect processes, ports and data first.",
+        "Classify the cause as defect, deferred behavior, environment or misuse, with evidence.",
+        "Continue a fix with the change intent."
+      ],
+      "finish": "A diagnosis backed by reproduction or evidence; any fix follows the change intent.",
+      "skills": []
+    },
+    {
+      "id": "operate",
+      "title": "run, release, recover",
+      "override": false,
+      "cues": [
+        "deploy",
+        "deployment",
+        "redeploy",
+        "rollout",
+        "roll out",
+        "publish",
+        "bootstrap",
+        "restart",
+        "start the stack",
+        "run the stack",
+        "stop the stack",
+        "restore",
+        "backup",
+        "openshift",
+        "cutover",
+        "cut over",
+        "rebuild the index"
+      ],
+      "show": [
+        "orientation",
+        "related",
+        "checks"
+      ],
+      "sources": [
+        "policy-delivery"
+      ],
+      "steps": [
+        "Follow the runbook for the operation; inspect processes, ports and data before starting or stopping anything.",
+        "Confirm authorization: publishing, merging, production deployment and shared-service changes need it, and operating teams own infrastructure.",
+        "Use the dedicated migration job; no service migrates on startup.",
+        "Record commands, revisions, environment and results as delivery evidence."
+      ],
+      "finish": "The operation is done, or stopped at an authorization boundary, with revisions and results recorded.",
+      "skills": []
+    }
+  ],
+  "scope_sections": {
+    "appchi-design/verification/verification-plan.md": [
+      "Additional scalability regressions — 2026-10-06",
+      "Worker scope correction"
+    ]
+  },
+  "find_roots": [
+    {
+      "path": "appchi-design/specs",
+      "authority": "normative"
+    },
+    {
+      "path": "appchi-design/verification",
+      "authority": "verification"
+    },
+    {
+      "path": "appchi-design/decisions/design-register.md",
+      "authority": "normative"
+    },
+    {
+      "path": "appchi-design/decisions",
+      "authority": "historical"
+    },
+    {
+      "path": "appchi-design/architecture",
+      "authority": "normative"
+    },
+    {
+      "path": "appchi-design/context/README.md",
+      "authority": "instruction"
+    },
+    {
+      "path": "appchi-delivery/docs",
+      "authority": "instruction"
+    },
+    {
+      "path": "appchi-delivery/status",
+      "authority": "evidence"
+    }
+  ],
   "sources": {
     "system-baseline": {
       "path": "appchi-design/specs/spec-alerts-management-system.md",
@@ -772,505 +1036,348 @@
         "Workspace layout and instruction ownership"
       ],
       "include_preamble": true
+    },
+    "architecture-overview": {
+      "path": "appchi-design/architecture/README.md",
+      "authority": "normative",
+      "sections": [],
+      "include_preamble": true
+    },
+    "spec-map": {
+      "path": "appchi-design/specs/spec-alerts-management-system.md",
+      "authority": "normative",
+      "sections": [
+        "Specification map"
+      ],
+      "include_preamble": true
+    },
+    "policy-design-first": {
+      "path": "appchi-delivery/docs/agent-workflows.md",
+      "authority": "instruction",
+      "sections": [
+        "Read the design first"
+      ],
+      "include_preamble": true
+    },
+    "reliability-failures": {
+      "path": "appchi-design/specs/spec-reliability-operations.md",
+      "authority": "normative",
+      "sections": [
+        "8. Request timeouts and retries",
+        "10. Application backlog limits and admission control",
+        "12. Dependency failure behavior",
+        "16. Dependency recovery guarantees and application recovery",
+        "20. Application observability and telemetry ownership",
+        "21. Operational alerting"
+      ],
+      "include_preamble": true
+    },
+    "kafka-first-runbook": {
+      "path": "appchi-delivery/docs/runbooks/kafka-first.md",
+      "authority": "instruction",
+      "sections": [
+        "Workload bindings",
+        "Failure and recovery"
+      ],
+      "include_preamble": true
+    },
+    "development-runbook": {
+      "path": "appchi-delivery/docs/runbooks/development.md",
+      "authority": "instruction",
+      "sections": [
+        "Prerequisites and configuration",
+        "Start the implemented workloads",
+        "Verification commands"
+      ],
+      "include_preamble": true
     }
   },
-  "routes": [
+  "topics": [
     {
       "id": "behavior",
-      "title": "Behavior and system boundaries",
-      "when": [
-        "The requested change affects observable behavior, architecture or repository boundaries."
+      "area": "System",
+      "title": "System overview and boundaries",
+      "covers": "Product model, services and data authority, cross-system invariants, repository boundaries and current worker scope.",
+      "ask_like": [
+        "How does Appchi work end to end?",
+        "Which service owns which data?",
+        "What does the current worker scope defer?"
       ],
-      "keywords": [],
+      "aliases": [
+        "architecture",
+        "system overview",
+        "end to end",
+        "service boundary",
+        "repository boundary",
+        "worker scope",
+        "data authority",
+        "invariant"
+      ],
       "path_globs": [],
       "requires": [],
+      "orientation": [
+        "architecture-overview"
+      ],
       "sources": [
         "system-baseline",
         "scope-core",
         "repository-boundaries"
       ],
-      "repositories": [
-        "appchi-design"
-      ],
-      "expand": [
+      "evidence": [],
+      "related": [
         {
           "when": "Product commands, retries or shared HTTP mutation semantics change.",
-          "route": "shared-commands"
+          "topic": "shared-commands"
         },
         {
           "when": "Storage, SQL privileges or transaction schema changes.",
-          "route": "database"
+          "topic": "database"
         },
         {
           "when": "Authorization, grants or trusted identities change.",
-          "route": "identity-access"
+          "topic": "identity-access"
         },
         {
           "when": "Runtime roles, coordinated deployment or qualification change.",
-          "route": "delivery"
+          "topic": "delivery"
         }
+      ],
+      "repositories": [
+        "appchi-design"
       ],
       "checks": [
         "Resolve specification/code discrepancies before changing behavior; consult each affected repository README for checks."
       ]
     },
     {
-      "id": "shared-commands",
-      "title": "Shared commands and transactions",
-      "when": [
-        "Adding or changing product mutations, request validation, retries or expected-revision handling."
+      "id": "requirements-and-decisions",
+      "area": "System",
+      "title": "Requirements, decisions and traceability",
+      "covers": "Where requirements, the 55 issue IDs, REV decisions and acceptance scenarios live, and how to trace them.",
+      "ask_like": [
+        "What did REV-49 decide?",
+        "Which requirement covers incident search?",
+        "Where are the acceptance scenarios for alerts?"
       ],
-      "keywords": [],
-      "path_globs": [],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "shared-command-contract"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain"
-      ],
-      "expand": [
-        {
-          "when": "Authorization or assignment eligibility changes.",
-          "route": "identity-access"
-        },
-        {
-          "when": "A command changes browser invalidation or delivery.",
-          "route": "live-updates"
-        },
-        {
-          "when": "The schema or privilege contract changes.",
-          "route": "database"
-        }
-      ],
-      "checks": [
-        "Read affected API and domain READMEs; verify authorization, conflict, retry/no-op and atomic history behavior."
-      ]
-    },
-    {
-      "id": "incidents",
-      "title": "Incident feature baseline",
-      "when": [
-        "Adding or changing incident content, lifecycle, assignment, membership, list, detail or report behavior."
-      ],
-      "keywords": [
-        "incident",
-        "incidents"
+      "aliases": [
+        "requirement",
+        "rev",
+        "decision",
+        "decide",
+        "design register",
+        "issue id",
+        "acceptance scenario",
+        "verification plan",
+        "traceability",
+        "spec map"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/incidents/*.py",
-        "appchi-domain/src/appchi/incidents/*.py",
-        "appchi-frontend/src/components/incident*.tsx"
-      ],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "incident-baseline",
-        "verify-incidents"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend"
-      ],
-      "expand": [
-        {
-          "when": "Notes, assignment, lifecycle or other mutations change.",
-          "route": "incident-mutations"
-        },
-        {
-          "when": "Alert links, unlinking, moves, ownership or reopening conflicts change.",
-          "route": "incident-membership"
-        },
-        {
-          "when": "List filters, ordering, search fields, counts or pagination change.",
-          "route": "incident-search"
-        },
-        {
-          "when": "Automatic creation, attachment or fresh-transition rules change.",
-          "route": "correlation"
-        },
-        {
-          "when": "Browser interactions or live presentation change.",
-          "route": "ui-behavior"
-        }
-      ],
-      "checks": [
-        "Choose applicable incident acceptance scenarios, apply current worker scope, and read the affected repository test guidance."
-      ]
-    },
-    {
-      "id": "incident-mutations",
-      "title": "Incident mutations and lifecycle",
-      "when": [
-        "Changing incident notes, content, assignment, state transitions or command results."
-      ],
-      "keywords": [
-        "incident notes",
-        "incident assignment",
-        "resolve incident",
-        "reopen incident"
-      ],
-      "path_globs": [],
-      "requires": [
-        "incidents",
-        "shared-commands"
-      ],
-      "sources": [
-        "incident-mutations",
-        "incident-http-storage"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain"
-      ],
-      "expand": [
-        {
-          "when": "Resolve, reopen, link or unlink changes the ownership or correlation boundary.",
-          "route": "incident-membership"
-        },
-        {
-          "when": "Assignee selection or permission rules change.",
-          "route": "identity-access"
-        },
-        {
-          "when": "A response schema changes.",
-          "route": "http-contract"
-        },
-        {
-          "when": "New fields require persistent storage.",
-          "route": "database"
-        },
-        {
-          "when": "Mutation propagation or visible refresh changes.",
-          "route": "live-updates"
-        }
-      ],
-      "checks": [
-        "Use API/domain test guidance for uncertain retries, stale revisions, all-or-nothing writes, audit and permissions."
-      ]
-    },
-    {
-      "id": "incident-membership",
-      "title": "Incident membership and ownership",
-      "when": [
-        "Changing linking, unlinking, moving alerts, active ownership, or resolve/reopen ownership effects."
-      ],
-      "keywords": [
-        "link alerts",
-        "unlink alerts",
-        "incident membership",
-        "incident ownership"
-      ],
-      "path_globs": [
-        "appchi-frontend/src/components/incident-membership.tsx"
-      ],
-      "requires": [
-        "incidents",
-        "shared-commands"
-      ],
-      "sources": [
-        "incident-membership",
-        "correlation-membership",
-        "incident-http-storage"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-correlation"
-      ],
-      "expand": [
-        {
-          "when": "Automatic attachment/evaluation or reset processing changes.",
-          "route": "correlation"
-        },
-        {
-          "when": "Linked-alert status, suppression or selection behavior changes.",
-          "route": "alerts"
-        },
-        {
-          "when": "Ownership constraints or indexes change.",
-          "route": "database"
-        },
-        {
-          "when": "Membership controls or feedback change.",
-          "route": "ui-behavior"
-        }
-      ],
-      "checks": [
-        "Use incident and affected correlation tests for competing owners, atomic moves, multi-alert conflicts and fresh-transition boundaries."
-      ]
-    },
-    {
-      "id": "incident-search",
-      "title": "Incident collection and search",
-      "when": [
-        "Changing incident search, filtering, ordering, cursor semantics or list counts."
-      ],
-      "keywords": [
-        "incident search",
-        "incident filter",
-        "incident pagination"
-      ],
-      "path_globs": [
-        "appchi-api/src/appchi/incidents/listing.py",
-        "appchi-domain/src/appchi/incidents/counts.py",
-        "appchi-frontend/src/components/incident-list.tsx"
-      ],
-      "requires": [
-        "incidents"
-      ],
-      "sources": [
-        "incident-search",
-        "incident-http-storage",
-        "shared-collections"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend"
-      ],
-      "expand": [
-        {
-          "when": "PostgreSQL search fields or indexes change.",
-          "route": "database"
-        },
-        {
-          "when": "Shared collection envelopes or generated HTTP schemas change.",
-          "route": "http-contract"
-        },
-        {
-          "when": "Browser list interaction changes.",
-          "route": "ui-behavior"
-        }
-      ],
-      "checks": [
-        "Follow API/frontend test guidance for tenant-scoped list/search, stable ordering, cursors, current note text and browser errors."
-      ]
-    },
-    {
-      "id": "correlation",
-      "title": "Correlation evaluation and rule management",
-      "when": [
-        "Changing automatic incident creation or attachment, evidence, ordering, rules, or rule tests."
-      ],
-      "keywords": [
-        "correlation",
-        "automatic incident",
-        "rule evaluation"
-      ],
-      "path_globs": [
-        "appchi-correlation/src/appchi/correlation/*.py",
-        "appchi-domain/src/appchi/correlation/*.py",
-        "appchi-api/src/appchi/correlation/*.py",
-        "appchi-frontend/src/components/rules-pages.tsx",
-        "appchi-frontend/src/components/correlation-tester.tsx"
-      ],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "correlation-evaluation",
-        "correlation-management",
-        "correlation-membership",
-        "correlation-persistence",
-        "pipeline-maintenance",
-        "verify-correlation"
-      ],
-      "repositories": [
-        "appchi-correlation",
-        "appchi-domain",
-        "appchi-api"
-      ],
-      "expand": [
-        {
-          "when": "Incident creation or active ownership changes.",
-          "route": "incident-membership"
-        },
-        {
-          "when": "Rule-management commands change.",
-          "route": "shared-commands"
-        },
-        {
-          "when": "Shared CEL semantics or field catalogs change.",
-          "route": "search"
-        },
-        {
-          "when": "Changed-event format or order changes.",
-          "route": "event-contract"
-        },
-        {
-          "when": "Maintenance qualification or release changes.",
-          "route": "maintenance"
-        },
-        {
-          "when": "Rule editor behavior changes.",
-          "route": "ui-behavior"
-        }
-      ],
-      "checks": [
-        "Read correlation/domain/API test guidance; serialize native CEL suites and cover reset, replay, evidence expiry, all-eligible attachments and concurrency."
-      ]
-    },
-    {
-      "id": "maintenance",
-      "title": "Maintenance qualification and management",
-      "when": [
-        "Changing maintenance windows, matching, overlap, suppression, timezones or release behavior."
-      ],
-      "keywords": [
-        "maintenance",
-        "suppression release"
-      ],
-      "path_globs": [
-        "appchi-domain/src/appchi/maintenance/*.py",
-        "appchi-api/src/appchi/maintenance/*.py",
-        "appchi-frontend/src/components/maintenance-*.tsx"
-      ],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "scope-maintenance",
-        "maintenance-semantics",
-        "maintenance-management",
-        "pipeline-maintenance",
-        "verify-maintenance"
-      ],
-      "repositories": [
-        "appchi-domain",
-        "appchi-processor",
-        "appchi-api"
-      ],
-      "expand": [
-        {
-          "when": "Correlation eligibility or handoff changes.",
-          "route": "correlation"
-        },
-        {
-          "when": "Management mutations or command schemas change.",
-          "route": "shared-commands"
-        },
-        {
-          "when": "Stored temporal proof, columns or constraints change.",
-          "route": "database"
-        },
-        {
-          "when": "Editor interaction changes.",
-          "route": "ui-behavior"
-        },
-        {
-          "when": "New automation would reinstate a deferred scheduler; resolve scope against authoritative decisions before implementation.",
-          "route": "delivery"
-        }
-      ],
-      "checks": [
-        "Use domain/processor/API guidance for delayed input, repeats, overlapping causes, no backfill and current source-driven release; do not treat elapsed time as release."
-      ]
-    },
-    {
-      "id": "ui-appearance",
-      "title": "UI appearance without behavior changes",
-      "when": [
-        "Changing visual spacing, typography, color, layout or styling while preserving interaction and contracts."
-      ],
-      "keywords": [
-        "spacing",
-        "typography",
-        "stylesheet",
-        "visual styling"
-      ],
-      "path_globs": [
-        "appchi-frontend/src/app/*.css",
-        "appchi-frontend/src/app/styles/*.css",
-        "appchi-frontend/src/components/icons.tsx"
+        "appchi-design/decisions/*",
+        "appchi-design/verification/*"
       ],
       "requires": [],
+      "orientation": [
+        "spec-map"
+      ],
       "sources": [
-        "shared-ui-contract",
-        "frontend-guide"
+        "policy-design-first"
       ],
-      "repositories": [
-        "appchi-frontend"
+      "evidence": [
+        "implementation-checkpoint"
       ],
-      "expand": [
+      "related": [
         {
-          "when": "Interaction, accessibility semantics, persisted layout, query meaning or API behavior changes.",
-          "route": "ui-behavior"
-        },
-        {
-          "when": "Shared dashboard/preset behavior or saved layout changes.",
-          "route": "shared-views"
+          "when": "The question concerns one feature's behavior.",
+          "topic": "behavior"
         }
       ],
+      "repositories": [
+        "appchi-design",
+        "appchi-delivery"
+      ],
       "checks": [
-        "Use frontend README checks and inspect affected rendered states; identify approved domain-specific visual guidance when applicable."
+        "Use only IDs that appear in a governing heading, register row or decision; never invent one."
       ]
     },
     {
-      "id": "ui-behavior",
-      "title": "UI interaction and browser behavior",
-      "when": [
-        "Changing navigation, forms, loading/error states, accessibility behavior or browser state."
+      "id": "alert-pipeline",
+      "area": "Alert flow",
+      "title": "Alert pipeline from ingestion to processing",
+      "covers": "How an alert travels: v1/v2/Grafana admission, Kafka publication, source processing with replay proof, then changed events.",
+      "ask_like": [
+        "How does an alert get from ingestion to the processor?",
+        "What does the processor do on replay?",
+        "When does ingestion acknowledge a delivery?"
       ],
-      "keywords": [
-        "keyboard navigation",
-        "form validation",
-        "browser interaction",
-        "navigation behavior"
+      "aliases": [
+        "ingestion",
+        "ingest",
+        "admission",
+        "alert pipeline",
+        "processor",
+        "source processing",
+        "kafka",
+        "replay",
+        "offset",
+        "alerts received",
+        "alerts changed",
+        "webhook",
+        "native v1",
+        "native v2",
+        "receipt"
       ],
-      "path_globs": [],
+      "path_globs": [
+        "appchi-ingestion/src/appchi/ingestion/*.py",
+        "appchi-processor/src/appchi/*.py",
+        "appchi-processor/src/appchi/processor/*.py"
+      ],
       "requires": [
         "behavior"
       ],
+      "orientation": [
+        "architecture-overview"
+      ],
       "sources": [
-        "shared-ui-contract",
-        "frontend-guide"
+        "pipeline-events"
       ],
-      "repositories": [
-        "appchi-frontend"
+      "evidence": [
+        "implementation-checkpoint"
       ],
-      "expand": [
+      "related": [
         {
-          "when": "A mutation or expected-revision flow changes.",
-          "route": "shared-commands"
+          "when": "Native or Kafka event fields, schemas or serialization change.",
+          "topic": "event-contract"
         },
         {
-          "when": "SSE, invalidations or reconnect behavior changes.",
-          "route": "live-updates"
+          "when": "Failure, retry, backlog or outage behavior matters.",
+          "topic": "reliability"
         },
         {
-          "when": "API request/response shapes change.",
-          "route": "http-contract"
+          "when": "Replay fences, restore or retained history matter.",
+          "topic": "recovery"
         },
         {
-          "when": "Sign-in, sessions, access loss or directory selection changes.",
-          "route": "identity-access"
+          "when": "Automatic incident creation from changed events matters.",
+          "topic": "correlation"
         },
         {
-          "when": "Shared presets or dashboards change.",
-          "route": "shared-views"
+          "when": "The search projection or indexing matters.",
+          "topic": "search"
+        },
+        {
+          "when": "Kong policy, operator keys or Grafana routing matter.",
+          "topic": "operators"
+        },
+        {
+          "when": "Maintenance suppression applied during processing matters.",
+          "topic": "maintenance"
         }
       ],
+      "repositories": [
+        "appchi-ingestion",
+        "appchi-processor",
+        "appchi-contracts",
+        "appchi-domain"
+      ],
       "checks": [
-        "Run relevant frontend README type/build and browser workflows; distinguish controlled API fixtures from real integrated behavior."
+        "Apply the pipeline replay, ordering and recovery scenarios from the verification plan with real services where required."
+      ]
+    },
+    {
+      "id": "alerts",
+      "area": "Alert flow",
+      "title": "Alert lifecycle and manual operations",
+      "covers": "Alert fields and identity, lifecycle, assignment, notes, history, dismissal and bulk manual operations.",
+      "ask_like": [
+        "How is an alert's identity computed?",
+        "What happens when an alert is assigned?",
+        "How does dismissing an alert work?"
+      ],
+      "aliases": [
+        "alert lifecycle",
+        "alert assignment",
+        "alert notes",
+        "alert history",
+        "bulk alert",
+        "alert identity",
+        "dismiss",
+        "dismissal",
+        "acknowledge",
+        "alert name",
+        "alert field",
+        "occurrence"
+      ],
+      "path_globs": [
+        "appchi-api/src/appchi/alerts/*.py",
+        "appchi-domain/src/appchi/alerts/*.py",
+        "appchi-frontend/src/components/alerts.tsx",
+        "appchi-frontend/src/components/alert-*.tsx"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "alert-lifecycle",
+        "pipeline-maintenance",
+        "verify-alerts"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Manual mutation commands change.",
+          "topic": "shared-commands"
+        },
+        {
+          "when": "Maintenance suppression or qualifying transitions change.",
+          "topic": "maintenance"
+        },
+        {
+          "when": "Incident ownership changes.",
+          "topic": "incident-membership"
+        },
+        {
+          "when": "Native input or source event semantics change.",
+          "topic": "event-contract"
+        },
+        {
+          "when": "History/replay protection or cleanup changes.",
+          "topic": "recovery"
+        },
+        {
+          "when": "Current search/count behavior changes.",
+          "topic": "search"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain",
+        "appchi-processor",
+        "appchi-frontend"
+      ],
+      "checks": [
+        "Follow API/domain/processor guidance for source/manual ordering, derived status, actor/history proof, no-op commands and tenant isolation."
       ]
     },
     {
       "id": "event-contract",
+      "area": "Alert flow",
       "title": "Native and Kafka event contracts",
-      "when": [
-        "Changing native input or Kafka event fields, semantics, serialization or compatibility."
+      "covers": "Native v1/v2 input fields and Kafka event schemas: definitions, serialization, generation and compatibility.",
+      "ask_like": [
+        "Which fields does a native v2 alert accept?",
+        "Is adding a field to alerts.changed compatible?",
+        "Where are the Kafka event schemas defined?"
       ],
-      "keywords": [
+      "aliases": [
         "event contract",
         "native field",
         "kafka schema",
-        "native input"
+        "native input",
+        "event schema",
+        "serialization",
+        "native v2 field",
+        "schema compatibility"
       ],
       "path_globs": [
         "appchi-contracts/src/appchi/ingestion/*.py",
@@ -1282,6 +1389,7 @@
       "requires": [
         "behavior"
       ],
+      "orientation": [],
       "sources": [
         "native-contract",
         "pipeline-events",
@@ -1289,6 +1397,21 @@
         "shared-contract-generation",
         "contracts-guide",
         "verify-events"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "A shared package or generated client pin changes.",
+          "topic": "dependencies"
+        },
+        {
+          "when": "Replay, order, cutover or deployed consumer compatibility changes.",
+          "topic": "delivery"
+        },
+        {
+          "when": "Stored proof or data structures change.",
+          "topic": "database"
+        }
       ],
       "repositories": [
         "appchi-contracts",
@@ -1299,35 +1422,914 @@
         "appchi-indexer",
         "appchi-frontend"
       ],
-      "expand": [
-        {
-          "when": "A shared package or generated client pin changes.",
-          "route": "dependencies"
-        },
-        {
-          "when": "Replay, order, cutover or deployed consumer compatibility changes.",
-          "route": "delivery"
-        },
-        {
-          "when": "Stored proof or data structures change.",
-          "route": "database"
-        }
-      ],
       "checks": [
         "Read contracts and producer/consumer READMEs; regenerate with existing tools, run drift/compatibility and affected consumer checks, and identify actual producer revisions."
       ]
     },
     {
-      "id": "http-contract",
-      "title": "HTTP contracts and generated clients",
-      "when": [
-        "Changing Product API or Ingestion API endpoints, request/response envelopes, or generated client types."
+      "id": "search",
+      "area": "Alert flow",
+      "title": "Alert CEL, search projection and visibility",
+      "covers": "Alert CEL filters, search and counts, the Elasticsearch projection, indexing progress, reconciliation and rebuilds.",
+      "ask_like": [
+        "Why does a search count lag behind the database?",
+        "How is the Elasticsearch index rebuilt?",
+        "Which CEL functions can filters use?"
       ],
-      "keywords": [
+      "aliases": [
+        "cel",
+        "elasticsearch",
+        "search projection",
+        "search watermark",
+        "search rebuild",
+        "indexer",
+        "indexing",
+        "reconciliation",
+        "alert search",
+        "feed search",
+        "alert filter",
+        "feed filter",
+        "alert count",
+        "dashboard count",
+        "search count",
+        "projection"
+      ],
+      "path_globs": [
+        "appchi-indexer/src/appchi/*.py",
+        "appchi-api/src/appchi/search_routes.py",
+        "appchi-api/src/appchi/search_clients.py"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "cel-search",
+        "search-progress",
+        "pipeline-search",
+        "shared-collections",
+        "verify-search"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Shared field definitions or event formats change.",
+          "topic": "event-contract"
+        },
+        {
+          "when": "Correlation CEL eligibility changes.",
+          "topic": "correlation"
+        },
+        {
+          "when": "Browser refresh or relative-time behavior changes.",
+          "topic": "live-updates"
+        },
+        {
+          "when": "Rebuild or index-switch rollout changes.",
+          "topic": "delivery"
+        },
+        {
+          "when": "Preset/dashboard query or count semantics change.",
+          "topic": "shared-views"
+        }
+      ],
+      "repositories": [
+        "appchi-domain",
+        "appchi-indexer",
+        "appchi-api"
+      ],
+      "checks": [
+        "Follow indexer/domain/API test guidance; serialize native CEL suites, verify exact counts, tenant isolation, ordering, missed-hint reconciliation and rebuild proof."
+      ]
+    },
+    {
+      "id": "live-updates",
+      "area": "Alert flow",
+      "title": "Live publishing, SSE and reconciliation",
+      "covers": "Live publishing from the API, SSE streams, reconnect and polling, scoped invalidation and Redis hints.",
+      "ask_like": [
+        "How does the UI learn about a new alert without reloading?",
+        "What happens when the SSE stream reconnects?"
+      ],
+      "aliases": [
+        "sse",
+        "live publishing",
+        "live updates",
+        "reconnect",
+        "redis hint",
+        "live",
+        "real time",
+        "realtime",
+        "stream",
+        "invalidation"
+      ],
+      "path_globs": [
+        "appchi-api/src/appchi/live.py",
+        "appchi-domain/src/appchi/alert_notifications.py",
+        "appchi-frontend/src/lib/live-stream.ts"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "scope-live",
+        "live-protocol",
+        "live-non-alert",
+        "verify-live"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Session or tenant authorization changes.",
+          "topic": "identity-access"
+        },
+        {
+          "when": "Alert searchable progress is part of refresh.",
+          "topic": "search"
+        },
+        {
+          "when": "Outbox permissions or schema changes.",
+          "topic": "database"
+        },
+        {
+          "when": "Deployment capacity or old live-worker shutdown is affected.",
+          "topic": "delivery"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain",
+        "appchi-frontend"
+      ],
+      "checks": [
+        "Use API/frontend checks for lost/duplicate hints, connected-tenant reconciliation, reconnect, access loss, shutdown and visible freshness."
+      ]
+    },
+    {
+      "id": "recovery",
+      "area": "Alert flow",
+      "title": "Recovery fences, replay and retained history",
+      "covers": "Restore and replay fences, protected proof, retirement, retention, deletion and access to retained history.",
+      "ask_like": [
+        "What protects the system during a database restore?",
+        "How long is alert history retained?",
+        "What is a replay fence?"
+      ],
+      "aliases": [
+        "restore fence",
+        "recovery proof",
+        "retirement",
+        "retention",
+        "replay fence",
+        "restore",
+        "recovery",
+        "backup",
+        "replay",
+        "retained history",
+        "purge",
+        "deletion"
+      ],
+      "path_globs": [
+        "appchi-domain/src/appchi/recovery/*.py",
+        "appchi-api/src/appchi/recovery/*.py"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "recovery-boundaries",
+        "recovery-proofs",
+        "restore-runbook",
+        "verify-recovery"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Schema, privileges or migration proof changes.",
+          "topic": "database"
+        },
+        {
+          "when": "Source transport, replay or cutover changes.",
+          "topic": "event-contract"
+        },
+        {
+          "when": "Release recovery qualification or supplied capability changes.",
+          "topic": "delivery"
+        },
+        {
+          "when": "Retained incident lifecycle or references change.",
+          "topic": "incidents"
+        }
+      ],
+      "repositories": [
+        "appchi-domain",
+        "appchi-api",
+        "appchi-delivery"
+      ],
+      "checks": [
+        "Follow delivery recovery runbooks and owning-repository checks; preserve read-time windows and retirement/revocation fences while automation remains deferred."
+      ]
+    },
+    {
+      "id": "incidents",
+      "area": "Incidents",
+      "title": "Incident feature baseline",
+      "covers": "Incident content, origin, lifecycle, assignment, membership, detail, list and period reports.",
+      "ask_like": [
+        "Do incidents auto-resolve after inactivity?",
+        "Who can be assigned to an incident?",
+        "What does an incident report contain?"
+      ],
+      "aliases": [
+        "incident",
+        "incidents",
+        "incident report"
+      ],
+      "path_globs": [
+        "appchi-api/src/appchi/incidents/*.py",
+        "appchi-domain/src/appchi/incidents/*.py",
+        "appchi-frontend/src/components/incident*.tsx"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "incident-baseline",
+        "verify-incidents"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Notes, assignment, lifecycle or other mutations change.",
+          "topic": "incident-mutations"
+        },
+        {
+          "when": "Alert links, unlinking, moves, ownership or reopening conflicts change.",
+          "topic": "incident-membership"
+        },
+        {
+          "when": "List filters, ordering, search fields, counts or pagination change.",
+          "topic": "incident-search"
+        },
+        {
+          "when": "Automatic creation, attachment or fresh-transition rules change.",
+          "topic": "correlation"
+        },
+        {
+          "when": "Browser interactions or live presentation change.",
+          "topic": "ui-behavior"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain",
+        "appchi-frontend"
+      ],
+      "checks": [
+        "Choose applicable incident acceptance scenarios, apply current worker scope, and read the affected repository test guidance."
+      ]
+    },
+    {
+      "id": "incident-mutations",
+      "area": "Incidents",
+      "title": "Incident mutations and lifecycle",
+      "covers": "Incident notes, content edits, assignment, resolve and reopen transitions, and command results.",
+      "ask_like": [
+        "What happens when two people edit an incident note at once?",
+        "Can a resolved incident be reopened?"
+      ],
+      "aliases": [
+        "incident notes",
+        "incident assignment",
+        "resolve incident",
+        "reopen incident"
+      ],
+      "path_globs": [],
+      "requires": [
+        "incidents",
+        "shared-commands"
+      ],
+      "orientation": [],
+      "sources": [
+        "incident-mutations",
+        "incident-http-storage"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Resolve, reopen, link or unlink changes the ownership or correlation boundary.",
+          "topic": "incident-membership"
+        },
+        {
+          "when": "Assignee selection or permission rules change.",
+          "topic": "identity-access"
+        },
+        {
+          "when": "A response schema changes.",
+          "topic": "http-contract"
+        },
+        {
+          "when": "New fields require persistent storage.",
+          "topic": "database"
+        },
+        {
+          "when": "Mutation propagation or visible refresh changes.",
+          "topic": "live-updates"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain"
+      ],
+      "checks": [
+        "Use API/domain test guidance for uncertain retries, stale revisions, all-or-nothing writes, audit and permissions."
+      ]
+    },
+    {
+      "id": "incident-membership",
+      "area": "Incidents",
+      "title": "Incident membership and ownership",
+      "covers": "Linking, unlinking and moving alerts between incidents, active ownership and resolve/reopen ownership effects.",
+      "ask_like": [
+        "Can an alert belong to two incidents?",
+        "What happens to linked alerts when an incident resolves?"
+      ],
+      "aliases": [
+        "link alerts",
+        "unlink alerts",
+        "incident membership",
+        "incident ownership",
+        "move alert"
+      ],
+      "path_globs": [
+        "appchi-frontend/src/components/incident-membership.tsx"
+      ],
+      "requires": [
+        "incidents",
+        "shared-commands"
+      ],
+      "orientation": [],
+      "sources": [
+        "incident-membership",
+        "correlation-membership",
+        "incident-http-storage"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Automatic attachment/evaluation or reset processing changes.",
+          "topic": "correlation"
+        },
+        {
+          "when": "Linked-alert status, suppression or selection behavior changes.",
+          "topic": "alerts"
+        },
+        {
+          "when": "Ownership constraints or indexes change.",
+          "topic": "database"
+        },
+        {
+          "when": "Membership controls or feedback change.",
+          "topic": "ui-behavior"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain",
+        "appchi-correlation"
+      ],
+      "checks": [
+        "Use incident and affected correlation tests for competing owners, atomic moves, multi-alert conflicts and fresh-transition boundaries."
+      ]
+    },
+    {
+      "id": "incident-search",
+      "area": "Incidents",
+      "title": "Incident collection and search",
+      "covers": "Incident list filters, ordering, cursors, counts and PostgreSQL-backed incident search.",
+      "ask_like": [
+        "How does incident search work?",
+        "How are incidents ordered and paged?"
+      ],
+      "aliases": [
+        "incident search",
+        "incident filter",
+        "incident pagination",
+        "incident list",
+        "incident order",
+        "incident count",
+        "filter incidents",
+        "sort incidents"
+      ],
+      "path_globs": [
+        "appchi-api/src/appchi/incidents/listing.py",
+        "appchi-domain/src/appchi/incidents/counts.py",
+        "appchi-frontend/src/components/incident-list.tsx"
+      ],
+      "requires": [
+        "incidents"
+      ],
+      "orientation": [],
+      "sources": [
+        "incident-search",
+        "incident-http-storage",
+        "shared-collections"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "PostgreSQL search fields or indexes change.",
+          "topic": "database"
+        },
+        {
+          "when": "Shared collection envelopes or generated HTTP schemas change.",
+          "topic": "http-contract"
+        },
+        {
+          "when": "Browser list interaction changes.",
+          "topic": "ui-behavior"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain",
+        "appchi-frontend"
+      ],
+      "checks": [
+        "Follow API/frontend test guidance for tenant-scoped list/search, stable ordering, cursors, current note text and browser errors."
+      ]
+    },
+    {
+      "id": "correlation",
+      "area": "Incidents",
+      "title": "Correlation evaluation and rule management",
+      "covers": "Automatic incident creation and attachment from changed events: rule conditions, grouping, evidence and ordering.",
+      "ask_like": [
+        "How are alerts correlated into incidents?",
+        "Why did an alert attach to an existing incident?",
+        "How do I try a correlation rule?"
+      ],
+      "aliases": [
+        "correlation",
+        "automatic incident",
+        "rule evaluation",
+        "correlate",
+        "correlation rule",
+        "grouping",
+        "attach"
+      ],
+      "path_globs": [
+        "appchi-correlation/src/appchi/correlation/*.py",
+        "appchi-domain/src/appchi/correlation/*.py",
+        "appchi-api/src/appchi/correlation/*.py",
+        "appchi-frontend/src/components/rules-pages.tsx",
+        "appchi-frontend/src/components/correlation-tester.tsx"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "correlation-evaluation",
+        "correlation-management",
+        "correlation-membership",
+        "correlation-persistence",
+        "pipeline-maintenance",
+        "verify-correlation"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Incident creation or active ownership changes.",
+          "topic": "incident-membership"
+        },
+        {
+          "when": "Rule-management commands change.",
+          "topic": "shared-commands"
+        },
+        {
+          "when": "Shared CEL semantics or field catalogs change.",
+          "topic": "search"
+        },
+        {
+          "when": "Changed-event format or order changes.",
+          "topic": "event-contract"
+        },
+        {
+          "when": "Maintenance qualification or release changes.",
+          "topic": "maintenance"
+        },
+        {
+          "when": "Rule editor behavior changes.",
+          "topic": "ui-behavior"
+        }
+      ],
+      "repositories": [
+        "appchi-correlation",
+        "appchi-domain",
+        "appchi-api"
+      ],
+      "checks": [
+        "Read correlation/domain/API test guidance; serialize native CEL suites and cover reset, replay, evidence expiry, all-eligible attachments and concurrency."
+      ]
+    },
+    {
+      "id": "maintenance",
+      "area": "Product areas",
+      "title": "Maintenance qualification and management",
+      "covers": "Maintenance windows: matching, overlap, suppression, timezones, release when a window ends, and management.",
+      "ask_like": [
+        "What happens to alerts when a maintenance window ends?",
+        "How do overlapping maintenance windows combine?"
+      ],
+      "aliases": [
+        "maintenance",
+        "suppression release",
+        "maintenance window",
+        "suppression",
+        "suppress"
+      ],
+      "path_globs": [
+        "appchi-domain/src/appchi/maintenance/*.py",
+        "appchi-api/src/appchi/maintenance/*.py",
+        "appchi-frontend/src/components/maintenance-*.tsx"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "scope-maintenance",
+        "maintenance-semantics",
+        "maintenance-management",
+        "pipeline-maintenance",
+        "verify-maintenance"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Correlation eligibility or handoff changes.",
+          "topic": "correlation"
+        },
+        {
+          "when": "Management mutations or command schemas change.",
+          "topic": "shared-commands"
+        },
+        {
+          "when": "Stored temporal proof, columns or constraints change.",
+          "topic": "database"
+        },
+        {
+          "when": "Editor interaction changes.",
+          "topic": "ui-behavior"
+        },
+        {
+          "when": "New automation would reinstate a deferred scheduler; resolve scope against authoritative decisions before implementation.",
+          "topic": "delivery"
+        }
+      ],
+      "repositories": [
+        "appchi-domain",
+        "appchi-processor",
+        "appchi-api"
+      ],
+      "checks": [
+        "Use domain/processor/API guidance for delayed input, repeats, overlapping causes, no backfill and current source-driven release; do not treat elapsed time as release."
+      ]
+    },
+    {
+      "id": "shared-views",
+      "area": "Product areas",
+      "title": "Shared presets and dashboards",
+      "covers": "Saved presets and dashboards: definitions, panels, count batches, shared editing and references.",
+      "ask_like": [
+        "Why does a dashboard count differ from the alert list?",
+        "How are preset edits shared between users?"
+      ],
+      "aliases": [
+        "preset",
+        "dashboard",
+        "saved view",
+        "panel",
+        "quick view",
+        "count batch"
+      ],
+      "path_globs": [
+        "appchi-frontend/src/components/presets-pages.tsx",
+        "appchi-frontend/src/components/dashboards-pages.tsx",
+        "appchi-frontend/src/components/dashboard-*.tsx",
+        "appchi-frontend/src/lib/dashboard-layout.ts"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "presets",
+        "dashboards",
+        "verify-shared-views"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "CEL, search/count or caching semantics change.",
+          "topic": "search"
+        },
+        {
+          "when": "Saved editing commands or conflict handling change.",
+          "topic": "shared-commands"
+        },
+        {
+          "when": "Rendering or browser interaction changes.",
+          "topic": "ui-behavior"
+        },
+        {
+          "when": "References, indexes or stored layout schema change.",
+          "topic": "database"
+        },
+        {
+          "when": "Refresh, invalidation or visibility changes.",
+          "topic": "live-updates"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain",
+        "appchi-frontend"
+      ],
+      "checks": [
+        "Use API/frontend checks for exact count provenance, references, concurrent saves, responsive layout and saved/shared behavior; personal views remain excluded."
+      ]
+    },
+    {
+      "id": "operators",
+      "area": "Product areas",
+      "title": "Operator keys, Kong and Grafana provisioning",
+      "covers": "Operator lifecycle and API keys, Kong gateway policy, synchronous provisioning and shared Grafana routing.",
+      "ask_like": [
+        "How is a new operator key provisioned in Kong?",
+        "How do Grafana alerts reach Appchi?"
+      ],
+      "aliases": [
+        "operator key",
+        "grafana",
+        "kong",
+        "operator provisioning",
+        "operator lifecycle",
+        "api key",
+        "gateway"
+      ],
+      "path_globs": [
+        "appchi-api/src/appchi/operators/*.py",
+        "appchi-contracts/src/appchi/operators/*.py"
+      ],
+      "requires": [
+        "shared-commands"
+      ],
+      "orientation": [],
+      "sources": [
+        "scope-operators",
+        "operators-management",
+        "pipeline-provisioning",
+        "verify-operators"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Native/Grafana input or event mapping changes.",
+          "topic": "event-contract"
+        },
+        {
+          "when": "Kong plugin migration or deployed binding changes.",
+          "topic": "delivery"
+        },
+        {
+          "when": "Credential recovery, revocation or replay fences change.",
+          "topic": "recovery"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-ingestion",
+        "appchi-contracts"
+      ],
+      "checks": [
+        "Use API/ingestion test guidance for partial remote operations, explicit retry, generation/all-node proof, exact routing labels, secret disposal and denial barriers."
+      ]
+    },
+    {
+      "id": "identity-access",
+      "area": "Product areas",
+      "title": "Identity, sessions, grants and authorization",
+      "covers": "Sign-in and sessions, tenants and roles, grants, directory publication, tenant visibility and assignee eligibility.",
+      "ask_like": [
+        "Who can see alerts from another tenant?",
+        "How does sign-in work with Keycloak?",
+        "Who is eligible to be assigned?"
+      ],
+      "aliases": [
+        "identity",
+        "authorization",
+        "tenant access",
+        "oidc",
+        "keycloak",
+        "directory publication",
+        "tenant",
+        "role",
+        "grant",
+        "permission",
+        "sign in",
+        "login",
+        "session",
+        "ldap",
+        "visibility"
+      ],
+      "path_globs": [
+        "appchi-api/src/appchi/identity/*.py",
+        "appchi-domain/src/appchi/identity/*.py",
+        "appchi-api/src/appchi/tenant_routes.py",
+        "appchi-frontend/src/components/directory-picker.tsx"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "identity-session",
+        "tenant-access",
+        "verify-identity"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Grant/tenant commands change.",
+          "topic": "shared-commands"
+        },
+        {
+          "when": "Sessions or access revocation affect SSE streams.",
+          "topic": "live-updates"
+        },
+        {
+          "when": "Stored identity/audit records or privileges change.",
+          "topic": "database"
+        },
+        {
+          "when": "Identity recovery or publication proof changes.",
+          "topic": "recovery"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain",
+        "appchi-frontend",
+        "appchi-delivery"
+      ],
+      "checks": [
+        "Read API/domain/delivery guidance; test current grants, known revocations, trusted publication, expiry, tenant isolation and restore gates."
+      ]
+    },
+    {
+      "id": "shared-commands",
+      "area": "Platform",
+      "title": "Shared commands and transactions",
+      "covers": "Shared mutation rules: request validation, expected revisions, idempotent retries, conflicts and error results.",
+      "ask_like": [
+        "What happens when a client retries a command?",
+        "How are revision conflicts reported?"
+      ],
+      "aliases": [
+        "expected revision",
+        "revision conflict",
+        "idempotency",
+        "idempotent",
+        "command result",
+        "mutation"
+      ],
+      "path_globs": [],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "shared-command-contract"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Authorization or assignment eligibility changes.",
+          "topic": "identity-access"
+        },
+        {
+          "when": "A command changes browser invalidation or delivery.",
+          "topic": "live-updates"
+        },
+        {
+          "when": "The schema or privilege contract changes.",
+          "topic": "database"
+        }
+      ],
+      "repositories": [
+        "appchi-api",
+        "appchi-domain"
+      ],
+      "checks": [
+        "Read affected API and domain READMEs; verify authorization, conflict, retry/no-op and atomic history behavior."
+      ]
+    },
+    {
+      "id": "database",
+      "area": "Platform",
+      "title": "PostgreSQL schema, privileges and migrations",
+      "covers": "PostgreSQL tables, columns, indexes, RLS and privileges, transactions and lock order, and the migration chain.",
+      "ask_like": [
+        "How do I add a column?",
+        "What is the lock order for incident writes?",
+        "How are migrations run?"
+      ],
+      "aliases": [
+        "database migration",
+        "schema migration",
+        "postgresql schema",
+        "rls",
+        "sql privilege",
+        "database",
+        "postgresql",
+        "postgres",
+        "database table",
+        "database column",
+        "add column",
+        "migration",
+        "row level security",
+        "lock order",
+        "transaction"
+      ],
+      "path_globs": [
+        "appchi-migrations/src/appchi/migration_sql/*",
+        "appchi-migrations/src/appchi/migration_alembic/*",
+        "appchi-migrations/src/appchi/migrate.py"
+      ],
+      "requires": [
+        "behavior"
+      ],
+      "orientation": [],
+      "sources": [
+        "database-contract",
+        "database-authority",
+        "migration-rollout",
+        "migration-guide",
+        "verify-database",
+        "policy-database"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Changed data belongs to incidents; inspect its readers and writers.",
+          "topic": "incidents"
+        },
+        {
+          "when": "Deployment ordering, stopped writers or adoption/cutover changes.",
+          "topic": "delivery"
+        },
+        {
+          "when": "Tenant or authorization boundaries change.",
+          "topic": "identity-access"
+        },
+        {
+          "when": "Recovery or protected proof changes.",
+          "topic": "recovery"
+        }
+      ],
+      "repositories": [
+        "appchi-migrations",
+        "appchi-domain",
+        "appchi-delivery"
+      ],
+      "checks": [
+        "Follow migrations README for checksum/history integrity, supported upgrades, schema/privilege checks and affected writers using isolated PostgreSQL."
+      ]
+    },
+    {
+      "id": "http-contract",
+      "area": "Platform",
+      "title": "HTTP contracts and generated clients",
+      "covers": "Product and Ingestion API endpoints, request/response envelopes, errors, OpenAPI generation and the generated client.",
+      "ask_like": [
+        "Which endpoint lists incidents?",
+        "How do I regenerate the frontend client after an API change?"
+      ],
+      "aliases": [
         "openapi",
         "generated client",
         "http contract",
-        "api response schema"
+        "api response schema",
+        "endpoint",
+        "api route",
+        "response envelope",
+        "error response",
+        "status code"
       ],
       "path_globs": [
         "appchi-contracts/schemas/product.openapi.json",
@@ -1339,10 +2341,34 @@
       "requires": [
         "behavior"
       ],
+      "orientation": [],
       "sources": [
         "shared-contract-generation",
         "shared-command-contract",
         "contracts-guide"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "The API is native/Grafana admission or changes an event field.",
+          "topic": "event-contract"
+        },
+        {
+          "when": "Mutation semantics, expected revisions or retry receipts change.",
+          "topic": "shared-commands"
+        },
+        {
+          "when": "Published package pins or consumer dependencies change.",
+          "topic": "dependencies"
+        },
+        {
+          "when": "The resource is incident content or lifecycle.",
+          "topic": "incidents"
+        },
+        {
+          "when": "The resource is a shared preset or dashboard.",
+          "topic": "shared-views"
+        }
       ],
       "repositories": [
         "appchi-api",
@@ -1350,269 +2376,322 @@
         "appchi-contracts",
         "appchi-frontend"
       ],
-      "expand": [
-        {
-          "when": "The API is native/Grafana admission or changes an event field.",
-          "route": "event-contract"
-        },
-        {
-          "when": "Mutation semantics, expected revisions or retry receipts change.",
-          "route": "shared-commands"
-        },
-        {
-          "when": "Published package pins or consumer dependencies change.",
-          "route": "dependencies"
-        },
-        {
-          "when": "The resource is incident content or lifecycle.",
-          "route": "incidents"
-        },
-        {
-          "when": "The resource is a shared preset or dashboard.",
-          "route": "shared-views"
-        }
-      ],
       "checks": [
         "Read producer, contracts and frontend READMEs; generate schemas/types using repository tools and run drift plus affected producer/consumer compatibility checks."
       ]
     },
     {
-      "id": "database",
-      "title": "PostgreSQL schema, privileges and migrations",
-      "when": [
-        "Changing tables, columns, indexes, RLS, SQL privileges or migration execution."
+      "id": "reliability",
+      "area": "Platform",
+      "title": "Reliability and failure behavior",
+      "covers": "Timeouts and retries, backpressure and admission control, dependency outages, recovery guarantees, telemetry and alerting.",
+      "ask_like": [
+        "What happens when Kafka is down during admission?",
+        "What are the request timeouts?",
+        "Which metrics and alerts does Appchi emit?"
       ],
-      "keywords": [
-        "database migration",
-        "schema migration",
-        "postgresql schema",
-        "rls",
-        "sql privilege"
+      "aliases": [
+        "timeout",
+        "retry",
+        "backpressure",
+        "backlog",
+        "admission control",
+        "outage",
+        "kafka down",
+        "database down",
+        "elasticsearch down",
+        "redis down",
+        "unavailable",
+        "slo",
+        "latency",
+        "telemetry",
+        "metric",
+        "observability",
+        "operational alerting",
+        "error budget",
+        "overload"
       ],
-      "path_globs": [
-        "appchi-migrations/src/appchi/migration_sql/*",
-        "appchi-migrations/src/appchi/migration_alembic/*",
-        "appchi-migrations/src/appchi/migrate.py"
-      ],
+      "path_globs": [],
       "requires": [
         "behavior"
       ],
+      "orientation": [],
       "sources": [
-        "database-contract",
-        "database-authority",
-        "migration-rollout",
-        "migration-guide",
-        "verify-database",
-        "policy-database"
+        "reliability-failures",
+        "kafka-first-runbook"
       ],
-      "repositories": [
-        "appchi-migrations",
-        "appchi-domain",
-        "appchi-delivery"
+      "evidence": [
+        "implementation-checkpoint"
       ],
-      "expand": [
+      "related": [
         {
-          "when": "Changed data belongs to incidents; inspect its readers and writers.",
-          "route": "incidents"
+          "when": "Admission or processing order matters.",
+          "topic": "alert-pipeline"
         },
         {
-          "when": "Deployment ordering, stopped writers or adoption/cutover changes.",
-          "route": "delivery"
+          "when": "Restore, replay fences or retained history matter.",
+          "topic": "recovery"
         },
         {
-          "when": "Tenant or authorization boundaries change.",
-          "route": "identity-access"
-        },
-        {
-          "when": "Recovery or protected proof changes.",
-          "route": "recovery"
+          "when": "Deployment, capacity qualification or rollout matter.",
+          "topic": "delivery"
         }
       ],
+      "repositories": [
+        "appchi-ingestion",
+        "appchi-processor",
+        "appchi-api",
+        "appchi-delivery"
+      ],
       "checks": [
-        "Follow migrations README for checksum/history integrity, supported upgrades, schema/privilege checks and affected writers using isolated PostgreSQL."
+        "Use the reliability fault and recovery scenarios from the verification plan; synthetic local results are not production qualification."
       ]
     },
     {
-      "id": "identity-access",
-      "title": "Identity, sessions, grants and authorization",
-      "when": [
-        "Changing authentication, tenant access, grants, identity publication or assignee eligibility."
+      "id": "ui-appearance",
+      "area": "UI",
+      "title": "UI appearance without behavior changes",
+      "covers": "Visual spacing, typography, color, layout and styling that preserve interaction, contracts and saved data.",
+      "ask_like": [
+        "Adjust dashboard spacing",
+        "Which palette does the UI use?"
       ],
-      "keywords": [
-        "identity",
-        "authorization",
-        "tenant access",
-        "oidc",
-        "keycloak",
-        "directory publication"
+      "aliases": [
+        "spacing",
+        "typography",
+        "stylesheet",
+        "visual styling",
+        "css",
+        "color",
+        "colour",
+        "palette",
+        "font",
+        "styling"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/identity/*.py",
-        "appchi-domain/src/appchi/identity/*.py",
-        "appchi-api/src/appchi/tenant_routes.py",
-        "appchi-frontend/src/components/directory-picker.tsx"
+        "appchi-frontend/src/app/*.css",
+        "appchi-frontend/src/app/styles/*.css",
+        "appchi-frontend/src/components/icons.tsx"
       ],
-      "requires": [
-        "behavior"
-      ],
+      "requires": [],
+      "orientation": [],
       "sources": [
-        "identity-session",
-        "tenant-access",
-        "verify-identity"
+        "shared-ui-contract",
+        "frontend-guide"
       ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend",
-        "appchi-delivery"
-      ],
-      "expand": [
+      "evidence": [],
+      "related": [
         {
-          "when": "Grant/tenant commands change.",
-          "route": "shared-commands"
+          "when": "Interaction, accessibility semantics, persisted layout, query meaning or API behavior changes.",
+          "topic": "ui-behavior"
         },
         {
-          "when": "Sessions or access revocation affect SSE streams.",
-          "route": "live-updates"
-        },
-        {
-          "when": "Stored identity/audit records or privileges change.",
-          "route": "database"
-        },
-        {
-          "when": "Identity recovery or publication proof changes.",
-          "route": "recovery"
+          "when": "Shared dashboard/preset behavior or saved layout changes.",
+          "topic": "shared-views"
         }
       ],
-      "checks": [
-        "Read API/domain/delivery guidance; test current grants, known revocations, trusted publication, expiry, tenant isolation and restore gates."
-      ]
-    },
-    {
-      "id": "live-updates",
-      "title": "Live publishing, SSE and reconciliation",
-      "when": [
-        "Changing API live publishing, SSE streams, reconnect, polling, scoped invalidation or render proof."
-      ],
-      "keywords": [
-        "sse",
-        "live publishing",
-        "live updates",
-        "reconnect",
-        "redis hint"
-      ],
-      "path_globs": [
-        "appchi-api/src/appchi/live.py",
-        "appchi-domain/src/appchi/alert_notifications.py",
-        "appchi-frontend/src/lib/live-stream.ts"
-      ],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "scope-live",
-        "live-protocol",
-        "live-non-alert",
-        "verify-live"
-      ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
         "appchi-frontend"
       ],
-      "expand": [
-        {
-          "when": "Session or tenant authorization changes.",
-          "route": "identity-access"
-        },
-        {
-          "when": "Alert searchable progress is part of refresh.",
-          "route": "search"
-        },
-        {
-          "when": "Outbox permissions or schema changes.",
-          "route": "database"
-        },
-        {
-          "when": "Deployment capacity or old live-worker shutdown is affected.",
-          "route": "delivery"
-        }
-      ],
       "checks": [
-        "Use API/frontend checks for lost/duplicate hints, connected-tenant reconciliation, reconnect, access loss, shutdown and visible freshness."
+        "Use frontend README checks and inspect affected rendered states; identify approved domain-specific visual guidance when applicable."
       ]
     },
     {
-      "id": "search",
-      "title": "Alert CEL, search projection and visibility",
-      "when": [
-        "Changing CEL semantics, alert search/counts, Elasticsearch projection, reconciliation or rebuild."
+      "id": "ui-behavior",
+      "area": "UI",
+      "title": "UI interaction and browser behavior",
+      "covers": "Navigation, forms, loading and error states, accessibility, keyboard use and browser state.",
+      "ask_like": [
+        "What should a form show while saving?",
+        "How does keyboard navigation work in the Feed?"
       ],
-      "keywords": [
-        "cel",
-        "elasticsearch",
-        "search projection",
-        "search watermark",
-        "search rebuild"
+      "aliases": [
+        "keyboard navigation",
+        "form validation",
+        "browser interaction",
+        "navigation behavior",
+        "accessibility",
+        "keyboard",
+        "loading state",
+        "error state",
+        "browser",
+        "form"
       ],
-      "path_globs": [
-        "appchi-indexer/src/appchi/*.py",
-        "appchi-api/src/appchi/search_routes.py",
-        "appchi-api/src/appchi/search_clients.py"
-      ],
+      "path_globs": [],
       "requires": [
         "behavior"
       ],
+      "orientation": [],
       "sources": [
-        "cel-search",
-        "search-progress",
-        "pipeline-search",
-        "shared-collections",
-        "verify-search"
+        "shared-ui-contract",
+        "frontend-guide"
       ],
-      "repositories": [
-        "appchi-domain",
-        "appchi-indexer",
-        "appchi-api"
-      ],
-      "expand": [
+      "evidence": [],
+      "related": [
         {
-          "when": "Shared field definitions or event formats change.",
-          "route": "event-contract"
+          "when": "A mutation or expected-revision flow changes.",
+          "topic": "shared-commands"
         },
         {
-          "when": "Correlation CEL eligibility changes.",
-          "route": "correlation"
+          "when": "SSE, invalidations or reconnect behavior changes.",
+          "topic": "live-updates"
         },
         {
-          "when": "Browser refresh or relative-time behavior changes.",
-          "route": "live-updates"
+          "when": "API request/response shapes change.",
+          "topic": "http-contract"
         },
         {
-          "when": "Rebuild or index-switch rollout changes.",
-          "route": "delivery"
+          "when": "Sign-in, sessions, access loss or directory selection changes.",
+          "topic": "identity-access"
         },
         {
-          "when": "Preset/dashboard query or count semantics change.",
-          "route": "shared-views"
+          "when": "Shared presets or dashboards change.",
+          "topic": "shared-views"
         }
       ],
+      "repositories": [
+        "appchi-frontend"
+      ],
       "checks": [
-        "Follow indexer/domain/API test guidance; serialize native CEL suites, verify exact counts, tenant isolation, ordering, missed-hint reconciliation and rebuild proof."
+        "Run relevant frontend README type/build and browser workflows; distinguish controlled API fixtures from real integrated behavior."
+      ]
+    },
+    {
+      "id": "local-development",
+      "area": "Engineering",
+      "title": "Local development and verification",
+      "covers": "Running the local stack, prerequisites, isolated fixtures, the smoke baseline, test commands and the workspace.",
+      "ask_like": [
+        "How do I run the stack locally?",
+        "How do I run the smoke journeys?",
+        "Which tests cover my change?"
+      ],
+      "aliases": [
+        "local stack",
+        "locally",
+        "run local",
+        "smoke",
+        "smoke baseline",
+        "fixture",
+        "test suite",
+        "unit test",
+        "integration test",
+        "pytest",
+        "playwright",
+        "docker",
+        "workspace bootstrap"
+      ],
+      "path_globs": [
+        "appchi-delivery/scripts/local*",
+        "appchi-delivery/docs/runbooks/development.md"
+      ],
+      "requires": [],
+      "orientation": [],
+      "sources": [
+        "development-runbook",
+        "workspace-development"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Packages, locks or editable overrides change.",
+          "topic": "dependencies"
+        },
+        {
+          "when": "A deployment or release is involved.",
+          "topic": "delivery"
+        }
+      ],
+      "repositories": [
+        "appchi-delivery"
+      ],
+      "checks": [
+        "Record commands, revisions, results and skipped checks; old evidence is not proof for changed code."
+      ]
+    },
+    {
+      "id": "dependencies",
+      "area": "Engineering",
+      "title": "Packages, locks and workspace compatibility",
+      "covers": "Python and Node packages, lock files, internal revision pins and coordinated editable environments.",
+      "ask_like": [
+        "How do I bump a shared package pin?",
+        "Why does poetry sync fail?"
+      ],
+      "aliases": [
+        "dependency upgrade",
+        "poetry",
+        "package pin",
+        "lockfile",
+        "editable override",
+        "dependency",
+        "package",
+        "lock file",
+        "npm"
+      ],
+      "path_globs": [
+        "*/pyproject.toml",
+        "*/poetry.lock",
+        "appchi-frontend/package.json",
+        "appchi-frontend/package-lock.json",
+        "appchi-delivery/workspace/manifest.json"
+      ],
+      "requires": [],
+      "orientation": [],
+      "sources": [
+        "repository-boundaries",
+        "release-identity",
+        "workspace-development",
+        "policy-dependencies"
+      ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "Package behavior or cross-repository runtime contracts change.",
+          "topic": "behavior"
+        },
+        {
+          "when": "HTTP request/response schemas or generated client types change.",
+          "topic": "http-contract"
+        },
+        {
+          "when": "Native input or Kafka event contracts change.",
+          "topic": "event-contract"
+        },
+        {
+          "when": "A release combination or rollout is being qualified.",
+          "topic": "delivery"
+        }
+      ],
+      "repositories": [
+        "appchi-delivery"
+      ],
+      "checks": [
+        "Inspect affected manifests, locks and READMEs; record actual source revisions and local overrides, validate Poetry locks and run the affected consumer checks."
       ]
     },
     {
       "id": "delivery",
+      "area": "Engineering",
       "title": "Deployment, qualification and coordinated rollout",
-      "when": [
-        "Preparing a release, changing workloads or assessing capability readiness and rollout compatibility."
+      "covers": "Deployment, OpenShift workloads, release artifacts, qualification, readiness and coordinated rollout.",
+      "ask_like": [
+        "What is needed before releasing to production?",
+        "How is the release manifest pinned?"
       ],
-      "keywords": [
+      "aliases": [
         "release qualification",
         "deployment",
         "rollout",
         "readiness",
-        "openshift"
+        "openshift",
+        "deploy",
+        "release artifact",
+        "release manifest",
+        "release to production",
+        "production",
+        "qualification"
       ],
       "path_globs": [
         "appchi-delivery/deploy/*",
@@ -1622,6 +2701,7 @@
       "requires": [
         "behavior"
       ],
+      "orientation": [],
       "sources": [
         "delivery-contract",
         "reliability-gates",
@@ -1632,94 +2712,51 @@
         "verify-system",
         "policy-delivery"
       ],
-      "repositories": [
-        "appchi-delivery"
-      ],
-      "expand": [
+      "evidence": [],
+      "related": [
         {
           "when": "Packages, locks or pinned source revisions change.",
-          "route": "dependencies"
+          "topic": "dependencies"
         },
         {
           "when": "Migration, privilege or writer ordering changes.",
-          "route": "database"
+          "topic": "database"
         },
         {
           "when": "Restore/drain/cutover proof changes.",
-          "route": "recovery"
+          "topic": "recovery"
         },
         {
           "when": "A missing capability depends on identity.",
-          "route": "identity-access"
+          "topic": "identity-access"
         }
+      ],
+      "repositories": [
+        "appchi-delivery"
       ],
       "checks": [
         "Read current delivery README/runbooks and manifest; record revisions, dirty state, images, migrations, configuration and executed evidence. Deployment authorization remains separate."
       ]
     },
     {
-      "id": "dependencies",
-      "title": "Packages, locks and workspace compatibility",
-      "when": [
-        "Changing packages, lock files, internal revision pins or coordinated editable environments."
-      ],
-      "keywords": [
-        "dependency upgrade",
-        "poetry",
-        "package pin",
-        "lockfile",
-        "editable override"
-      ],
-      "path_globs": [
-        "*/pyproject.toml",
-        "*/poetry.lock",
-        "appchi-frontend/package.json",
-        "appchi-frontend/package-lock.json",
-        "appchi-delivery/workspace/manifest.json"
-      ],
-      "requires": [],
-      "sources": [
-        "repository-boundaries",
-        "release-identity",
-        "workspace-development",
-        "policy-dependencies"
-      ],
-      "repositories": [
-        "appchi-delivery"
-      ],
-      "expand": [
-        {
-          "when": "Package behavior or cross-repository runtime contracts change.",
-          "route": "behavior"
-        },
-        {
-          "when": "HTTP request/response schemas or generated client types change.",
-          "route": "http-contract"
-        },
-        {
-          "when": "Native input or Kafka event contracts change.",
-          "route": "event-contract"
-        },
-        {
-          "when": "A release combination or rollout is being qualified.",
-          "route": "delivery"
-        }
-      ],
-      "checks": [
-        "Inspect affected manifests, locks and READMEs; record actual source revisions and local overrides, validate Poetry locks and run the affected consumer checks."
-      ]
-    },
-    {
       "id": "documentation",
+      "area": "Engineering",
       "title": "Documentation and instruction maintenance",
-      "when": [
-        "Changing instructions, navigation, task routes, document links or explanatory prose without changing product requirements."
+      "covers": "Agent instructions, this context catalog, navigation, document links and prose that do not change requirements.",
+      "ask_like": [
+        "Add a topic to the context map",
+        "Update the AGENTS.md guidance"
       ],
-      "keywords": [
+      "aliases": [
         "documentation",
         "task map",
         "context layer",
-        "agents.md"
+        "agents.md",
+        "context map",
+        "context catalog",
+        "readme",
+        "claude.md",
+        "agent instructions"
       ],
       "path_globs": [
         "appchi-design/context/*",
@@ -1728,251 +2765,33 @@
         "appchi-delivery/workspace/CLAUDE.md"
       ],
       "requires": [],
+      "orientation": [],
       "sources": [
         "design-guide",
         "workspace-instructions",
         "policy-documentation"
       ],
+      "evidence": [],
+      "related": [
+        {
+          "when": "A specification or design decision changes product behavior.",
+          "topic": "behavior"
+        },
+        {
+          "when": "Repository ownership or package boundaries change.",
+          "topic": "dependencies"
+        },
+        {
+          "when": "Operational guidance or release evidence changes.",
+          "topic": "delivery"
+        }
+      ],
       "repositories": [
         "appchi-design",
         "appchi-delivery"
       ],
-      "expand": [
-        {
-          "when": "A specification or design decision changes product behavior.",
-          "route": "behavior"
-        },
-        {
-          "when": "Repository ownership or package boundaries change.",
-          "route": "dependencies"
-        },
-        {
-          "when": "Operational guidance or release evidence changes.",
-          "route": "delivery"
-        }
-      ],
       "checks": [
         "Use design README/check_docs and delivery documentation/context checks; preserve all 55 issue IDs and decision numbering, and synchronize canonical/installed instructions when affected."
-      ]
-    },
-    {
-      "id": "alerts",
-      "title": "Alert lifecycle and manual operations",
-      "when": [
-        "Changing alert assignment, notes, lifecycle, suppression controls, history or bulk manual operations."
-      ],
-      "keywords": [
-        "alert lifecycle",
-        "alert assignment",
-        "alert notes",
-        "alert history",
-        "bulk alert"
-      ],
-      "path_globs": [
-        "appchi-api/src/appchi/alerts/*.py",
-        "appchi-domain/src/appchi/alerts/*.py",
-        "appchi-frontend/src/components/alerts.tsx",
-        "appchi-frontend/src/components/alert-*.tsx"
-      ],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "alert-lifecycle",
-        "pipeline-maintenance",
-        "verify-alerts"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-processor",
-        "appchi-frontend"
-      ],
-      "expand": [
-        {
-          "when": "Manual mutation commands change.",
-          "route": "shared-commands"
-        },
-        {
-          "when": "Maintenance suppression or qualifying transitions change.",
-          "route": "maintenance"
-        },
-        {
-          "when": "Incident ownership changes.",
-          "route": "incident-membership"
-        },
-        {
-          "when": "Native input or source event semantics change.",
-          "route": "event-contract"
-        },
-        {
-          "when": "History/replay protection or cleanup changes.",
-          "route": "recovery"
-        },
-        {
-          "when": "Current search/count behavior changes.",
-          "route": "search"
-        }
-      ],
-      "checks": [
-        "Follow API/domain/processor guidance for source/manual ordering, derived status, actor/history proof, no-op commands and tenant isolation."
-      ]
-    },
-    {
-      "id": "operators",
-      "title": "Operator keys, Kong and Grafana provisioning",
-      "when": [
-        "Changing operator lifecycle, keys, synchronous provisioning or shared Grafana routing."
-      ],
-      "keywords": [
-        "operator key",
-        "grafana",
-        "kong",
-        "operator provisioning"
-      ],
-      "path_globs": [
-        "appchi-api/src/appchi/operators/*.py",
-        "appchi-contracts/src/appchi/operators/*.py"
-      ],
-      "requires": [
-        "shared-commands"
-      ],
-      "sources": [
-        "scope-operators",
-        "operators-management",
-        "pipeline-provisioning",
-        "verify-operators"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-ingestion",
-        "appchi-contracts"
-      ],
-      "expand": [
-        {
-          "when": "Native/Grafana input or event mapping changes.",
-          "route": "event-contract"
-        },
-        {
-          "when": "Kong plugin migration or deployed binding changes.",
-          "route": "delivery"
-        },
-        {
-          "when": "Credential recovery, revocation or replay fences change.",
-          "route": "recovery"
-        }
-      ],
-      "checks": [
-        "Use API/ingestion test guidance for partial remote operations, explicit retry, generation/all-node proof, exact routing labels, secret disposal and denial barriers."
-      ]
-    },
-    {
-      "id": "shared-views",
-      "title": "Shared presets and dashboards",
-      "when": [
-        "Changing saved presets, dashboard definitions, count batches, shared editing or references."
-      ],
-      "keywords": [
-        "preset",
-        "dashboard",
-        "saved view"
-      ],
-      "path_globs": [
-        "appchi-frontend/src/components/presets-pages.tsx",
-        "appchi-frontend/src/components/dashboards-pages.tsx",
-        "appchi-frontend/src/components/dashboard-*.tsx",
-        "appchi-frontend/src/lib/dashboard-layout.ts"
-      ],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "presets",
-        "dashboards",
-        "verify-shared-views"
-      ],
-      "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend"
-      ],
-      "expand": [
-        {
-          "when": "CEL, search/count or caching semantics change.",
-          "route": "search"
-        },
-        {
-          "when": "Saved editing commands or conflict handling change.",
-          "route": "shared-commands"
-        },
-        {
-          "when": "Rendering or browser interaction changes.",
-          "route": "ui-behavior"
-        },
-        {
-          "when": "References, indexes or stored layout schema change.",
-          "route": "database"
-        },
-        {
-          "when": "Refresh, invalidation or visibility changes.",
-          "route": "live-updates"
-        }
-      ],
-      "checks": [
-        "Use API/frontend checks for exact count provenance, references, concurrent saves, responsive layout and saved/shared behavior; personal views remain excluded."
-      ]
-    },
-    {
-      "id": "recovery",
-      "title": "Recovery fences, replay and retained history",
-      "when": [
-        "Changing restore safety, retirement helpers, protected proof, replay fences or history access."
-      ],
-      "keywords": [
-        "restore fence",
-        "recovery proof",
-        "retirement",
-        "retention",
-        "replay fence"
-      ],
-      "path_globs": [
-        "appchi-domain/src/appchi/recovery/*.py",
-        "appchi-api/src/appchi/recovery/*.py"
-      ],
-      "requires": [
-        "behavior"
-      ],
-      "sources": [
-        "recovery-boundaries",
-        "recovery-proofs",
-        "restore-runbook",
-        "verify-recovery"
-      ],
-      "repositories": [
-        "appchi-domain",
-        "appchi-api",
-        "appchi-delivery"
-      ],
-      "expand": [
-        {
-          "when": "Schema, privileges or migration proof changes.",
-          "route": "database"
-        },
-        {
-          "when": "Source transport, replay or cutover changes.",
-          "route": "event-contract"
-        },
-        {
-          "when": "Release recovery qualification or supplied capability changes.",
-          "route": "delivery"
-        },
-        {
-          "when": "Retained incident lifecycle or references change.",
-          "route": "incidents"
-        }
-      ],
-      "checks": [
-        "Follow delivery recovery runbooks and owning-repository checks; preserve read-time windows and retirement/revocation fences while automation remains deferred."
       ]
     }
   ]
