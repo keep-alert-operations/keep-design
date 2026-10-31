@@ -16,7 +16,7 @@ Open the workspace root as an Obsidian vault to include sibling repositories. Us
 |---|---|
 | [Behavior and system boundaries](routes/behavior.md) | The requested change affects observable behavior, architecture or repository boundaries. |
 | [Shared commands and transactions](routes/shared-commands.md) | Adding or changing product mutations, request validation, retries or expected-revision handling. |
-| [Incident feature baseline](routes/incidents.md) | Adding or changing incident content, lifecycle, assignment, membership, list or detail behavior. |
+| [Incident feature baseline](routes/incidents.md) | Adding or changing incident content, lifecycle, assignment, membership, list, detail or report behavior. |
 | [Incident mutations and lifecycle](routes/incident-mutations.md) | Changing incident notes, content, assignment, state transitions or command results. |
 | [Incident membership and ownership](routes/incident-membership.md) | Changing linking, unlinking, moving alerts, active ownership, or resolve/reopen ownership effects. |
 | [Incident collection and search](routes/incident-search.md) | Changing incident search, filtering, ordering, cursor semantics or list counts. |

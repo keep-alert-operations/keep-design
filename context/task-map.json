@@ -91,7 +91,8 @@
         "2. Text validation and generated content (I1, I5, C4)",
         "3. Assignment and permissions (I5)",
         "4. Lifecycle cycles and timestamps (I2)",
-        "15. Detail and mutation UX (I3, I5)"
+        "15. Detail and mutation UX (I3, I5)",
+        "20. Incident reports (I5, N3; REV-53)"
       ],
       "include_preamble": true
     },
@@ -853,7 +854,7 @@
       "id": "incidents",
       "title": "Incident feature baseline",
       "when": [
-        "Adding or changing incident content, lifecycle, assignment, membership, list or detail behavior."
+        "Adding or changing incident content, lifecycle, assignment, membership, list, detail or report behavior."
       ],
       "keywords": [
         "incident",

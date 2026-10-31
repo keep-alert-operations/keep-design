@@ -11,7 +11,7 @@ route_id: incidents
 
 ## Applies when
 
-- Adding or changing incident content, lifecycle, assignment, membership, list or detail behavior.
+- Adding or changing incident content, lifecycle, assignment, membership, list, detail or report behavior.
 
 ## Required routes
 
@@ -27,6 +27,7 @@ Include each source's preamble and scope corrections, plus the selected sections
   - [3. Assignment and permissions (I5)](../../specs/spec-incident-operations.md#3-assignment-and-permissions-i5)
   - [4. Lifecycle cycles and timestamps (I2)](../../specs/spec-incident-operations.md#4-lifecycle-cycles-and-timestamps-i2)
   - [15. Detail and mutation UX (I3, I5)](../../specs/spec-incident-operations.md#15-detail-and-mutation-ux-i3-i5)
+  - [20. Incident reports (I5, N3; REV-53)](../../specs/spec-incident-operations.md#20-incident-reports-i5-n3-rev-53)
 - [verify-incidents](../../verification/verification-plan.md) — verification; preamble required.
   - [Incidents](../../verification/verification-plan.md#incidents)
   - [Worker scope correction](../../verification/verification-plan.md#worker-scope-correction)
