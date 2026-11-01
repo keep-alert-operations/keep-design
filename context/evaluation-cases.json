@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "cases": [
     {
       "id": "appearance-only",
@@ -7,13 +7,13 @@
       "paths": [
         "appchi-frontend/src/app/styles/dashboards.css"
       ],
-      "routes": [
+      "topics": [
         "ui-appearance"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "ui-appearance"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "behavior",
         "shared-views",
         "database"
@@ -29,11 +29,11 @@
       "paths": [
         "appchi-frontend/src/app/styles/incidents.css"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "ui-appearance"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "behavior",
         "incidents"
       ],
@@ -43,14 +43,14 @@
       "id": "incident-baseline",
       "task": "Add a feature to incidents; first establish the affected behavior.",
       "paths": [],
-      "routes": [
+      "topics": [
         "incidents"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "incidents",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "database",
         "correlation",
         "search"
@@ -65,12 +65,12 @@
       "id": "incident-keyword",
       "task": "Investigate an incident display issue.",
       "paths": [],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "incidents",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "database"
       ],
       "must_include_sources": [
@@ -81,16 +81,16 @@
       "id": "incident-notes",
       "task": "Edit incident notes without changing membership.",
       "paths": [],
-      "routes": [
+      "topics": [
         "incident-mutations"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "incidents",
         "incident-mutations",
         "shared-commands",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "correlation",
         "incident-membership"
       ],
@@ -103,16 +103,16 @@
       "id": "incident-reopening",
       "task": "Fix ownership conflicts when reopening a resolved incident.",
       "paths": [],
-      "routes": [
+      "topics": [
         "incident-mutations",
         "incident-membership"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "incident-membership",
         "incident-mutations",
         "shared-commands"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "correlation-membership",
         "scope-core"
@@ -124,13 +124,13 @@
       "paths": [
         "appchi-frontend/src/components/incident-membership.tsx"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "incidents",
         "incident-membership",
         "shared-commands"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "database"
       ],
       "must_include_sources": [
@@ -143,12 +143,12 @@
       "paths": [
         "appchi-api/src/appchi/incidents/listing.py"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "incident-search",
         "incidents"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "search"
       ],
       "must_include_sources": [
@@ -161,20 +161,20 @@
       "id": "incident-tags-boundaries",
       "task": "Design editable searchable incident tags and inspect persistence and API impact.",
       "paths": [],
-      "routes": [
+      "topics": [
         "incident-mutations",
         "incident-search",
         "database",
         "http-contract",
         "ui-behavior"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "incidents",
         "shared-commands",
         "database",
         "http-contract"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "event-contract",
         "correlation"
       ],
@@ -188,14 +188,14 @@
       "id": "incident-inactivity-deferred",
       "task": "Investigate why a 30-day-inactive incident has not automatically resolved.",
       "paths": [],
-      "routes": [
+      "topics": [
         "incidents"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "behavior",
         "incidents"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "delivery"
       ],
       "must_include_sources": [
@@ -208,14 +208,14 @@
       "id": "maintenance-after-end",
       "task": "Investigate an alert remaining suppressed after its window ended.",
       "paths": [],
-      "routes": [
+      "topics": [
         "maintenance"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "maintenance",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "correlation"
       ],
       "must_include_sources": [
@@ -228,15 +228,15 @@
       "id": "maintenance-correlation-handoff",
       "task": "Change genuine source-driven maintenance release eligibility.",
       "paths": [],
-      "routes": [
+      "topics": [
         "maintenance",
         "correlation"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "maintenance",
         "correlation"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "scope-maintenance",
         "pipeline-maintenance",
@@ -247,14 +247,14 @@
       "id": "directory-polling-deferred",
       "task": "Investigate directory changes waiting for explicit trusted publication.",
       "paths": [],
-      "routes": [
+      "topics": [
         "identity-access"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "identity-access",
         "behavior"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "scope-core",
         "identity-session",
@@ -265,14 +265,14 @@
       "id": "operator-synchronous",
       "task": "Fix partial operator provisioning and explicit retries.",
       "paths": [],
-      "routes": [
+      "topics": [
         "operators"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "operators",
         "shared-commands"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "scope-operators",
         "operators-management",
@@ -285,12 +285,12 @@
       "paths": [
         "appchi-api/src/appchi/live.py"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "live-updates",
         "behavior"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "scope-live",
         "live-protocol"
@@ -300,14 +300,14 @@
       "id": "native-event",
       "task": "Add a native input field and check event compatibility.",
       "paths": [],
-      "routes": [
+      "topics": [
         "event-contract"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "event-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "database",
         "delivery"
       ],
@@ -322,14 +322,14 @@
       "id": "http-only",
       "task": "Change a Product API response schema without touching native events.",
       "paths": [],
-      "routes": [
+      "topics": [
         "http-contract"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "http-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "event-contract"
       ],
       "must_include_sources": [
@@ -343,12 +343,12 @@
       "paths": [
         "appchi-migrations/src/appchi/migration_sql/0051_example.sql"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "database",
         "behavior"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "migration-rollout",
         "migration-guide",
@@ -359,14 +359,14 @@
       "id": "alert-search",
       "task": "Fix alert searchable-watermark reconciliation.",
       "paths": [],
-      "routes": [
+      "topics": [
         "search"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "search",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "incident-search"
       ],
       "must_include_sources": [
@@ -379,17 +379,17 @@
       "id": "alert-ownership",
       "task": "Change assignment-based alert status.",
       "paths": [],
-      "routes": [
+      "topics": [
         "alerts",
         "shared-commands",
         "identity-access"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "alerts",
         "shared-commands",
         "identity-access"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "alert-lifecycle",
         "tenant-access",
@@ -400,17 +400,17 @@
       "id": "dashboard-counts",
       "task": "Change exact dashboard count batching and visible stale states.",
       "paths": [],
-      "routes": [
+      "topics": [
         "shared-views",
         "search",
         "ui-behavior"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "shared-views",
         "search",
         "ui-behavior"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "dashboards",
         "verify-shared-views",
@@ -423,11 +423,11 @@
       "paths": [
         "appchi-api/poetry.lock"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "dependencies"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "behavior",
         "database"
       ],
@@ -441,13 +441,13 @@
       "id": "documentation-only",
       "task": "Repair context layer navigation.",
       "paths": [],
-      "routes": [
+      "topics": [
         "documentation"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "documentation"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "behavior",
         "delivery"
       ],
@@ -460,14 +460,14 @@
       "id": "delivery-evidence",
       "task": "Assess release qualification without deploying.",
       "paths": [],
-      "routes": [
+      "topics": [
         "delivery"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "delivery",
         "behavior"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "delivery-readiness",
         "implementation-checkpoint",
@@ -479,16 +479,16 @@
       "id": "restore-fences",
       "task": "Verify restore safety for retired incident references.",
       "paths": [],
-      "routes": [
+      "topics": [
         "recovery",
         "incidents"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "recovery",
         "incidents",
         "behavior"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "recovery-proofs",
         "restore-runbook",
@@ -499,15 +499,15 @@
       "id": "resume-current-authority",
       "task": "Resume incident mutation work from a checkpoint that cites older automatic cleanup algorithms.",
       "paths": [],
-      "routes": [
+      "topics": [
         "incident-mutations"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "incident-mutations",
         "incidents",
         "behavior"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "scope-core",
         "incident-baseline",
@@ -518,9 +518,9 @@
       "id": "unmatched-fallback",
       "task": "Investigate a new zephyr capability with unclear ownership.",
       "paths": [],
-      "routes": [],
-      "must_include_routes": [],
-      "must_exclude_routes": [
+      "topics": [],
+      "must_include_topics": [],
+      "must_exclude_topics": [
         "behavior",
         "documentation",
         "database",
@@ -535,12 +535,12 @@
       "paths": [
         "appchi-api\\src\\appchi\\incidents\\listing.py"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "incidents",
         "incident-search"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "search"
       ],
       "must_include_sources": []
@@ -549,15 +549,15 @@
       "id": "correlation-management",
       "task": "Change correlation rule edit validation.",
       "paths": [],
-      "routes": [
+      "topics": [
         "correlation",
         "shared-commands"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "correlation",
         "shared-commands"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "correlation-management",
         "correlation-persistence",
@@ -568,15 +568,15 @@
       "id": "preset-references",
       "task": "Change saved preset deletion conflict handling.",
       "paths": [],
-      "routes": [
+      "topics": [
         "shared-views",
         "shared-commands"
       ],
-      "must_include_routes": [
+      "must_include_topics": [
         "shared-views",
         "shared-commands"
       ],
-      "must_exclude_routes": [],
+      "must_exclude_topics": [],
       "must_include_sources": [
         "presets",
         "verify-shared-views"
@@ -588,12 +588,12 @@
       "paths": [
         "appchi-contracts/schemas/product.openapi.json"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "http-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "event-contract"
       ],
       "must_include_sources": [
@@ -606,12 +606,12 @@
       "paths": [
         "appchi-contracts/schemas/openapi.json"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "http-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "event-contract"
       ],
       "must_include_sources": [
@@ -624,12 +624,12 @@
       "paths": [
         "appchi-contracts/schemas/ingestion.openapi.json"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "http-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "event-contract"
       ],
       "must_include_sources": [
@@ -642,12 +642,12 @@
       "paths": [
         "appchi-contracts/schemas/alerts.received.v2.schema.json"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "event-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "http-contract"
       ],
       "must_include_sources": [
@@ -660,12 +660,12 @@
       "paths": [
         "appchi-contracts/src/appchi/event_models.py"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "event-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "http-contract"
       ],
       "must_include_sources": [
@@ -678,12 +678,12 @@
       "paths": [
         "appchi-contracts/src/appchi/ingestion/native.py"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "event-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "http-contract"
       ],
       "must_include_sources": [
@@ -696,16 +696,380 @@
       "paths": [
         "appchi-contracts/src/appchi/models.py"
       ],
-      "routes": [],
-      "must_include_routes": [
+      "topics": [],
+      "must_include_topics": [
         "http-contract",
         "behavior"
       ],
-      "must_exclude_routes": [
+      "must_exclude_topics": [
         "event-contract"
       ],
       "must_include_sources": [
         "shared-command-contract"
+      ]
+    },
+    {
+      "id": "question-incident-search",
+      "task": "How does incident search work?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incidents",
+        "incident-search"
+      ],
+      "must_exclude_topics": [
+        "search"
+      ],
+      "must_include_sources": [],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-inactivity",
+      "task": "Do incidents auto-resolve after inactivity?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incidents",
+        "behavior"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "scope-core"
+      ],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-ingestion-to-processor",
+      "task": "How does an alert get from ingestion to the processor?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "alert-pipeline"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "pipeline-events",
+        "architecture-overview"
+      ],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-kafka-down",
+      "task": "What happens when Kafka is down during admission?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "alert-pipeline",
+        "reliability"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "reliability-failures"
+      ],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-tenant-visibility",
+      "task": "Who can see alerts from another tenant?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "identity-access"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "tenant-access"
+      ],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-dashboard-count",
+      "task": "Why does a dashboard count differ from the alert list?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "shared-views",
+        "search"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-correlated",
+      "task": "How are alerts correlated into incidents?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "correlation",
+        "incidents"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-replay",
+      "task": "What does the processor do on replay?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "alert-pipeline",
+        "recovery"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-architecture",
+      "task": "Explain the overall architecture",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "behavior"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "architecture-overview",
+        "system-baseline"
+      ],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-rev-decision",
+      "task": "What did REV-49 decide?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "requirements-and-decisions"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "spec-map",
+        "policy-design-first"
+      ],
+      "expect_intent": "question"
+    },
+    {
+      "id": "question-run-tests-locally",
+      "task": "How do I run the test suite locally?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "local-development"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "development-runbook"
+      ],
+      "expect_intent": "question"
+    },
+    {
+      "id": "investigate-inactivity-bug",
+      "task": "Incidents are not resolving after inactivity; is this a bug?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incidents"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "scope-core"
+      ],
+      "expect_intent": "investigate"
+    },
+    {
+      "id": "investigate-live-stopped",
+      "task": "Live updates stopped after the SSE stream reconnected",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "live-updates"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "investigate"
+    },
+    {
+      "id": "investigate-processor-error",
+      "task": "The processor logs an error and holds a partition",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "alert-pipeline"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "scope-core"
+      ],
+      "expect_intent": "investigate"
+    },
+    {
+      "id": "investigate-poetry",
+      "task": "Why does poetry sync fail in CI?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "dependencies"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "investigate"
+    },
+    {
+      "id": "review-incident-notes",
+      "task": "Review the pull request that changes incident note revisions",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incidents",
+        "incident-mutations"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "review"
+    },
+    {
+      "id": "operate-redeploy-local",
+      "task": "Redeploy the local stack from main",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "local-development"
+      ],
+      "must_exclude_topics": [
+        "delivery"
+      ],
+      "must_include_sources": [],
+      "expect_intent": "operate"
+    },
+    {
+      "id": "operate-openshift",
+      "task": "Deploy the release to OpenShift",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "delivery"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "policy-delivery"
+      ],
+      "expect_intent": "operate"
+    },
+    {
+      "id": "operate-restore",
+      "task": "Restore the database from last night's backup",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "recovery",
+        "database"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "operate"
+    },
+    {
+      "id": "change-feed-colors",
+      "task": "Adjust the Feed table colors",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "ui-appearance"
+      ],
+      "must_exclude_topics": [
+        "behavior",
+        "search",
+        "shared-views"
+      ],
+      "must_include_sources": [],
+      "expect_intent": "change"
+    },
+    {
+      "id": "change-maintenance-release",
+      "task": "Change maintenance release behavior when a window ends",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "maintenance"
+      ],
+      "must_exclude_topics": [
+        "delivery"
+      ],
+      "must_include_sources": [],
+      "expect_intent": "change"
+    },
+    {
+      "id": "change-filter-incidents",
+      "task": "Allow users to filter incidents by assignee",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incident-search"
+      ],
+      "must_exclude_topics": [
+        "search"
+      ],
+      "must_include_sources": [],
+      "expect_intent": "change"
+    },
+    {
+      "id": "unclear-defaults-to-question",
+      "task": "incident reports",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incidents"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "question"
+    },
+    {
+      "id": "unresolved-offers-sections",
+      "task": "scheduler cadence",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_status": "unresolved",
+      "must_find": [
+        "spec-reliability-operations.md#15. Scheduler cadence and clock protection"
+      ]
+    },
+    {
+      "id": "explicit-topic-closure",
+      "task": "",
+      "paths": [],
+      "topics": [
+        "alert-pipeline"
+      ],
+      "must_include_topics": [
+        "alert-pipeline",
+        "behavior"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "pipeline-events",
+        "architecture-overview"
+      ]
+    },
+    {
+      "id": "ldap-group-not-correlation",
+      "task": "LDAP group removals take far longer than five minutes to reach Appchi.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "identity-access"
+      ],
+      "must_exclude_topics": [
+        "correlation"
+      ],
+      "must_include_sources": [
+        "scope-core"
       ]
     }
   ]

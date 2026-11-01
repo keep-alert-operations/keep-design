@@ -67,21 +67,26 @@ for path in ROOT.rglob('*.md'):
 # here so a renamed heading fails in design CI; delivery checks sibling sources.
 catalog = json.loads((ROOT / 'context/task-map.json').read_text(encoding='utf-8-sig'))
 sections = 0
-for source_id, source in catalog['sources'].items():
-    parts = PurePosixPath(source['path']).parts
+# Scope sections travel with every partial read of their document, so check them too.
+references = [(source_id, source['path'], source['sections'])
+              for source_id, source in catalog['sources'].items()]
+references += [(f'scope_sections[{path}]', path, titles)
+               for path, titles in catalog.get('scope_sections', {}).items()]
+for label, path, wanted in references:
+    parts = PurePosixPath(path).parts
     if parts[0] != 'appchi-design':
         continue
     target = ROOT.joinpath(*parts[1:])
     if not target.is_file():
-        errors.append(f'context/task-map.json: {source_id} missing {source["path"]}')
+        errors.append(f'context/task-map.json: {label} missing {path}')
         continue
     text = target.read_text(encoding='utf-8-sig').replace('\r\n', '\n').replace('\r', '\n')
     titles = heading_titles(text.splitlines())
-    for title in source['sections']:
+    for title in wanted:
         sections += 1
         if (found := titles.count(title)) != 1:
-            errors.append(f'context/task-map.json: {source_id} heading {title!r} must exist '
-                          f'exactly once in {source["path"]} (found {found})')
+            errors.append(f'context/task-map.json: {label} heading {title!r} must exist '
+                          f'exactly once in {path} (found {found})')
 register = (ROOT / 'decisions/design-register.md').read_text(encoding='utf-8')
 ids = {int(value) for value in re.findall(r'^(?:\|\s*|##\s*)REV-(\d+)', register, re.M)}
 if ids != set(range(1, 56)):

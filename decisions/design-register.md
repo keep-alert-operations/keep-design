@@ -385,6 +385,8 @@ The concise workspace entrypoint retains universal constraints and links the
 preserved detailed engineering policies. Scope corrections accompany extracted
 sections; keyword matches and routing fixtures never establish complete context
 or agent understanding. Original issue IDs and REV numbering are unchanged.
+**Superseded in part (2026-11-01):** change-oriented routes are replaced by topics
+and intents; see [Context topics and intents](#context-topics-and-intents--2026-11-01).
 
 ## Source partition batching — 2026-10-18
 
@@ -1195,3 +1197,25 @@ User decision. Every v1 and v2 alert gains `provider` and `alert_rule_url`
   new mapping.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## Context topics and intents — 2026-11-01
+
+The user approved a redesign of the context navigation so that any request — a
+question, a change, an investigation, a review or an operation — reaches the
+relevant sources in one step and says what to do with them. Trials on 2026-10-31
+showed that change-oriented routes left four of eight natural questions unmatched.
+The user decided against a separate knowledge graph; requirement traceability
+derived from test docstrings and headings is a later, separately approved phase.
+
+Assistant-selected details, recorded in the [context guide](../context/README.md):
+the 23 routes become subject topics with the same IDs, plus `requirements-and-decisions`,
+`alert-pipeline`, `reliability` and `local-development`; five intents (`question`,
+`change`, `review`, `investigate`, `operate`, unclear requests starting as
+`question`) carry steps and a finish line; a generated topic index of at most 40
+lines sits in the workspace AGENTS.md; matching uses conservatively stemmed whole
+words and caps automatic selection at three topics; unmatched requests list ranked
+headings from a `find` command; `plan --content` returns the selected text; and
+document-level scope sections carry the verification plan's REV-34/35 corrections
+into every partial read of it. No hook, retrieval service or database is added.
+These are navigation choices, not changes to product requirements or authorization
+boundaries. Original issue IDs and REV numbering are unchanged.

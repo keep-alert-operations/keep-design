@@ -6,7 +6,7 @@ See [system design](https://github.com/appchi-alert-operations/appchi-design), [
 
 ## Reading order
 
-Start with the [task map](context/map.md) and [context guide](context/README.md).
+Start with the [context map](context/map.md) and [context guide](context/README.md).
 Choose the sources applicable to the task and expand when dependencies or
 uncertainty emerge. Behavior, architecture and cross-repository changes require
 the relevant [system design](specs/spec-alerts-management-system.md),
