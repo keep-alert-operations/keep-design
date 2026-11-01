@@ -203,6 +203,13 @@ The implementation must demonstrate: manual creation without alerts; explicit im
 - Measure p99 within two seconds on a seeded tenant of 20,000 cycles in 90 days and 200,000 activity rows, with the migration 0058 indexes in use (N3; reliability operations 5).
 - Check the browser page: loading placeholders, Refreshing… with figures kept, empty, partial and error states with Retry; light and dark themes, phone width, keyboard use and labels, the chart's table alternative, and breakdown rows opening the Incidents list filtered by group and created time.
 
+### Incident list link counts (REV-56)
+
+- Verify every `GET /incidents` row returns `total_linked`, `suppressed` and `unavailable` equal to the detail for the same state, under the API's restricted role: distinct current references including unavailable ones, unlinked references excluded, dismissed or maintenance-suppressed retained alerts counted as suppressed, a resolved incident keeping its current links, and an empty incident at zero.
+- Verify a row whose retained linked alert lacks complete maintenance proof returns `suppressed: null` with its total while the page returns 200, and that the detail still returns 503 `maintenance_proof_unavailable`.
+- Measure a 200-row page over 20,000 current links, one incident holding 10,000, within two seconds (N3; reliability operations 5).
+- Check the browser column: "N linked" with nonzero suppressed and unavailable parts, the total alone while proof is pending, "—" only for a row without counts, and narrow-viewport layout.
+
 ## Identity
 
 **Current scope (REV-35, REV-34):** LDAP-change propagation timing (item 2) and assignee cleanup (item 4) are future qualification; verify explicit publication instead; see [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Other items remain required.

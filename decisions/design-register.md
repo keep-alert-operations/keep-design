@@ -72,7 +72,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | I2 | Independent status/assignment, lifecycle cycles, direct resolve, reopen conflicts and unchanged alert statuses remain incident operations 4/9/12/17–18; REV-46 adds resolution when all linked alerts resolve. Physical claims and transactions are system completion 15–17. |
 | I3 | Active-only manual link/unlink/Move, <=100 explicit distinct IDs, atomic ownership and unavailable counterpart references remain incident operations 5–7/17–18; exact routes and tables are system completion 10/15. |
 | I4 | 30-day qualifying inactivity/hourly expiry and 90-day latest-resolution retention remain unchanged. Source activity ordering and protected parent purge are complete in system completion 15/19–20. |
-| I5 | Incident list/detail/current text search, notes/history, assignment and counters are selected in incident operations. System completion 8/10/15 completes token lookup, API routes, physical records and consistent reads; REV-53 adds period reports in incident operations 20. |
+| I5 | Incident list/detail/current text search, notes/history, assignment and counters are selected in incident operations. System completion 8/10/15 completes token lookup, API routes, physical records and consistent reads; REV-53 adds period reports in incident operations 20; REV-56 adds link counts to list rows. |
 
 ## D. Persistence, events, consistency, and recovery
 
@@ -1219,3 +1219,27 @@ document-level scope sections carry the verification plan's REV-34/35 correction
 into every partial read of it. No hook, retrieval service or database is added.
 These are navigation choices, not changes to product requirements or authorization
 boundaries. Original issue IDs and REV numbering are unchanged.
+
+## REV-56 — Link counts on incident list rows (2026-11-01)
+
+User decision. The Incidents list's Linked alerts column showed "—" on every row
+because the list returned no link counts; only the detail computed them. Each list
+row now carries the same counts as the detail
+([incident operations 7, 14 and 16](../specs/spec-incident-operations.md#14-incident-list-and-search-i5);
+[system completion 10](../specs/spec-system-completion.md#10-incident-routes-and-aggregate-contracts)).
+
+- **Counts (user decision, 2026-11-01).** `GET /incidents` rows return `total_linked`,
+  `suppressed` and `unavailable` as decimal strings, and the column shows the total
+  and suppressed subset.
+- **Missing maintenance proof (user decision, 2026-11-01).** A row whose retained
+  linked alert has no complete maintenance proof returns `suppressed: null` and keeps
+  its total; the page never fails for it. The detail keeps its 503
+  `maintenance_proof_unavailable`.
+- **Assistant-selected details.** One grouped PostgreSQL query per page, inside the
+  list's existing repeatable-read transaction, shares the detail's definition, so list
+  and detail agree. `maintenance_updating` stays detail-only. The column reads
+  "N linked", adding "· M suppressed" and "· K unavailable" only when nonzero. The
+  fields are documented on the shared incident response model, an additive OpenAPI
+  change. No migration is needed.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
