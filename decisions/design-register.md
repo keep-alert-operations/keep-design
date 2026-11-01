@@ -1160,4 +1160,38 @@ alert rule name ([alert operations field inventory, 3, 5, 7 and 24](../specs/spe
   search index needs a rebuild for its new mapping, and ingestion deploys after the
   processor.
 
+## REV-55 — Alert provider and Grafana alert rule URL (2026-10-31)
+
+User decision. Every v1 and v2 alert gains `provider` and `alert_rule_url`
+([alert operations field inventory, 3, 7 and 24](../specs/spec-alert-operations.md#3-managed-field-catalog);
+[operator operations 18](../specs/spec-operator-operations.md#18-grafana-to-v2-field-mapping);
+[alerts technical 6 and 26](../specs/spec-alert-history-technical.md#26-schema-event-and-application-rollout)).
+
+- **Provider (user decision, 2026-10-31).** `provider` is the source that sent the
+  alert: `grafana` when it arrived through the Grafana webhook, `api` in every other
+  case.
+- **Rule URL (user decision, 2026-10-31).** For a Grafana alert, `alert_rule_url` is
+  the URL of the alert rule that fired it. Native v1 and v2 senders cannot supply
+  one, so `api` alerts have none and both native input schemas are unchanged.
+- **Existing alerts (user decision, 2026-10-31).** Alerts stored before this change
+  are backfilled from their stored deliveries rather than waiting for the next one.
+- **Screens (user decision, 2026-10-31).** Alert detail shows the provider and a link
+  to the rule; both fields are searchable, and provider is a Feed and preset column.
+- **Assistant-selected details.** The rule URL is Grafana's per-alert `generatorURL`,
+  which Grafana documents as the URL of the alert rule. A missing, non-string or
+  invalid value (the `runbook_url` rules) leaves it null and still admits the alert,
+  because rejecting would turn Grafana alerts accepted today into failures. Both
+  fields follow the latest applied delivery like `message`, stay outside the identity
+  and semantic revision, and are not maintenance or correlation rule inputs. The
+  processor derives them from the received event's existing `adapter_version` and
+  retained original bytes, so the Kafka envelope and ingestion code are unchanged.
+  Migration 0060 adds nullable columns with checks (`provider` in `api`/`grafana`; a
+  rule URL only with `grafana`) and rewrites no rows. The backfill is a one-time,
+  rerunnable source processor command that reads each remaining alert's latest
+  applied source event and publishes a non-semantic projection change (cause
+  `provider-backfill`) under the normal lock order, so no stopped-writer window is
+  needed. Readers resolve a missing provider as `api` for v1; a v2 alert reads as no
+  provider until the backfill reaches it. The search index needs a rebuild for its
+  new mapping.
+
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
