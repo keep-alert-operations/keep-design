@@ -1071,6 +1071,100 @@
       "must_include_sources": [
         "scope-core"
       ]
+    },
+    {
+      "id": "product-api-is-not-delivery",
+      "task": "Add the note count to the Product API incident list response and the incident table.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incidents"
+      ],
+      "must_exclude_topics": [
+        "delivery"
+      ],
+      "must_include_sources": [],
+      "expect_intent": "change"
+    },
+    {
+      "id": "intent-imperative-after-statement",
+      "task": "When a maintenance window ends, its alerts stay suppressed. Make suppression end at the window end time.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "maintenance"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "change"
+    },
+    {
+      "id": "intent-plan-opener",
+      "task": "The live feed refreshes too often under load. Plan how the browser should batch updates.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "change"
+    },
+    {
+      "id": "intent-let-opener",
+      "task": "Let users try a correlation rule against an alert before they enable it.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "correlation"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "change"
+    },
+    {
+      "id": "intent-hypothetical-failure-is-a-question",
+      "task": "If the indexer fails to apply a changed-alert event, how does search become consistent again?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "search"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "question"
+    },
+    {
+      "id": "intent-question-sentence-over-statement-cue",
+      "task": "Two people save changes to the same shared preset at once. Whose edit wins?",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "question"
+    },
+    {
+      "id": "intent-users-report-is-investigation",
+      "task": "Users report that incidents never resolve after 30 days without activity. Plan the fix.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "incidents"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "investigate"
+    },
+    {
+      "id": "intent-show-me-is-a-question",
+      "task": "Show me where maintenance windows are matched to alerts.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "maintenance"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [],
+      "expect_intent": "question"
     }
   ]
 }

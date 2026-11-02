@@ -1243,3 +1243,25 @@ row now carries the same counts as the detail
   change. No migration is needed.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## Context catalog fixes — 2026-11-02
+
+The user asked whether the context navigation helps agents as much as it could and
+approved four small fixes after a comparison. A retrieval study found that 72 of 261
+specification sections belong to no topic and that plans carried procedure text that
+questions do not use. A paired trial of a redesign (complete topic coverage plus a
+section outline) then scored the same as the current layer (50.5/56 each). Agents
+choosing topics by meaning searched the specifications for what plans lacked, so the
+topic model stays as it is.
+
+Assistant-selected details, recorded in the [context guide](../context/README.md):
+the `delivery` alias "production" is removed because it stems to "product" and pulled
+delivery policy into every Product API request; the agent-workflow policies, the
+migration guide and the release-artifact runbook list `intents` (`change`, `operate`),
+and other intents' plans keep them as pointers without text; `plan --content` emits a
+document's preamble and shared sections once; `check` reports the specification
+sections no topic reaches without failing on them; and intent inference ignores
+failures inside suppositions, lets an opening instruction (with catalog `openers` such
+as "plan" and "let") decide before question words, and treats a question sentence as a
+question. Navigation choices only; no product requirement, authorization boundary,
+issue ID or REV number changes.

@@ -22,6 +22,7 @@
         "which",
         "where",
         "who",
+        "whose",
         "when",
         "does",
         "do",
@@ -33,6 +34,9 @@
         "describe",
         "tell me",
         "?"
+      ],
+      "openers": [
+        "show me"
       ],
       "show": [
         "orientation",
@@ -83,6 +87,12 @@
         "edit",
         "write"
       ],
+      "openers": [
+        "plan",
+        "design",
+        "let",
+        "show"
+      ],
       "show": [
         "code",
         "related",
@@ -116,6 +126,7 @@
         "the diff",
         "code review"
       ],
+      "openers": [],
       "show": [
         "code",
         "related",
@@ -162,8 +173,11 @@
         "didn't",
         "won't",
         "no longer",
-        "stopped"
+        "stopped",
+        "users report",
+        "customers report"
       ],
+      "openers": [],
       "show": [
         "orientation",
         "code",
@@ -206,6 +220,7 @@
         "cut over",
         "rebuild the index"
       ],
+      "openers": [],
       "show": [
         "orientation",
         "related",
@@ -943,6 +958,10 @@
       "path": "appchi-migrations/README.md",
       "authority": "implementation",
       "sections": [],
+      "intents": [
+        "change",
+        "operate"
+      ],
       "include_preamble": true
     },
     "workspace-development": {
@@ -981,6 +1000,10 @@
       "path": "appchi-delivery/docs/runbooks/release-artifacts.md",
       "authority": "implementation",
       "sections": [],
+      "intents": [
+        "change",
+        "operate"
+      ],
       "include_preamble": true
     },
     "restore-runbook": {
@@ -1008,6 +1031,10 @@
         "Make changes across repositories coherently",
         "Git and local execution"
       ],
+      "intents": [
+        "change",
+        "operate"
+      ],
       "include_preamble": true
     },
     "policy-database": {
@@ -1015,6 +1042,10 @@
       "authority": "instruction",
       "sections": [
         "Database, cutover and release discipline"
+      ],
+      "intents": [
+        "change",
+        "operate"
       ],
       "include_preamble": true
     },
@@ -1025,6 +1056,10 @@
         "Database, cutover and release discipline",
         "Documentation and verification",
         "Authorization and operating-team boundaries"
+      ],
+      "intents": [
+        "change",
+        "operate"
       ],
       "include_preamble": true
     },
@@ -2689,7 +2724,6 @@
         "release artifact",
         "release manifest",
         "release to production",
-        "production",
         "qualification"
       ],
       "path_globs": [
