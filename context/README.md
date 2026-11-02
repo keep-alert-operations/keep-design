@@ -46,8 +46,13 @@ stays in the shared eng-* skills; intents only point to them.
 | `operate` | Running, releasing, recovering | Runbooks and authorization boundaries |
 
 An unclear request starts as `question`. Without `--intent`, the resolver infers one
-from cue words: review and failure cues anywhere win; otherwise the earliest
-question, change or operation cue decides. The plan reports the intent and why.
+from cue words, in this order. Review and failure cues anywhere win, except a failure
+inside a supposition ("If the indexer fails, how …?"). Next, a sentence that opens,
+after filler such as "please" or "can you", with an instruction decides: a cue of a
+non-default intent or an intent's `openers` ("Make …", "Plan …", "Let users …"; the
+longest opener wins, so "Show me …" is a question while "Show …" is a change). Then
+any sentence ending in a question mark makes it a `question`; otherwise the earliest
+cue decides. The plan reports the intent and why.
 
 ## Topics say what to read
 
@@ -76,7 +81,9 @@ The resolver accepts `--workspace ROOT` before the subcommand when checkouts are
 elsewhere. `plan --format json` emits structured output; `--topic` and `--path`
 can be repeated, and `--route` remains an alias of `--topic`. `--content` includes
 the selected text so one command replaces the separate `read` calls; nothing is
-truncated.
+truncated. A document's preamble, and any section that two selected sources share,
+appears once under the first source that reads it; later sources name the line
+ranges shown above.
 
 Selection follows these rules:
 
@@ -91,7 +98,10 @@ Selection follows these rules:
    orientation (when the intent shows it), the requested topics' own sources,
    `scope` sources from required topics (current-scope corrections are never
    background), intent additions, the remaining `background` from topics that are
-   only required, then evidence (when the intent shows it).
+   only required, then evidence (when the intent shows it). A source that lists
+   `intents` is procedure for those intents (the agent-workflow policies, the
+   migration guide and the release-artifact runbook serve `change` and `operate`);
+   other intents' plans keep it as a binding pointer without its text.
 3. Read the selected sections **with their source preambles**. Corrections in a
    preamble qualify historical text farther down a specification. A section that
    a later decision changes also carries a **Current scope** note under its heading.
@@ -182,6 +192,10 @@ artifacts; retain catalog and generated navigation together. Design's
 `python scripts/check_docs.py`, which also runs in design CI, checks that every
 catalog section and scope section in a design-owned source exists exactly once.
 Sources in sibling repositories and the remaining checks require the delivery gate.
+`check` also reports how many level-2 specification sections some topic's sources
+reach; `check --unowned` lists the rest. This is a report, not a gate: agents choosing
+by meaning still search the specifications, so a gap is closed when a recurring
+request needs it.
 
 ## Authority, freshness and task memory
 
