@@ -1339,7 +1339,10 @@ implementation ([preset sections 3, 8 and 16](../specs/spec-preset-operations.md
   while the preset is noisy and the view's exact total is above zero, the same total
   the page shows. It stops at an exact zero, when the page closes or after a revision
   turns the alarm off. A Noisy marker sits beside the title and in the preset list; an
-  Alarm playing banner offers Mute on this screen.
+  Alarm playing banner offers Mute.
+- **Banner wording (user decision, 2026-11-03).** The button reads Mute. The playing
+  banner no longer says the alarm stops when no alerts match, and the muted banner no
+  longer says others still hear it. Both behaviors are unchanged.
 - **Blocked sound (user decision, 2026-11-03).** Browsers refuse sound until the page
   receives a user gesture, so a freshly loaded screen shows that the alarm is waiting
   and starts it on the next click on the page. Appchi cannot remove this step.
