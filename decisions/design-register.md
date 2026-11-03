@@ -1265,3 +1265,35 @@ failures inside suppositions, lets an opening instruction (with catalog `openers
 as "plan" and "let") decide before question words, and treats a question sentence as a
 question. Navigation choices only; no product requirement, authorization boundary,
 issue ID or REV number changes.
+
+## REV-58 — Noisy presets that sound an alarm (2026-11-03)
+
+User decision. The user asked for presets that can be noisy: while such a preset is
+open and has alerts, the page plays a loud sound meant to wake someone at night. They
+approved the generated alarm (a heavy action-trailer track, 27 seconds, looping), the
+[noisy preset design mock](https://claude.ai/artifact/9i9edScgrAKBYCxqrECxtF) and its
+implementation ([preset sections 3, 8 and 16](../specs/spec-preset-operations.md#3-saved-definition-and-initial-defaults)).
+
+- **Setting (user decision, 2026-11-03).** `noisy` is a saved boolean on the preset
+  definition, shared with everyone in the tenant like the other fields. A Sound tab in
+  the preset editor, after Group by, holds the Noisy preset switch, a Play sample button
+  and three notes on how the alarm behaves.
+- **When it sounds (user decision, 2026-11-03).** The results page loops the alarm
+  while the preset is noisy and the view's exact total is above zero, the same total
+  the page shows. It stops at an exact zero, when the page closes or after a revision
+  turns the alarm off. A Noisy marker sits beside the title and in the preset list; an
+  Alarm playing banner offers Mute on this screen.
+- **Blocked sound (user decision, 2026-11-03).** Browsers refuse sound until the page
+  receives a user gesture, so a freshly loaded screen shows that the alarm is waiting
+  and starts it on the next click on the page. Appchi cannot remove this step.
+- **Assistant-selected details.** An omitted `noisy` in create or replace means false,
+  and false is left out of command fingerprints so retries of earlier commands still
+  match, as for `group_by`. Migration 0061 adds `presets.noisy boolean NOT NULL DEFAULT
+  false`; older history snapshots without the field read as not noisy. Mute lasts for
+  the tab until the preset is reopened or the page reloads and is not stored, because
+  preset section 8 keeps personal settings out of browser storage. A loading or failed
+  total keeps the previous alarm state instead of counting as zero. Editor previews,
+  the Feed and dashboards never sound. The alarm is a static frontend asset with its
+  generator script committed beside it, so no API serves audio.
+
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
