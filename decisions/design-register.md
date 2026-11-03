@@ -1354,3 +1354,17 @@ implementation ([preset sections 3, 8 and 16](../specs/spec-preset-operations.md
   generator script committed beside it, so no API serves audio.
 
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-59 — Incident path on alert details (2026-11-03)
+
+User decision. The user reported that an alert opened from an incident showed Feed as
+its path, and asked for the incident instead, as an alert opened from a preset shows
+its preset ([incident section 15](../specs/spec-incident-operations.md#15-detail-and-mutation-ux-i3-i5);
+[shared navigation](../specs/spec-system-completion.md#3-navigation-and-visual-system)).
+
+- **Path (user decision, 2026-11-03).** The alert detail's breadcrumb shows Incidents
+  and the incident title, each linking to its page.
+- **Return and stepping (assistant-selected, 2026-11-03).** The rest of REV-25 follows:
+  a Back to incident action, and Previous and Next over the visible page of linked
+  alerts, skipping unavailable references. The browser-tab alert-list context holds the
+  source, so a direct alert link still starts at Feed. No API or stored data changes.

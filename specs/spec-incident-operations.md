@@ -1,5 +1,7 @@
 # Incidents
 
+**Later user decision — 2026-11-03 (REV-59):** an alert opened from an incident's linked alerts keeps that incident as its path; see [section 15](#15-detail-and-mutation-ux-i3-i5) and the [register](../decisions/design-register.md#rev-59--incident-path-on-alert-details-2026-11-03).
+
 **Later user decision — 2026-11-01 (REV-56):** incident list rows show their link counts as the detail computes them; see [section 14](#14-incident-list-and-search-i5) and the [register](../decisions/design-register.md#rev-56--link-counts-on-incident-list-rows-2026-11-01).
 
 **Later user decision — 2026-10-30 (REV-53):** a Reports page shows how incidents were handled in a chosen period, computed on request from lifecycle cycles and assignment activity; see [section 20](#20-incident-reports-i5-n3-rev-53) and the [register](../decisions/design-register.md#rev-53--incident-reports-by-period-2026-10-30).
@@ -109,6 +111,8 @@ This resolves incident-specific durations and parent-owned history retention, no
 Default to active incidents, sorted by last qualifying activity descending, then immutable incident identifier as a deterministic tie-breaker. Support Active, Resolved, and All views; filters for status, severity, assignee (including unassigned/me), creation source, originating rule, linked alert identifier, and created/activity/resolved time ranges. Offer sorting by creation time, last activity, fixed severity rank, and resolution time. Support exact incident-identifier lookup and search current title/description and current non-deleted note text using case-insensitive ANDed text terms; no incident CEL, regex, fuzzy matching, or advanced query language in the initial design. Use cursor pagination, default 50 and maximum 200 rows. Each row shows its section 7 link totals, counted per section 16 in the page's read; a row whose retained linked alert lacks current maintenance proof shows its total without a suppressed count instead of failing the page (REV-56). The list is a live view rather than a frozen cross-page snapshot; refresh from the first page to see reordered updates, preserve explicit selection by identifier, and do not promise snapshot pagination across concurrent changes.
 
 ### 15. Detail and mutation UX (I3, I5)
+
+**Alert path (REV-59).** Opening an alert from the linked-alerts table shows Incidents and the incident title as the alert detail's breadcrumb, with a Back to incident action. Previous and Next step through the visible page of linked alerts, skipping unavailable references. The source is remembered for the opened alert in the browser tab, so a direct alert link starts at Feed.
 
 **Current scope (REV-34):** Inactivity and retention deadlines are stored but not enforced, so do not present them as upcoming automatic actions; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other detail and mutation rules below remain normative.
 
