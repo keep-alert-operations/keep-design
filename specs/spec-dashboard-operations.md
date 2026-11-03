@@ -14,6 +14,12 @@ Dashboards have immutable UUIDs and tenant ownership. Active names are unique wi
 
 Save name and an ordered collection of panels with immutable panel UUID, preset UUID, optional custom title, layout and color thresholds. A dashboard may contain zero through 24 panels; zero is a valid empty state with an Add panel action for editors. New dashboards start empty. Panels reference only active presets in the same tenant, always their **current saved queries**; repeated references are allowed. Panel identity remains stable across rearrangement and edits; copy/new panels receive new IDs. Save no time range, free-text search, suppression switch, refresh interval, fullscreen state or individual user's preference.
 
+**Later user decision — 2026-11-03 (REV-57):** a panel has a type. `count` is the
+panel described in this document. `html` has an optional title and sanitized HTML
+content, references no preset and has no thresholds; it is never counted. A panel
+without `type` is `count`. A panel keeps its type for its lifetime. Allowed HTML,
+size and sanitizing rules are in [REV-57](../decisions/design-register.md#rev-57--dashboard-panel-types-and-html-panels-2026-11-03).
+
 ## 3. Panel titles and content
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
@@ -54,6 +60,10 @@ the pre-gesture draft. Count refresh does not rearrange the layout.
 Default is neutral for every value, avoiding an implied incident-severity mapping. A panel may define up to three increasing, distinct, nonnegative integer lower bounds with selected palette colors (`blue`, `green`, `amber`, `red`); the largest bound <= count applies. Bounds use exact integer arithmetic and the JSON decimal-string count representation. No arbitrary CSS, gradients, blinking, sounds or automatic action is accepted. A threshold is presentation only and never creates an incident, changes alert severity or sends a notification.
 
 A text/accessible label states the matching threshold, so color is not the only signal. Loading/unavailable/stale states use a separate status marker; do not give an old result a fresh threshold status without its stale label. Preview thresholds locally against returned counts without saving shared changes.
+
+**Later user decision — 2026-11-03 (REV-57):** HTML panels may carry the inline
+style properties REV-57 allows, inside their own content area only. Thresholds and
+count colors are unchanged.
 
 ## 6. Time, suppression and count meaning
 
@@ -160,6 +170,12 @@ All paths use `/api/tenants/{tenant_id}`. Bodies have the common 64 KiB raw limi
 
 Counts read current saved queries, not client-supplied replacement CEL for a saved reference. Preview may use an unsaved layout but still only references saved presets; test new CEL through preset preview. History uses 50/default, 200/max and 15-minute watermark cursors. Common 400/401/403/404/409/413/422/429/503 distinctions apply. Same-value saves commit a receipt without a new revision/history event.
 
+**Later user decision — 2026-11-03 (REV-57):** panel objects carry `type`
+(`count` or `html`); `html` panels carry `html` instead of `preset_id` and
+`thresholds`. Count, preview and reference routes consider `count` panels only.
+Validate also reports the parts of HTML content that sanitizing removed. Saving an
+existing panel ID with another type returns 422 `panel_type_changed`.
+
 ## 15. Deletion and history
 
 **Current scope (REV-34):** Daily history cleanup is not deployed; expired history stays unreadable without physical deletion; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion, retention windows and fences below remain normative.
@@ -196,6 +212,12 @@ chip sits beside the name. Dashboard list cards show the editor and a time relat
 to now without a revision number, and a stale panel's captured time is relative too.
 
 Use the system's selected light or dark palette, tabular numerals, visible focus, labeled count cards and text status alongside color. The visual reference and theme behavior are governed by [shared system section 3](spec-system-completion.md#3-navigation-and-visual-system). Announce an aggregated “Dashboard updated” politely after a batch; do not announce every second or every changed digit. Reduced-motion preference removes count transitions; do not animate counting through intermediate false values. A screen reader can read panel title, exact count, preset, freshness and threshold. Keyboard users can enter/exit fullscreen, open presets and operate all editing controls.
+
+**Later user decision — 2026-11-03 (REV-57):** the panel dialog has a fixed size for
+every type with a Panel type dropdown, settings on the left and a preview on the
+right. An HTML panel is labeled by its title or "HTML panel"; its content allows
+headings `h3`–`h6` only so it cannot break the page's heading order, and its content
+area scrolls without growing the panel.
 
 ## 17. Acceptance and observability
 

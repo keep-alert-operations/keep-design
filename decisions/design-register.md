@@ -1266,6 +1266,56 @@ as "plan" and "let") decide before question words, and treats a question sentenc
 question. Navigation choices only; no product requirement, authorization boundary,
 issue ID or REV number changes.
 
+## REV-57 — Dashboard panel types and HTML panels (2026-11-03)
+
+User decision. A dashboard panel has a type. Today's preset count panel is type
+`count`; a new `html` type shows sanitized HTML written by an editor. More types will
+follow, so each type carries its own settings and the panel dialog is built for a
+growing list
+([dashboard operations 2, 3, 5, 14 and 16](../specs/spec-dashboard-operations.md#2-saved-definition-and-initial-state)).
+The user chose the dialog from the canvas at
+https://claude.ai/artifact/193U2ejvHGUg2tjpUjWq6k.
+
+- **Types (user decision, 2026-11-03).** `count` keeps its preset reference, custom
+  title and thresholds unchanged. `html` has an optional title and HTML content and
+  references no preset. A panel sent without `type` is a `count` panel, so existing
+  definitions, retained revisions and older clients keep their meaning.
+- **Dialog (user decision, 2026-11-03).** Create and Edit panel open one dialog of a
+  fixed 1000 × 720 size whatever the type: a Panel type dropdown at the top (icon,
+  name and one-line description per type, with a search box), the chosen type's
+  settings on the left, a preview at the panel's current size on the right, and the
+  draft note with Cancel and Create/Apply at the bottom. Only the middle scrolls. On
+  smaller viewports the dialog shrinks to fit the screen.
+- **Sanitized HTML (user decision, 2026-11-03, accepting the assistant's proposed
+  defaults).** The server sanitizes on every save and stores and returns only the
+  sanitized HTML; the browser sanitizes again with the same allowlist before display.
+  Allowed elements: `p br strong em b i u s code pre blockquote ul ol li h3 h4 h5 h6
+  table thead tbody tr th td a span div hr`. Links allow `http`, `https` and `mailto`
+  and always open in a new tab with `rel="noopener noreferrer"`; relative links
+  are removed. The `style` attribute
+  keeps only `color`, `background-color`, `font-weight`, `font-style`, `text-align`,
+  `text-decoration`, `padding*`, `margin*`, `border*` and `border-radius`, with no
+  `url()`. Images are not allowed in this release. Content is at most 16,000
+  characters after sanitizing. Scripts, event handlers, iframes, forms, other URL
+  schemes and every other element or attribute are removed.
+- **Assistant-selected details.** A panel keeps its type: saving an existing panel ID
+  with another type is rejected with 422 `panel_type_changed`. Storage adds `type` and
+  a `content` JSON object for type-specific settings beside the count-only
+  `preset_id` and `thresholds` columns, so preset references stay database-enforced;
+  HTML panels hold `{"html": …}`. HTML panels are not part of count batches, never
+  block preset deletion and do not appear in preset reference lists.
+  `POST /dashboards/validate` reports what sanitizing removed, and the dialog warns
+  before saving. The panel content area scrolls and uses `contain: content`. An HTML
+  panel's accessible name is its title, else "HTML panel". Editors and admins write
+  HTML panels, as for every panel. The server sanitizes only after authorizing the
+  request, so an unauthenticated body is never parsed; style values also reject CSS
+  comments, and a link's own `target` and `rel` are not reported as removals.
+  Migration 0062 adds the columns and checks without rewriting rows; it follows
+  REV-58's 0061.
+
+This supersedes, for `html` panels only, section 2's rule that every panel references a
+preset and section 5's exclusion of arbitrary styling; count panels are unchanged.
+
 ## REV-58 — Noisy presets that sound an alarm (2026-11-03)
 
 User decision. The user asked for presets that can be noisy: while such a preset is
