@@ -220,6 +220,10 @@ The implementation must demonstrate: manual creation without alerts; explicit im
 - Measure p99 within two seconds on a seeded tenant of 20,000 cycles in 90 days and 200,000 activity rows, with the migration 0058 indexes in use (N3; reliability operations 5).
 - Check the browser page: loading placeholders, Refreshing… with figures kept, empty, partial and error states with Retry; light and dark themes, phone width, keyboard use and labels, the chart's table alternative, and breakdown rows opening the Incidents list filtered by group and created time.
 
+### Incident path on alert details (REV-59)
+
+- Check the browser: an alert opened from an incident's linked alerts shows Incidents and the incident title in its breadcrumb and Back to incident, Previous and Next stay inside the linked page and keep that path, an alert opened from a preset keeps its preset path, and a direct alert link starts at Feed.
+
 ### Incident list link counts (REV-56)
 
 - Verify every `GET /incidents` row returns `total_linked`, `suppressed` and `unavailable` equal to the detail for the same state, under the API's restricted role: distinct current references including unavailable ones, unlinked references excluded, dismissed or maintenance-suppressed retained alerts counted as suppressed, a resolved incident keeping its current links, and an empty incident at zero.
