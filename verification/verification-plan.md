@@ -164,6 +164,21 @@ continue without moving panel positions.
 
 Test duplicate references, same-PIT/clock parity with equivalent feed queries, relative-time boundary, saved-query edits during requests, name reuse, preset-delete/save races, same-value retries, stale revision/draft preservation, exact zero versus failed/partial results, purge and maintenance generation races, index switch, access loss during hidden/fullscreen/dirty views, responsive/keyboard layouts, threshold integer boundaries and deleted-history retention. Include counts/render observations in existing visibility measurements without storing sensitive query text in metrics. No additional dashboard-specific availability promise supersedes reliability objectives.
 
+### Panel types (REV-57)
+
+Verify that existing dashboards, retained revisions and requests without `type` read
+as `count` panels with unchanged counts, thresholds and preset references. Create,
+save, reload, copy, view as a viewer, open fullscreen and narrow, and read history for
+a dashboard mixing count and HTML panels, and one with only HTML panels, which makes
+no count request. Sanitizing must remove scripts, event handlers, `javascript:` and
+`data:` URLs, iframes, forms, images, headings above `h3` and style properties
+outside the allowlist on the server and again in the browser; validate reports the
+removals and the dialog shows them. Content over 16,000 characters is rejected.
+Changing an existing panel's type returns 422 `panel_type_changed`. HTML panels
+never block preset deletion or appear in preset references. The panel dialog keeps
+its size when the type changes, and its type dropdown, preview and focus handling
+work by keyboard.
+
 ## Tenants and access
 
 **Current scope (REV-34):** Physical audit cleanup is deferred; verify the 365-day read-time boundary rather than protected cleanup; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other cases remain required.
