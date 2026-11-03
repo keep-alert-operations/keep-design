@@ -1316,6 +1316,13 @@ https://claude.ai/artifact/193U2ejvHGUg2tjpUjWq6k.
 This supersedes, for `html` panels only, section 2's rule that every panel references a
 preset and section 5's exclusion of arbitrary styling; count panels are unchanged.
 
+**Later user correction — 2026-11-03.** The count preview in the panel dialog showed
+"—" until the dashboard was saved. It now counts the chosen preset as soon as it is
+picked: the saved query over current alerts without suppressed ones, as a dashboard
+counts it, through the existing `POST /alerts/counts`. Thresholds color that count as
+they are edited. The 2026-10-09 removal of draft-count requests on the board stands:
+unsaved panels on the board still ask to save the dashboard.
+
 ## REV-58 — Noisy presets that sound an alarm (2026-11-03)
 
 User decision. The user asked for presets that can be noisy: while such a preset is
