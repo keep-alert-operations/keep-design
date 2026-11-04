@@ -1323,6 +1323,12 @@ counts it, through the existing `POST /alerts/counts`. Thresholds color that cou
 they are edited. The 2026-10-09 removal of draft-count requests on the board stands:
 unsaved panels on the board still ask to save the dashboard.
 
+**Later user decision — 2026-11-04.** The `style` attribute of an HTML panel also keeps
+`font-size`, on the server and in the browser. Assistant-selected: `font-size` follows
+the same value rules as the other allowed properties and has no size limit, like
+`padding` and `margin`, because the content area scrolls and contains its content, so
+a large size affects only that panel.
+
 ## REV-58 — Noisy presets that sound an alarm (2026-11-03)
 
 User decision. The user asked for presets that can be noisy: while such a preset is
