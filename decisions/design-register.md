@@ -1377,3 +1377,18 @@ its preset ([incident section 15](../specs/spec-incident-operations.md#15-detail
   a Back to incident action, and Previous and Next over the visible page of linked
   alerts, skipping unavailable references. The browser-tab alert-list context holds the
   source, so a direct alert link still starts at Feed. No API or stored data changes.
+
+## REV-60 — Panels move on the grid only (2026-11-04)
+
+User decision. The user asked to remove the Move up and Move down actions from
+dashboard panels ([dashboard section 4](../specs/spec-dashboard-operations.md#4-layout-and-responsive-behavior)).
+
+- **Menu (user decision, 2026-11-04).** The panel options menu holds Edit panel and
+  Delete panel. This supersedes the keyboard Move up/down requirement in section 4.
+- **Narrow screens (user decision, 2026-11-04).** The grip stays hidden below 1,024 CSS
+  pixels, so panels cannot be rearranged there. The user confirmed this after being
+  told those actions were the only way to reorder at that width.
+- **Remaining ways to move (assistant-selected, 2026-11-04).** The grip still moves a
+  panel by pointer or arrow keys, so keyboard users keep the same reach on the desktop
+  grid. Saved layouts, the API and the preset editor's column Move up and Move down
+  are unchanged.
