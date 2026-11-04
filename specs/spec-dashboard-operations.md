@@ -30,6 +30,11 @@ Use a 12-column desktop grid. Panel width is 3 through 12 columns in steps of on
 
 Below 1,024 CSS pixels, render two equal columns; below 640, one. Order is saved y, x, then panel UUID. Responsive display does not write the shared desktop layout. Provide keyboard Move up/down and keyboard width/height resizing with the same packing preview, focus retention and announcements. Counts remain readable at 200% zoom and controls do not require dragging.
 
+**Later user decision — 2026-11-04 (REV-60):** the panel options menu no longer has
+Move up and Move down. Panels are moved with the grip, by pointer or arrow keys, and
+the grip shows from 1,024 CSS pixels. Below that width the layout displays but cannot
+be rearranged. This supersedes the Move up/down requirement above.
+
 **Later user decision — 2026-10-28 (REV-50):** panel width grows one column at a
 time from 3 to the full 12-column row, and height has no maximum beyond y+h <= 100.
 Width and height are set only by resizing on the grid; the panel create/edit dialog
