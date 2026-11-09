@@ -1544,3 +1544,38 @@ https://claude.ai/artifact/Jq25myWGjN3oAymCuc4Tdu.
 This extends section 5's palette; the rest of section 5 and every other panel type
 are unchanged. Original issue IDs and REV numbering are unchanged. Executed evidence
 belongs in delivery.
+
+## REV-66 — Panel links (2026-11-09)
+
+User decision. Every dashboard panel type (count, table, HTML and image) may have a
+panel link. When one is set, the panel shows a button that opens the link's address.
+The user asked for this on 2026-11-09 and approved the design from the canvas at
+https://claude.ai/artifact/4EeppYSGDV9QfWXR7Td6m9 ("Build it").
+
+- **Settings (user decision, 2026-11-09).** The panel dialog ends every type's
+  settings with a Panel link section: Link (optional) and Button text (optional),
+  plus Remove link. Blank button text shows "Open link". The dialog's preview shows
+  the button before the dashboard is saved.
+- **Button (user decision, 2026-11-09).** The button sits at the end of the title
+  row with an external-link icon and opens the address in a new tab. An untitled
+  HTML panel shows a slim row with only the button; an untitled image shows it over
+  the image's top-right corner. When the title row is too narrow, only the icon
+  shows. While panels are moved or resized the button shows but does not open. The
+  count panel's preset link still opens the preset; the button sits above it.
+- **Stored values (assistant-selected, 2026-11-09).** A panel carries `link`, either
+  `null` or `{url, label}`. `url` is an absolute `http` or `https` address with a
+  host, at most 2,048 printable ASCII characters, with no spaces and no user name or
+  password. `http` is allowed because internal tools often have no TLS; image
+  addresses stay `https` only. `label` is optional trimmed NFC single-line text of
+  at most 40 characters using the name character exclusions; blank is stored as
+  `null`. The link lives in the panel's `content`, so no migration is needed;
+  panels saved before REV-66 have no link.
+- **Safety (assistant-selected, 2026-11-09).** The server never fetches the address.
+  The browser opens it with `noopener noreferrer`, and the address shows on hover and
+  focus so people can see where it goes. Like HTML panel links, it is set by
+  editors and shown to everyone who can read the dashboard.
+
+This extends section 2's panel definition and section 3's panel content for every
+panel type; counts, thresholds, references and layout are unchanged. Original issue
+IDs and REV numbering are unchanged; REV-65 is held by ServiceNow ticket panels,
+built in parallel. Executed evidence belongs in delivery.
