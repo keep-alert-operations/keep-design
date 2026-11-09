@@ -233,6 +233,19 @@ connected. Answers are reused for 30 seconds and concurrent requests for the sam
 query share one call. The address's path and query never appear in responses or
 logs. Only super admins see the Integrations page and its Test connection action.
 
+### Panel links (REV-66)
+
+Verify that count, table, HTML, image and ServiceNow panels each save, reload, copy and show a
+panel link, with and without button text, to editors, viewers and in fullscreen, and
+that removing the link removes the button. `http` and `https` addresses up to 2,048
+characters are accepted; other schemes (`javascript:`, `data:`, `ftp:`), relative
+addresses, spaces, a user name or password, and button text over 40 characters or
+with line breaks are rejected with 422. Panels saved before REV-66 load with no
+button, and retried pre-REV-66 commands still match. The button opens a new tab with
+no referrer, is named by its text, works by keyboard, keeps the count panel's preset
+link working, and is inactive while panels are arranged. The dialog shows the
+button in its preview before saving.
+
 ## Tenants and access
 
 **Current scope (REV-34):** Physical audit cleanup is deferred; verify the 365-day read-time boundary rather than protected cleanup; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other cases remain required.

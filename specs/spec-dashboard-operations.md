@@ -48,6 +48,12 @@ method. Its count comes from outside Appchi and the panel dialog says so.
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
 
+**Later user decision — 2026-11-09 (REV-66):** every panel type may have a panel
+link: an `http` or `https` address and optional button text (blank shows "Open
+link"). A panel with a link shows a button at the end of its title row that opens the
+address in a new tab; untitled panels show the button in a row of its own or, for an
+image, over its top-right corner. See [REV-66](../decisions/design-register.md#rev-66--panel-links-2026-11-09).
+
 ## 4. Layout and responsive behavior
 
 Use a 12-column desktop grid. Panel width is 3 through 12 columns in steps of one; height is 2 or more grid units with no maximum other than the grid bound, each unit 48 CSS pixels, with 12-pixel gaps following the user's 2026-09-24 visual reference. Default panel is 3 by 2. Store integer x/y/w/h, nonnegative x/y, x+w <= 12 and y+h <= 100. Reject overlapping rectangles or duplicate IDs on save. Add places a panel into the first fitting row-major gap. Editor drag/resize may preview deterministic downward displacement, but the submitted whole layout must already be valid; the server does not silently rearrange it.
@@ -256,6 +262,11 @@ says whether the counting service is configured, and `POST /tenants/{tenant_id}/
 returns one result per query. Super admins read `GET /admin/integrations/ticket-count`
 and run `POST /admin/integrations/ticket-count/test`.
 
+**Later user decision — 2026-11-09 (REV-66):** every panel object may carry `link`,
+`null` or `{url, label}`. Panels saved before REV-66 read back with `link: null`, and
+retries of commands sent without `link` still match their receipts. An invalid
+address or text returns 422 `invalid_fields`.
+
 ## 15. Deletion and history
 
 **Current scope (REV-34):** Daily history cleanup is not deployed; expired history stays unreadable without physical deletion; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion, retention windows and fences below remain normative.
@@ -311,6 +322,12 @@ footer link to the preset, all reachable by keyboard.
 
 **Later user decision — 2026-11-09 (REV-65):** a ServiceNow panel is labeled by its
 title and its count or state in words, so the threshold color is never the only cue.
+
+**Later user decision — 2026-11-09 (REV-66):** a panel link is a real link named by
+its button text with "(opens in a new tab)"; hovering or focusing it shows the
+address. When the title row is too narrow, only its icon shows and the name stays.
+It opens with no referrer and no opener, and does not open while panels are being
+moved or resized.
 
 ## 17. Acceptance and observability
 
