@@ -30,12 +30,21 @@ preset like a count panel, with an optional custom title and `rows` (1–50, def
 10), and no thresholds. It shows the preset's latest matching alerts in its saved
 columns, newest first by last received. See [REV-63](../decisions/design-register.md#rev-63--alert-table-panels-2026-11-09).
 
+**Later user decision — 2026-11-09 (REV-65):** a `servicenow` panel shows how many
+ServiceNow incidents a team has, from the ticket counting service, with an optional
+title, a team, a ticket state, a detection method and count thresholds. It references
+no preset and is never part of a count batch. See [REV-65](../decisions/design-register.md#rev-65--servicenow-ticket-panels-2026-11-09).
+
 ## 3. Panel titles and content
 
 **Later user decision — 2026-11-09 (REV-63):** a table panel shows its preset's
 latest `rows` alerts instead of a count, with the same title rules and preset link,
 and states how many of the matching alerts it shows. Columns that do not fit are
 hidden from the right, keeping Alert; extra rows scroll inside the panel.
+
+**Later user decision — 2026-11-09 (REV-65):** a ServiceNow panel's default title is
+"<team> tickets". Under the title it states the team, ticket state and detection
+method. Its count comes from outside Appchi and the panel dialog says so.
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
 
@@ -177,11 +186,19 @@ query semantics, revision checks or snapshot provenance.
 
 If retention purged an alert since PIT capture, exact counts require a new PIT under the selected purge-generation contract; do not subtract the rows seen on one page. If maintenance fan-out is pending, label the snapshot Updating suppression; searchable position alone cannot claim completion. Elasticsearch failure leaves shared definitions and editing available through PostgreSQL. PostgreSQL authority failure prevents serving new protected results from cached definitions.
 
+**Later user decision — 2026-11-09 (REV-65):** each ServiceNow panel shows its own
+result: a count, Team not found, No count, ServiceNow isn't connected, or, when the
+counting service fails, its last count greyed with its age and no threshold color.
+
 ## 12. Count caching and load control
 
 Initially **do not persist or reuse completed count results server-side**. Deduplicate repeated panels within a request, cache compiled expressions under the selected version/digest checks, and use one in-flight request plus a pending refresh per browser dashboard. This avoids authorizing a stale cached definition or freezing relative time. Connected foreground views coalesce changes in the live merge window of [technical baseline section 19](spec-alert-history-technical.md#19-browser-refresh-reconnect-and-relative-time) and refresh relative expressions on the selected one-second clock; static queries refresh on committed searchable/configuration/purge/maintenance changes and Refresh now. No empty periodic query runs merely to animate the clock.
 
 Bound each request to 24 panels and the saved dashboard's actual references; draft previews have the same limit. Capacity-profile limits bound concurrent ES requests per process/tenant with fair scheduling and 429/Retry-After on exhaustion, preserving the existing p99 two-second count and five-second end-to-end objectives. A later cache requires a separately reviewed version/time/purge-safe design; it is not necessary for the initial system design. Qualify 24 distinct queries and repeated-preset cases under the selected concurrent-client workloads.
+
+**Later user decision — 2026-11-09 (REV-65):** ServiceNow ticket counts are not alert
+counts. The Product API reuses each counting-service answer for 30 seconds (failures
+for 10 seconds) and sends one request per team, state and detection at a time.
 
 ## 13. Storage and reference transactions
 
@@ -232,6 +249,12 @@ security policy. An unknown image in a saved or validated panel returns 422
 `rows`. Preset references and deletion checks include them; count batches and
 dashboard previews do not. `POST /presets/preview` accepts `newest_first` with a saved
 `preset_id`, replacing the saved sort with last received descending.
+
+**Later user decision — 2026-11-09 (REV-65):** `servicenow` panels carry `team`,
+`ticket_state` and `detection` plus `thresholds`. `GET /tenants/{tenant_id}/ticket-counts/status`
+says whether the counting service is configured, and `POST /tenants/{tenant_id}/ticket-counts`
+returns one result per query. Super admins read `GET /admin/integrations/ticket-count`
+and run `POST /admin/integrations/ticket-count/test`.
 
 ## 15. Deletion and history
 
@@ -285,6 +308,9 @@ an Open link for linked images. Linked images load with no referrer.
 **Later user decision — 2026-11-09 (REV-63):** a table panel is labeled by its title,
 else its preset name; its table has column headers, rows that are links and a
 footer link to the preset, all reachable by keyboard.
+
+**Later user decision — 2026-11-09 (REV-65):** a ServiceNow panel is labeled by its
+title and its count or state in words, so the threshold color is never the only cue.
 
 ## 17. Acceptance and observability
 
