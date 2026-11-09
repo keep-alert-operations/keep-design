@@ -1544,3 +1544,68 @@ https://claude.ai/artifact/Jq25myWGjN3oAymCuc4Tdu.
 This extends section 5's palette; the rest of section 5 and every other panel type
 are unchanged. Original issue IDs and REV numbering are unchanged. Executed evidence
 belongs in delivery.
+
+## REV-65 — ServiceNow ticket panels (2026-11-09)
+
+User decision. A new dashboard panel type, `servicenow`, shows how many ServiceNow
+incidents a team has right now, as a number colored by thresholds, like Keep's
+"Service Now" widget
+([dashboard operations 2, 3, 11, 12, 14 and 16](../specs/spec-dashboard-operations.md#2-saved-definition-and-initial-state)).
+The user approved the design from the canvas at
+https://claude.ai/artifact/Cz4RDE8QUBt35p4d1KrZ1e and removed its queue link.
+
+- **Settings (user decision, 2026-11-09).** A ServiceNow panel has an optional custom
+  title (blank shows "<team> tickets"), a team (free text, 1–200 characters), a
+  ticket state (Open, In progress or Both), a detection method (Hamal: incidents the
+  monitoring center raised; Direct: incidents reported straight to the team; All)
+  and up to three count thresholds with the same rules and colors as count panels.
+  It has no link and references no preset. It appears in the Panel type list as
+  "ServiceNow tickets".
+- **Where the count comes from (user decision, 2026-11-09).** The company's ticket
+  counting service, the same one Keep uses, answers one HTTP GET per query. The
+  panel's settings become query parameters exactly as Keep sends them: `team`,
+  `state` (`new`, `in_progress` or `all`) and `system_failure` (`true` for Hamal,
+  `false` for Direct, absent for All). Parameters already in the configured address
+  are kept; the panel's values replace same-named ones. `{"count": n}` shows n. How
+  the service queries ServiceNow is outside Appchi.
+- **Configuration (user decision, 2026-11-09).** The service address is deployment
+  configuration, like the Grafana connection
+  ([operator operations 14](../specs/spec-operator-operations.md#14-platform-grafana-configuration-and-compatibility)):
+  the secret `APPCHI_TICKET_COUNT_URL`, `https` only, mounted only into the Product
+  API, and it may carry an access key. Nobody edits it in the UI. Super admins see a
+  read-only Integrations page with its status, host, last answer or error and a Test
+  connection action; the path and query are never shown or logged. While it is not
+  configured, the type is listed but disabled and existing panels say ServiceNow isn't
+  connected.
+- **Load control (user decision, 2026-11-09).** Each Product API process shares
+  answers for the same team, state and detection for 30 seconds across viewers and
+  tenants, and sends one request per key at a time; failures are reused for 10
+  seconds. Panels refresh about every 60 seconds, on Refresh counts and when the tab
+  becomes visible again, so a shown count can be up to about 90 seconds old. This
+  is separate from alert counts, which section 12 still never reuses.
+- **Results that differ from Keep (user decision, 2026-11-09, accepting the canvas).**
+  A "Team not found" answer, with a 2xx or 4xx status, shows Team not found instead
+  of 0. Valid JSON without a whole-number count shows No count instead of 0. A
+  timeout, connection error, other error status, redirect, oversized or non-JSON
+  reply keeps the last count greyed
+  with no threshold color and its age; with no earlier count it shows that the count
+  is unavailable.
+- **Assistant-selected details.** Storage keeps `team`, `ticket_state` (`open`,
+  `in_progress`, `both`) and `detection` (`hamal`, `direct`, `all`) in `content` and
+  thresholds in `thresholds`; migration 0065 widens the panel checks without
+  rewriting rows. The browser asks for counts with
+  `POST /api/tenants/{tenant_id}/ticket-counts`, sending up to 24 queries rather than
+  panel IDs, so unsaved previews use the same call; each query has its own result
+  (`count`, `not_found`, `no_count`, `unavailable`, `not_configured`) and a failing
+  service never fails the request. Counts are decimal strings on the wire, like other
+  dashboard counts. Outbound requests time out after 5 seconds, do
+  not follow redirects, ask for an uncompressed reply and read at most 64 KiB. At most
+  20 requests per process run at once; a query that finds no free slot within 3
+  seconds is reported unavailable without being remembered as a service failure. An
+  optional `APPCHI_TICKET_COUNT_CA_FILE` names a trusted CA for the service. Teams are free text because the
+  service lists no teams. ServiceNow panels are not part of count batches; a new one
+  starts at 3 × 3. Viewers see them, as for every panel.
+
+This adds a panel type beside sections 2, 3 and 14; count, HTML, image and table
+panels are unchanged. Original issue IDs and REV numbering are unchanged. Executed
+evidence belongs in delivery.
