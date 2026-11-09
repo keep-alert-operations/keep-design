@@ -219,9 +219,23 @@ light and dark theme while custom colors do not, on the board and in the dashboa
 list's thumbnails. The picker's tabs, swatches, hex field and hue slider work by
 keyboard, Escape closes it, and picks show in the dialog's preview before saving.
 
+### ServiceNow ticket panels (REV-65)
+
+Verify that a ServiceNow panel saves its team, ticket state, detection method and
+thresholds, reloads, copies, keeps its type and shows to viewers and in fullscreen,
+and that an empty or over-long team is rejected with 422. Against a fake counting
+service, check the request parameters for each state and detection, merging with
+parameters already in the configured address, and each result: a count with its
+threshold color, Team not found, No count, and a timeout, error status, redirect,
+oversized or non-JSON reply showing the last count greyed with its age. Without
+`APPCHI_TICKET_COUNT_URL` the type is disabled and panels say ServiceNow isn't
+connected. Answers are reused for 30 seconds and concurrent requests for the same
+query share one call. The address's path and query never appear in responses or
+logs. Only super admins see the Integrations page and its Test connection action.
+
 ### Panel links (REV-66)
 
-Verify that count, table, HTML and image panels each save, reload, copy and show a
+Verify that count, table, HTML, image and ServiceNow panels each save, reload, copy and show a
 panel link, with and without button text, to editors, viewers and in fullscreen, and
 that removing the link removes the button. `http` and `https` addresses up to 2,048
 characters are accepted; other schemes (`javascript:`, `data:`, `ftp:`), relative
