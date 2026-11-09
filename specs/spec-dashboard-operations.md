@@ -20,7 +20,17 @@ content, references no preset and has no thresholds; it is never counted. A pane
 without `type` is `count`. A panel keeps its type for its lifetime. Allowed HTML,
 size and sanitizing rules are in [REV-57](../decisions/design-register.md#rev-57--dashboard-panel-types-and-html-panels-2026-11-03).
 
+**Later user decision — 2026-11-09 (REV-63):** a `table` panel references one saved
+preset like a count panel, with an optional custom title and `rows` (1–50, default
+10), and no thresholds. It shows the preset's latest matching alerts in its saved
+columns, newest first by last received. See [REV-63](../decisions/design-register.md#rev-63--alert-table-panels-2026-11-09).
+
 ## 3. Panel titles and content
+
+**Later user decision — 2026-11-09 (REV-63):** a table panel shows its preset's
+latest `rows` alerts instead of a count, with the same title rules and preset link,
+and states how many of the matching alerts it shows. Columns that do not fit are
+hidden from the right, keeping Alert; extra rows scroll inside the panel.
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
 
@@ -77,6 +87,9 @@ There is **no separate dashboard time picker** in the initial release. Time rest
 Count distinct retained logical alert rows, not occurrences, deliveries, notes or incident links, across the complete effective query. Preset sort/columns do not affect counts. Duplicate panels using the same preset share one query result. No aggregation over history, historical count chart or historical dashboard replay is introduced.
 
 ## 7. Drill-through
+
+**Later user decision — 2026-11-09 (REV-63):** in a table panel, a row opens that
+alert's details; the title and the "Open preset" footer link open the preset as above.
 
 Clicking a ready panel opens its saved preset in the same tenant, with empty free-text search and Include suppressed off. Use the current saved columns/sort and a fresh feed snapshot; pass observed dashboard/preset revision and count observation as navigation context only. Label “Opened current results; count may have changed” when the new feed clock/revision differs. Do not promise that an evolving feed reproduces an earlier count, pin a hidden historical query, or modify the preset. Browser back returns to the dashboard and refreshes it. Support ordinary open-in-new-tab links. Loading/stale panels still allow opening an accessible preset; a deleted/inaccessible resource uses the ordinary 404/access-loss flow.
 
@@ -187,6 +200,11 @@ Counts read current saved queries, not client-supplied replacement CEL for a sav
 Validate also reports the parts of HTML content that sanitizing removed. Saving an
 existing panel ID with another type returns 422 `panel_type_changed`.
 
+**Later user decision — 2026-11-09 (REV-63):** `table` panels carry `preset_id` and
+`rows`. Preset references and deletion checks include them; count batches and
+dashboard previews do not. `POST /presets/preview` accepts `newest_first` with a saved
+`preset_id`, replacing the saved sort with last received descending.
+
 ## 15. Deletion and history
 
 **Current scope (REV-34):** Daily history cleanup is not deployed; expired history stays unreadable without physical deletion; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion, retention windows and fences below remain normative.
@@ -229,6 +247,10 @@ every type with a Panel type dropdown, settings on the left and a preview on the
 right. An HTML panel is labeled by its title or "HTML panel"; its content allows
 headings `h3`–`h6` only so it cannot break the page's heading order, and its content
 area scrolls without growing the panel.
+
+**Later user decision — 2026-11-09 (REV-63):** a table panel is labeled by its title,
+else its preset name; its table has column headers, rows that are links and a
+footer link to the preset, all reachable by keyboard.
 
 ## 17. Acceptance and observability
 

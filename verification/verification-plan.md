@@ -181,6 +181,18 @@ never block preset deletion or appear in preset references. The panel dialog kee
 its size when the type changes, and its type dropdown, preview and focus handling
 work by keyboard.
 
+### Alert table panels (REV-63)
+
+Verify that a table panel saves its preset and `rows` (1 and 50 accepted, 0 and 51
+rejected), reloads, copies and shows to viewers and in fullscreen. It lists the
+preset's latest matching alerts newest first even when the preset sorts otherwise,
+excludes suppressed alerts, follows the preset's saved columns, hides columns from the
+right as the panel narrows while keeping Alert, and scrolls rows that do not fit. A
+preset edit reloads the panel; the dashboard's live updates refresh it. Table panels
+block preset deletion and appear in preset references, never enter count batches,
+and keep their type (422 `panel_type_changed`). `newest_first` without a saved preset
+is rejected. Rows and links work by keyboard.
+
 ## Tenants and access
 
 **Current scope (REV-34):** Physical audit cleanup is deferred; verify the 365-day read-time boundary rather than protected cleanup; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other cases remain required.
