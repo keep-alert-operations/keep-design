@@ -104,6 +104,12 @@ list that overlays the dialog below the field; a chevron marks it as a dropdown,
 choosing a preset shows its name in the field. First page and Next page sit at the
 bottom of the open list. Preset paging, search and selected-reference rules are unchanged.
 
+**Later user decision — 2026-11-09 (REV-61):** pressing E while the pointer is over a
+panel opens Edit panel for that panel, exactly as the panel options menu item would.
+When no panel is under the pointer, E edits the panel holding keyboard focus. It needs
+edit access and does nothing in fullscreen, while typing, or while a dialog, menu or
+drag is open. The Edit panel menu item shows the E hint.
+
 **Later user correction — 2026-10-09:** replace Pause updates with Discard changes
 in the main dashboard toolbar. Discard requires edit access and is enabled only
 for an unsaved draft while commands are unlocked; its existing confirmation and
