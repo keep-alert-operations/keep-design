@@ -1472,3 +1472,42 @@ https://claude.ai/artifact/DBAYiG4UFA3YEtsJec69w2
     rewriting rows.
 
 This extends REV-57's panel types; HTML panels still remove images.
+
+## REV-63 — Alert table panels (2026-11-09)
+
+User decision. A new dashboard panel type, `table`, shows the latest alerts of a saved
+preset as a table, like the preset's own results
+([dashboard operations 2, 3, 7, 14 and 16](../specs/spec-dashboard-operations.md#2-saved-definition-and-initial-state)).
+The user chose the design from the canvas at
+https://claude.ai/artifact/XscgPgm7y16jQqcwyAaVvi.
+
+- **Settings (user decision, 2026-11-09).** A table panel references one saved preset,
+  like a count panel, with an optional custom title and a number of alerts to show,
+  `rows`, from 1 to 50 (10 by default). It has no thresholds and its top bar stays
+  neutral. It appears in the Panel type list as "Alert table".
+- **What it shows (user decision, 2026-11-09, accepting the canvas's proposed
+  defaults).** The latest `rows` alerts matching the preset's current saved query,
+  newest first by last received, whatever the preset's own sort; default suppression
+  exclusion and no free-text search, as for counts. Columns are the preset's saved
+  columns, read-only. Columns that do not fit the panel's width are hidden from the
+  right; the Alert column is always kept. Rows that do not fit the panel's height
+  scroll inside it. Rows have no checkboxes, bulk actions or row menu: a row opens
+  the alert, the title and an "Open preset" footer link open the preset (section 7),
+  and the footer states how many of the matching alerts are shown.
+- **Assistant-selected details.** Storage reuses `preset_id` for the reference, so
+  table panels block preset deletion and appear in preset references exactly like
+  count panels, and keeps `{"rows": n}` in `content`; thresholds stay empty. Table
+  panels are not part of count batches. The browser reads the rows through the saved
+  preset preview (`POST /presets/preview` with `preset_id` and `expected_revision`),
+  which gains `newest_first`: allowed only with a saved preset, it replaces the saved
+  sort with last received descending, so the server still reads the saved query and
+  fences it by revision; a changed preset reloads the panel. The panel reloads with
+  the dashboard's live updates and refresh. A new table panel starts at 6 × 6 grid
+  units so its rows have room. Viewers see table panels, as for every panel. A table panel's accessible name is its title, else the preset name.
+  Migration 0064 widens the panel type check to `table` beside REV-62's `image` and
+  ties `preset_id` to `count` and `table` panels without rewriting rows; it follows
+  REV-62's 0063, which was built in parallel and merged first.
+
+This extends, for `table` panels, section 2's preset reference and section 3's
+content rules; count, HTML and image panels are unchanged. Original issue IDs and REV
+numbering are unchanged. Executed evidence belongs in delivery.

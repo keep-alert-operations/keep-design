@@ -25,7 +25,17 @@ an `https` image address with an optional title, description and fit (`contain` 
 `cover`). They reference no preset, have no thresholds and are never counted. File
 types, limits and checks are in [REV-62](../decisions/design-register.md#rev-62--image-panels-2026-11-09).
 
+**Later user decision — 2026-11-09 (REV-63):** a `table` panel references one saved
+preset like a count panel, with an optional custom title and `rows` (1–50, default
+10), and no thresholds. It shows the preset's latest matching alerts in its saved
+columns, newest first by last received. See [REV-63](../decisions/design-register.md#rev-63--alert-table-panels-2026-11-09).
+
 ## 3. Panel titles and content
+
+**Later user decision — 2026-11-09 (REV-63):** a table panel shows its preset's
+latest `rows` alerts instead of a count, with the same title rules and preset link,
+and states how many of the matching alerts it shows. Columns that do not fit are
+hidden from the right, keeping Alert; extra rows scroll inside the panel.
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
 
@@ -82,6 +92,9 @@ There is **no separate dashboard time picker** in the initial release. Time rest
 Count distinct retained logical alert rows, not occurrences, deliveries, notes or incident links, across the complete effective query. Preset sort/columns do not affect counts. Duplicate panels using the same preset share one query result. No aggregation over history, historical count chart or historical dashboard replay is introduced.
 
 ## 7. Drill-through
+
+**Later user decision — 2026-11-09 (REV-63):** in a table panel, a row opens that
+alert's details; the title and the "Open preset" footer link open the preset as above.
 
 Clicking a ready panel opens its saved preset in the same tenant, with empty free-text search and Include suppressed off. Use the current saved columns/sort and a fresh feed snapshot; pass observed dashboard/preset revision and count observation as navigation context only. Label “Opened current results; count may have changed” when the new feed clock/revision differs. Do not promise that an evolving feed reproduces an earlier count, pin a hidden historical query, or modify the preset. Browser back returns to the dashboard and refreshes it. Support ordinary open-in-new-tab links. Loading/stale panels still allow opening an accessible preset; a deleted/inaccessible resource uses the ordinary 404/access-loss flow.
 
@@ -208,6 +221,11 @@ readers with a strong ETag, `private, no-cache`, `nosniff` and a sandbox content
 security policy. An unknown image in a saved or validated panel returns 422
 `image_unavailable`.
 
+**Later user decision — 2026-11-09 (REV-63):** `table` panels carry `preset_id` and
+`rows`. Preset references and deletion checks include them; count batches and
+dashboard previews do not. `POST /presets/preview` accepts `newest_first` with a saved
+`preset_id`, replacing the saved sort with last received descending.
+
 ## 15. Deletion and history
 
 **Current scope (REV-34):** Daily history cleanup is not deployed; expired history stays unreadable without physical deletion; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion, retention windows and fences below remain normative.
@@ -256,6 +274,10 @@ title or "Image panel", and its image's alternative text is its description, els
 title, else "Image panel". It shows a loading state that keeps
 the panel's size and, when the image cannot load, "Image unavailable" in text, with
 an Open link for linked images. Linked images load with no referrer.
+
+**Later user decision — 2026-11-09 (REV-63):** a table panel is labeled by its title,
+else its preset name; its table has column headers, rows that are links and a
+footer link to the preset, all reachable by keyboard.
 
 ## 17. Acceptance and observability
 
