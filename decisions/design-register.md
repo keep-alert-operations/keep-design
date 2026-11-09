@@ -1392,3 +1392,19 @@ dashboard panels ([dashboard section 4](../specs/spec-dashboard-operations.md#4-
   panel by pointer or arrow keys, so keyboard users keep the same reach on the desktop
   grid. Saved layouts, the API and the preset editor's column Move up and Move down
   are unchanged.
+
+## REV-61 — E opens Edit panel (2026-11-09)
+
+User decision. The user asked that pressing E while hovering a dashboard panel open
+its Edit panel dialog ([dashboard section 8](../specs/spec-dashboard-operations.md#8-shared-editing-copying-and-conflicts)).
+
+- **Shortcut (user decision, 2026-11-09).** With the pointer over a panel, E opens the
+  same Edit panel dialog as the panel options menu. Apply still changes only the draft.
+- **Keyboard reach (assistant-selected, 2026-11-09).** When no panel is under the
+  pointer, E edits the panel holding focus, such as a focused grip, so keyboard users
+  get the same shortcut. The Edit panel menu item shows a muted E and declares
+  `aria-keyshortcuts`.
+- **When it is ignored (assistant-selected, 2026-11-09).** E does nothing without edit
+  access, in fullscreen, with Ctrl, Alt or Meta held, while typing in a field, while a
+  dialog or menu is open, during a drag, or while commands are locked, matching when
+  the menu item is unavailable.
