@@ -209,6 +209,16 @@ block preset deletion and appear in preset references, never enter count batches
 and keep their type (422 `panel_type_changed`). `newest_first` without a saved preset
 is rejected. Rows and links work by keyboard.
 
+### Threshold color picker (REV-64)
+
+Verify that a count panel saves, reloads, copies and shows each palette name and a
+custom `#RRGGBB` color, that lower-case hex is stored upper case, and that other
+values (`#abc`, `pink`, CSS such as `rgb(1,2,3)`) are rejected with 422. Panels saved
+with `blue`, `green`, `amber` or `red` look as before. Palette colors change with the
+light and dark theme while custom colors do not, on the board and in the dashboard
+list's thumbnails. The picker's tabs, swatches, hex field and hue slider work by
+keyboard, Escape closes it, and picks show in the dialog's preview before saving.
+
 ## Tenants and access
 
 **Current scope (REV-34):** Physical audit cleanup is deferred; verify the 365-day read-time boundary rather than protected cleanup; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other cases remain required.

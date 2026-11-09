@@ -1511,3 +1511,36 @@ https://claude.ai/artifact/XscgPgm7y16jQqcwyAaVvi.
 This extends, for `table` panels, section 2's preset reference and section 3's
 content rules; count, HTML and image panels are unchanged. Original issue IDs and REV
 numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-64 — Threshold color picker (2026-11-09)
+
+User decision. A count panel's threshold color is chosen from a palette of named
+colors or entered as a custom color, like Grafana's color picker, instead of the four
+fixed colors of [dashboard operations 5](../specs/spec-dashboard-operations.md#5-colors-and-thresholds).
+The user approved the design from the canvas at
+https://claude.ai/artifact/Jq25myWGjN3oAymCuc4Tdu.
+
+- **Picker (user decision, 2026-11-09).** Each threshold shows a color button with
+  the color and its name (or hex value). It opens a picker with two tabs. Colors
+  offers eight hues (red, orange, amber, green, teal, blue, purple, gray), each in
+  five shades from lightest to darkest. Custom offers a saturation and brightness
+  area, a hue slider and a hex field. A pick applies to the dialog's preview at once;
+  the dashboard still saves only when the editor saves it.
+- **Stored values (assistant-selected, accepted by the user 2026-11-09).** `color` is
+  either a palette name — the hue alone for the middle shade, or the hue prefixed by
+  `lightest-`, `light-`, `dark-` or `darkest-` (for example `dark-teal`) — or a
+  custom color `#RRGGBB`. Hex values are stored in upper case; any other value is
+  rejected. The former names `blue`, `green`, `amber` and `red` are palette names, so
+  saved panels keep their colors unchanged. No migration rewrites panels.
+- **Themes (assistant-selected, accepted by the user 2026-11-09).** Palette names
+  render in a shade tuned for the active light or dark theme; the middle shades of
+  blue, green, amber and red match the existing theme marks. Custom colors render
+  exactly as entered in both themes.
+- **Unchanged.** A threshold color stays a presentation-only top border on the count
+  panel and the dashboard list's panel thumbnails. No other CSS, gradients, blinking,
+  sounds or automatic action is accepted, and bounds, counts and accessibility rules
+  are unchanged.
+
+This extends section 5's palette; the rest of section 5 and every other panel type
+are unchanged. Original issue IDs and REV numbering are unchanged. Executed evidence
+belongs in delivery.
