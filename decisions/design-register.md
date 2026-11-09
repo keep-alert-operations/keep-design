@@ -1409,6 +1409,70 @@ its Edit panel dialog ([dashboard section 8](../specs/spec-dashboard-operations.
   dialog or menu is open, during a drag, or while commands are locked, matching when
   the menu item is unavailable.
 
+## REV-62 — Image panels (2026-11-09)
+
+User decision. The user asked for a dashboard panel type that shows an image, either
+uploaded or linked by address, and approved the mock at
+https://claude.ai/artifact/DBAYiG4UFA3YEtsJec69w2
+([dashboard operations 2, 13, 14 and 16](../specs/spec-dashboard-operations.md#2-saved-definition-and-initial-state)).
+
+- **Panel (user decision, 2026-11-09).** `image` is the third panel type after
+  `count` and `html`. It has an optional title, an image source, an optional
+  description and a fit, references no preset and is never counted. Without a title
+  the image fills the whole panel. The source is either an uploaded file or an
+  `https` address. Fit is "Show whole image" (`contain`) or "Fill the panel"
+  (`cover`, cropping the edges). The panel dialog shows a source switch, a drop area
+  or address field, the description, the fit and a live preview; a link that does not
+  load in the dialog warns but does not block saving. On the board an image panel
+  shows a loading state and, when the image cannot load, "Image unavailable" with an
+  Open link for linked images.
+- **Storage (user decision, 2026-11-09).** Uploaded files live in PostgreSQL in a new
+  tenant-scoped `dashboard_images` table with row-level security. An image is
+  immutable and stored once per tenant and SHA-256; panels reference it by ID. No
+  object store is introduced.
+- **Limits (user decision, 2026-11-09).** PNG, JPEG, GIF and WebP only; no SVG.
+  At most 5 MiB (5,242,880 bytes) per file, 8,000 pixels per side and 500 MiB of
+  stored images per tenant.
+- **File checks (user decision, 2026-11-09).** The server reads each file's own
+  header with the standard library to find its real type and dimensions; no image
+  library is added and files are not re-encoded. Images are served with the type found
+  in the file, `X-Content-Type-Options: nosniff` and
+  `Content-Security-Policy: sandbox; default-src 'none'`.
+- **Assistant-selected details (2026-11-09).**
+  - Wire shape: an image panel carries `image_id` (uploaded) or `url` (linked),
+    exactly one, plus `fit` (`contain` default or `cover`) and `alt` (optional,
+    single line, at most 300 characters). Addresses are absolute `https` URLs of at
+    most 2,048 characters without user information.
+  - `POST /dashboard-images` takes the raw file with its image `Content-Type`, an
+    `Idempotency-Key` command UUID and the CSRF header; editors and admins may upload.
+    The same bytes return the existing image (200) instead of a new one (201). It
+    answers 413 above 5 MiB, 415 for other content types, 422 `invalid_image` when the
+    header is not a supported image or exceeds 8,000 pixels, and 409
+    `image_quota_exceeded` past 500 MiB.
+  - `GET /dashboard-images/{id}` serves bytes to anyone who can read the tenant, with
+    a strong ETag and `Cache-Control: private, no-cache`, so every view rechecks
+    access and an unchanged image costs a 304.
+  - `dashboard_panels.image_id` has a composite tenant foreign key to
+    `dashboard_images`, so a saved panel cannot point at a missing or foreign image.
+    Fit, description and address live in `content`. Saving or validating a panel with
+    an unknown image returns 422 `image_unavailable`.
+  - A save marks its images as used (`first_used_at`). Used images are kept like
+    retained history, so past revisions keep showing them. Unused uploads cost space
+    with no worker to clear them (REV-34), so each upload deletes up to 50 of the
+    tenant's uploads that are more than 24 hours old and were never used. Uploads,
+    their cleanup and dashboard saves hold the tenant configuration-reference guard;
+    a save locks referenced image rows after preset rows and before dashboard rows.
+  - Linked images load in the viewer's browser with `referrerpolicy="no-referrer"`;
+    the server never fetches them. The dialog uploads a chosen file at once and
+    previews it from the local file meanwhile.
+  - The image's alternative text is its description, else its title, else "Image
+    panel"; the panel itself is labeled by its title or "Image panel". Image panels are not part of count batches, never block preset deletion
+    and do not appear in preset references, as for HTML panels.
+  - Migration 0063 creates the table and widens the panel type checks without
+    rewriting rows.
+
+This extends REV-57's panel types; HTML panels still remove images.
+
 ## REV-63 — Alert table panels (2026-11-09)
 
 User decision. A new dashboard panel type, `table`, shows the latest alerts of a saved
@@ -1440,10 +1504,10 @@ https://claude.ai/artifact/XscgPgm7y16jQqcwyAaVvi.
   fences it by revision; a changed preset reloads the panel. The panel reloads with
   the dashboard's live updates and refresh. A new table panel starts at 6 × 6 grid
   units so its rows have room. Viewers see table panels, as for every panel. A table panel's accessible name is its title, else the preset name.
-  Its migration widens the panel type check and ties `preset_id` to `count` and
-  `table` panels without rewriting rows; it was built beside REV-62's image panels,
-  and whichever merges second renumbers its migration and widens the type list.
+  Migration 0064 widens the panel type check to `table` beside REV-62's `image` and
+  ties `preset_id` to `count` and `table` panels without rewriting rows; it follows
+  REV-62's 0063, which was built in parallel and merged first.
 
 This extends, for `table` panels, section 2's preset reference and section 3's
-content rules; count and HTML panels are unchanged. Original issue IDs and REV
+content rules; count, HTML and image panels are unchanged. Original issue IDs and REV
 numbering are unchanged. Executed evidence belongs in delivery.

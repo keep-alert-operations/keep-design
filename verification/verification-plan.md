@@ -181,6 +181,22 @@ never block preset deletion or appear in preset references. The panel dialog kee
 its size when the type changes, and its type dropdown, preview and focus handling
 work by keyboard.
 
+### Image panels (REV-62)
+
+Create, save, reload, copy, view as a viewer, open fullscreen and narrow, and read
+history for a dashboard with uploaded and linked image panels in both fits, with and
+without a title. Uploads accept PNG, JPEG, GIF and WebP and reject SVG, other types,
+files whose header is not an image, files over 5 MiB (413), images over 8,000 pixels
+and uploads past the 500 MiB tenant quota (409); the same bytes return the existing
+image. Another tenant or a signed-out request cannot read an image, and served images
+carry `nosniff`, the sandbox policy and a working ETag. Addresses must be `https`
+without user information and at most 2,048 characters. A panel with an unknown or
+cleaned-up image returns 422 `image_unavailable`; never-used uploads older than 24
+hours are removed by later uploads while used images keep serving history. Image
+panels make no count request and never block preset deletion. The dialog's source
+switch, drop area, fit choice and preview work by keyboard, and a linked image that
+fails shows "Image unavailable" on the board.
+
 ### Alert table panels (REV-63)
 
 Verify that a table panel saves its preset and `rows` (1 and 50 accepted, 0 and 51

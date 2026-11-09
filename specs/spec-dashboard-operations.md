@@ -20,6 +20,11 @@ content, references no preset and has no thresholds; it is never counted. A pane
 without `type` is `count`. A panel keeps its type for its lifetime. Allowed HTML,
 size and sanitizing rules are in [REV-57](../decisions/design-register.md#rev-57--dashboard-panel-types-and-html-panels-2026-11-03).
 
+**Later user decision — 2026-11-09 (REV-62):** `image` panels show an uploaded file or
+an `https` image address with an optional title, description and fit (`contain` or
+`cover`). They reference no preset, have no thresholds and are never counted. File
+types, limits and checks are in [REV-62](../decisions/design-register.md#rev-62--image-panels-2026-11-09).
+
 **Later user decision — 2026-11-09 (REV-63):** a `table` panel references one saved
 preset like a count panel, with an optional custom title and `rows` (1–50, default
 10), and no thresholds. It shows the preset's latest matching alerts in its saved
@@ -177,6 +182,14 @@ Use `dashboards` (UUID, tenant, canonical name/key, revision, created/updated ac
 
 Guard every dashboard create/save/copy/delete and preset delete with one short tenant configuration-reference guard. Acquire it before sorted preset identity rows and then dashboard rows; never acquire tenant coordinator after holding this guard. These operations do not mutate alert/correlation state. Replace the complete panel set atomically, enforce panel uniqueness/layout/threshold validation in the service and relational range checks, update name claims, history, command receipt, collection generation and live outbox together. No persisted dashboard panel can refer to a deleted/cross-tenant preset. Preset deletion rechecks the same live-panel table under this guard and remains blocked while references exist.
 
+**Later user decision — 2026-11-09 (REV-62):** uploaded images live in tenant-scoped,
+immutable `dashboard_images` rows (one per tenant and SHA-256). `dashboard_panels`
+carries a nullable `image_id` with a composite tenant foreign key to them; fit,
+description and address live in `content`. Saves lock referenced image rows under
+the configuration-reference guard after preset rows and before dashboard rows, and
+mark them used. Uploads take the same guard, enforce the tenant quota and delete up
+to 50 never-used uploads older than 24 hours. Used images stay while history does.
+
 ## 14. APIs
 
 All paths use `/api/tenants/{tenant_id}`. Bodies have the common 64 KiB raw limit plus decoded field/panel limits. Return strong revision ETags.
@@ -199,6 +212,14 @@ Counts read current saved queries, not client-supplied replacement CEL for a sav
 `thresholds`. Count, preview and reference routes consider `count` panels only.
 Validate also reports the parts of HTML content that sanitizing removed. Saving an
 existing panel ID with another type returns 422 `panel_type_changed`.
+
+**Later user decision — 2026-11-09 (REV-62):** `image` panels carry `image_id` or
+`url` (exactly one), `fit` and `alt`. `POST /dashboard-images` uploads a raw PNG, JPEG,
+GIF or WebP body of at most 5 MiB with an `Idempotency-Key`; it is the one product
+route whose body is not JSON. `GET /dashboard-images/{id}` serves the bytes to tenant
+readers with a strong ETag, `private, no-cache`, `nosniff` and a sandbox content
+security policy. An unknown image in a saved or validated panel returns 422
+`image_unavailable`.
 
 **Later user decision — 2026-11-09 (REV-63):** `table` panels carry `preset_id` and
 `rows`. Preset references and deletion checks include them; count batches and
@@ -247,6 +268,12 @@ every type with a Panel type dropdown, settings on the left and a preview on the
 right. An HTML panel is labeled by its title or "HTML panel"; its content allows
 headings `h3`–`h6` only so it cannot break the page's heading order, and its content
 area scrolls without growing the panel.
+
+**Later user decision — 2026-11-09 (REV-62):** an image panel is labeled by its
+title or "Image panel", and its image's alternative text is its description, else its
+title, else "Image panel". It shows a loading state that keeps
+the panel's size and, when the image cannot load, "Image unavailable" in text, with
+an Open link for linked images. Linked images load with no referrer.
 
 **Later user decision — 2026-11-09 (REV-63):** a table panel is labeled by its title,
 else its preset name; its table has column headers, rows that are links and a
