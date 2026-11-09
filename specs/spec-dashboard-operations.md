@@ -85,6 +85,13 @@ A text/accessible label states the matching threshold, so color is not the only 
 style properties REV-57 allows, inside their own content area only. Thresholds and
 count colors are unchanged.
 
+**Later user decision — 2026-11-09 (REV-64):** a threshold color is a palette name or
+a custom `#RRGGBB` color chosen in a picker. The palette has eight hues (red, orange,
+amber, green, teal, blue, purple, gray) in five shades, named by the hue alone for the
+middle shade or with a `lightest-`, `light-`, `dark-` or `darkest-` prefix; `blue`,
+`green`, `amber` and `red` keep their meaning. Palette colors follow the light or
+dark theme; custom colors do not. See [REV-64](../decisions/design-register.md#rev-64--threshold-color-picker-2026-11-09).
+
 ## 6. Time, suppression and count meaning
 
 There is **no separate dashboard time picker** in the initial release. Time restrictions belong to saved preset CEL, including its supported relative time expressions. All panels in a count batch share one captured database query time. Dashboards also have no Include suppressed switch initially: every panel uses default suppression exclusion outside CEL and no implicit lifecycle exclusion. The same saved preset therefore means the same query wherever referenced. Users inspect suppressed alerts through the feed's existing transient switch.
