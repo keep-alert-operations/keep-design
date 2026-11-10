@@ -258,6 +258,19 @@ panel never creates a frame, that moving and resizing work over frames, and that
 `KEEP_GRAFANA_PANEL_ORIGINS` entries with a base path, loopback `http` in development
 and ignored entries behave as stated. Only super admins see the Integrations card.
 
+### Incident count panels (REV-69)
+
+Verify that an incident count panel saves its preset, `incident_status` (`open`,
+`investigating`, `both`; anything else rejected with 422) and thresholds, reloads,
+copies and shows to viewers and in fullscreen, and keeps its type (422
+`panel_type_changed`). With alerts in several incidents, it counts each incident once
+however many of its alerts match, ignores alerts in no incident, suppressed alerts and
+resolved incidents, and follows the chosen statuses: an incident moved to
+Investigating leaves a Firing-only count and joins an Investigating one. It blocks
+preset deletion, appears in preset references, refreshes with the batch, and colors by
+threshold. The dialog preview shows the count with its matching and linked alerts,
+and requires at least one status.
+
 ## Tenants and access
 
 **Current scope (REV-34):** Physical audit cleanup is deferred; verify the 365-day read-time boundary rather than protected cleanup; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other cases remain required.

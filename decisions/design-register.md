@@ -1766,3 +1766,42 @@ its theme option and moving its "Open in Grafana" button onto the address box.
 This adds a panel type beside sections 2, 3, 13, 14 and 16; other panel types are
 unchanged. Original issue IDs and REV numbering are unchanged. Executed evidence belongs
 in delivery.
+
+## REV-69 — Incident count panels (2026-11-10)
+
+User decision. A new dashboard panel type, `incident_count`, shows how many incidents
+the alerts of a saved preset are in
+([dashboard operations 2, 3, 7, 11, 14 and 16](../specs/spec-dashboard-operations.md#2-saved-definition-and-initial-state)).
+The user approved the canvas at https://claude.ai/artifact/GUkDWqBYr5DjzkMyMJacpd
+("build it", 2026-11-10).
+
+- **What it counts (user decision, 2026-11-10).** Distinct incidents that actively own
+  at least one alert matching the preset, as the preset's count matches them (saved
+  query, current alerts, suppressed excluded). An incident counts once however many of
+  its alerts match; alerts in no incident add nothing. The editor chooses Firing,
+  Investigating or both, as two checkboxes with both ticked by default; resolved
+  incidents are never counted. Firing is the incident status `open`, which the
+  Incidents list labels Open.
+- **Settings (user decision, 2026-11-10, accepting the canvas).** Optional title
+  ("<preset> incidents" when blank), a preset, the statuses and up to three count
+  thresholds like a count panel. It appears second in the Panel type list as
+  "Incident count". The tile states "<preset> · <statuses>" under its title. The dialog
+  preview shows the count and the numbers behind it: matching alerts, how many of
+  them are in a counted incident, and the incidents.
+- **Assistant-selected details.** Storage reuses `preset_id` and `thresholds` and keeps
+  `{"incident_status": "open" | "investigating" | "both"}` in `content`; migration 0068
+  widens the panel checks after REV-68's 0067 (Grafana panels, built in parallel and
+  merged first). The count batch adds a `terms` aggregation on
+  `active_incident_id` to the preset's count query in the batch's point in time and
+  keeps, in its PostgreSQL revalidation transaction, the incidents with a matching
+  status and an unretired identity. Alert ownership therefore comes from the search
+  projection and incident status from PostgreSQL; a just-changed link shows once
+  projected, as for alert counts. More than 10,000 distinct incidents for one panel
+  is unavailable rather than a partial number. `POST /alerts/counts` gains
+  `incident_status` per query for the dialog preview. The title opens the preset, as
+  for a count panel: the canvas proposed opening those incidents in the Incidents
+  list, which cannot filter by a preset's alerts.
+
+This extends, for `incident_count` panels, sections 2, 3 and 11 and the APIs of
+section 14; other panel types are unchanged. Original issue IDs and REV numbering are
+unchanged. Executed evidence belongs in delivery.

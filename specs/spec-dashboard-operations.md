@@ -39,6 +39,11 @@ no preset and is never part of a count batch. See [REV-65](../decisions/design-r
 Grafana panel from an allowed Grafana, with an optional title and one panel address.
 It references no preset and is never part of a count batch. See [REV-68](../decisions/design-register.md#rev-68--grafana-panels-2026-11-10).
 
+**Later user decision — 2026-11-10 (REV-69):** an `incident_count` panel references one
+saved preset like a count panel, with an optional custom title, which incident
+statuses to count (`open`, shown as Firing, `investigating`, or both) and count
+thresholds. See [REV-69](../decisions/design-register.md#rev-69--incident-count-panels-2026-11-10).
+
 ## 3. Panel titles and content
 
 **Later user decision — 2026-11-09 (REV-63):** a table panel shows its preset's
@@ -54,6 +59,12 @@ method. Its count comes from outside Keep and the panel dialog says so.
 untitled, the frame fills the panel. Its content comes from Grafana in the viewer's
 theme, checked against the allowed Grafana before every render; a failed check shows
 "Grafana panel blocked" with the reason instead of the frame.
+
+**Later user decision — 2026-11-10 (REV-69):** an incident count panel's default title
+is "<preset> incidents". Under the title it states the preset and the counted
+statuses. It shows the number of distinct incidents that actively own at least one
+alert the preset counts and whose status is one of the chosen ones; resolved
+incidents never count, and alerts in no incident add nothing.
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
 
@@ -126,6 +137,9 @@ Count distinct retained logical alert rows, not occurrences, deliveries, notes o
 
 **Later user decision — 2026-11-09 (REV-63):** in a table panel, a row opens that
 alert's details; the title and the "Open preset" footer link open the preset as above.
+
+**Later user decision — 2026-11-10 (REV-69):** an incident count panel's title opens
+its preset, as for a count panel.
 
 Clicking a ready panel opens its saved preset in the same tenant, with empty free-text search and Include suppressed off. Use the current saved columns/sort and a fresh feed snapshot; pass observed dashboard/preset revision and count observation as navigation context only. Label “Opened current results; count may have changed” when the new feed clock/revision differs. Do not promise that an evolving feed reproduces an earlier count, pin a hidden historical query, or modify the preset. Browser back returns to the dashboard and refreshes it. Support ordinary open-in-new-tab links. Loading/stale panels still allow opening an accessible preset; a deleted/inaccessible resource uses the ordinary 404/access-loss flow.
 
@@ -205,6 +219,11 @@ If retention purged an alert since PIT capture, exact counts require a new PIT u
 result: a count, Team not found, No count, ServiceNow isn't connected, or, when the
 counting service fails, its last count greyed with its age and no threshold color.
 
+**Later user decision — 2026-11-10 (REV-69):** incident count panels are part of the
+count batch: their preset query runs in the batch's point in time, and the batch's
+PostgreSQL revalidation keeps the incidents whose status matches. More than 10,000
+distinct incidents for one panel is reported unavailable, never a partial number.
+
 ## 12. Count caching and load control
 
 Initially **do not persist or reuse completed count results server-side**. Deduplicate repeated panels within a request, cache compiled expressions under the selected version/digest checks, and use one in-flight request plus a pending refresh per browser dashboard. This avoids authorizing a stale cached definition or freezing relative time. Connected foreground views coalesce changes in the live merge window of [technical baseline section 19](spec-alert-history-technical.md#19-browser-refresh-reconnect-and-relative-time) and refresh relative expressions on the selected one-second clock; static queries refresh on committed searchable/configuration/purge/maintenance changes and Refresh now. No empty periodic query runs merely to animate the clock.
@@ -282,6 +301,13 @@ Grafana panels are on and the allowed Grafana; super admins read
 retries of commands sent without `link` still match their receipts. An invalid
 address or text returns 422 `invalid_fields`.
 
+**Later user decision — 2026-11-10 (REV-69):** `incident_count` panels carry
+`preset_id`, `incident_status` (`open`, `investigating` or `both`) and `thresholds`.
+Preset references, deletion checks, count batches and dashboard previews include
+them; each of their batch results carries `count` (incidents), `alerts` and
+`linked_alerts`. `POST /alerts/counts` accepts `incident_status` on a query and then
+returns the same three numbers for it under `incidents`.
+
 ## 15. Deletion and history
 
 **Current scope (REV-34):** Daily history cleanup is not deployed; expired history stays unreadable without physical deletion; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion, retention windows and fences below remain normative.
@@ -347,6 +373,9 @@ its button text with "(opens in a new tab)"; hovering or focusing it shows the
 address. When the title row is too narrow, only its icon shows and the name stays.
 It opens with no referrer and no opener, and does not open while panels are being
 moved or resized.
+
+**Later user decision — 2026-11-10 (REV-69):** an incident count panel is labeled by
+its title and its number of incidents in words, as a count panel is.
 
 ## 17. Acceptance and observability
 
