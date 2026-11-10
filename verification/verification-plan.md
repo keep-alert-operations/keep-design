@@ -321,6 +321,12 @@ The implementation must demonstrate: manual creation without alerts; explicit im
 - Measure a 200-row page over 20,000 current links, one incident holding 10,000, within two seconds (N3; reliability operations 5).
 - Check the browser column: "N linked" with nonzero suppressed and unavailable parts, the total alone while proof is pending, "—" only for a row without counts, and narrow-viewport layout.
 
+### ServiceNow tickets on incidents (REV-70)
+
+- Verify `POST /incidents/{id}/ticket` links, changes and unlinks a ticket on open, investigating and resolved incidents; each effective change advances the revision and records one `ticket` activity with the new and previous link and number, a no-op records nothing, a retry with the same command identity returns the first result, a stale revision returns 409 with nothing changed, a viewer gets 403 and another tenant's incident 404.
+- Verify 422 `ticket_url_invalid` for another host or port, a path outside the base path, `http` against an `https` ServiceNow, a user name or password, spaces, over 2,048 characters, a number without a link and a malformed number; that numbers are stored upper case; and that without `KEEP_SERVICENOW_URL` linking returns 409 `servicenow_not_configured` while unlinking works. Resolving and reopening keep the link, and last activity does not move.
+- Check the browser: the row hidden without configuration or a ticket; linking by link and by number with the live checks; Create opening the prefilled form and linking back; Change and Unlink; viewers seeing only the link; two tabs showing the conflict without overwriting; the activity entries; the Integrations card; keyboard use and phone width.
+
 ## Identity
 
 **Current scope (REV-35, REV-34):** LDAP-change propagation timing (item 2) and assignee cleanup (item 4) are future qualification; verify explicit publication instead; see [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Other items remain required.
