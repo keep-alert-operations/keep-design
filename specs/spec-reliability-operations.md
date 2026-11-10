@@ -6,7 +6,7 @@
 
 The 2026-09-30 [Kafka-first pipeline](spec-kafka-alert-pipeline.md) governs alert transport, gateway admission, UTC ordering, manual correlation, search reconciliation and cutover (REV-33). Unrelated product behavior remains unchanged.
 
-Application service objectives, capacity, backpressure, failure handling and recovery. These are selected objectives; measured results and supplied service guarantees belong in [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md).
+Application service objectives, capacity, backpressure, failure handling and recovery. These are selected objectives; measured results and supplied service guarantees belong in [Delivery readiness](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md).
 
 ## 1. Preserved requirements and ownership
 
@@ -14,7 +14,7 @@ Application service objectives, capacity, backpressure, failure handling and rec
 
 Preserve the user-selected sustained requirement of 15,000 deliveries/minute (250/second), including concentration in one tenant or Global. Normal traffic is about 4,000/minute; peak duration is unknown. Preserve p99 normal-operation targets of one second for durable ingestion acceptance, five seconds for incoming alert/status UI visibility and five seconds for maintenance-expiry UI visibility. Preserve broker acknowledgement before 202, original ingress/effective times, per-key source order, tenant changed order and occurrence semantics. Acknowledged unprocessed inputs remain subject to Kafka retention.
 
-Appchi owns application objectives/instrumentation, processing correctness, tenant isolation, retries, idempotency, degraded-state UX, logical lifecycle rules, application backpressure and safe post-restore checks. Each technology team owns its service's operation, infrastructure retention, backups, HA, failover, maintenance, capacity and recovery. Appchi supplies workload and safety requirements; both sides agree supported integration settings, allocations and recovery handoff.
+Keep owns application objectives/instrumentation, processing correctness, tenant isolation, retries, idempotency, degraded-state UX, logical lifecycle rules, application backpressure and safe post-restore checks. Each technology team owns its service's operation, infrastructure retention, backups, HA, failover, maintenance, capacity and recovery. Keep supplies workload and safety requirements; both sides agree supported integration settings, allocations and recovery handoff.
 
 Record the application operational contact and each dependency team's support route before rollout. Automatic operator-specific Kong/Grafana provisioning remains application integration behavior; running those technologies belongs to their teams. No individual names or supplied service guarantees are assumed.
 
@@ -70,7 +70,7 @@ Missing or late eligible acknowledgements cannot count as successes. With fewer 
 
 Bound ingestion handling to five seconds, including body read, and retain the ten-second gateway timeout. Each Kafka attempt has a one-second broker delivery deadline and at most 1.1 seconds application wait; three attempts fit the handler budget. A timeout is an uncertain outcome, never proof of rollback. V2 context expires ten seconds after gateway authorization; deletion waits fifteen seconds after all-node denial before capturing its Kafka drain barrier. The one-second p99 remains an unqualified performance objective.
 
-Ordinary Product API and search requests have a ten-second handler timeout and fifteen-second gateway timeout. Technical supplement 18–20 selects SSE heartbeat, bounded buffering and stream/proxy timeout requirements; deployed compatibility remains to be confirmed. Bound database waits by the remaining request budget. HTTP timeout does not truncate an already admitted atomic background attachment or other mandatory operation. Use the selected 429/503 retry contracts below. Gateway timeouts are requested integration settings for the gateway team to confirm and apply; Appchi owns its handler deadlines and does not independently reconfigure the shared gateway.
+Ordinary Product API and search requests have a ten-second handler timeout and fifteen-second gateway timeout. Technical supplement 18–20 selects SSE heartbeat, bounded buffering and stream/proxy timeout requirements; deployed compatibility remains to be confirmed. Bound database waits by the remaining request budget. HTTP timeout does not truncate an already admitted atomic background attachment or other mandatory operation. Use the selected 429/503 retry contracts below. Gateway timeouts are requested integration settings for the gateway team to confirm and apply; Keep owns its handler deadlines and does not independently reconfigure the shared gateway.
 
 The handler propagates an absolute request budget into database acquisition,
 statement/lock waits and the pre-commit check. Cancellation alone cannot stop a
@@ -113,7 +113,7 @@ PostgreSQL failure blocks application processing and commands, but healthy Kafka
 
 Dedicated technology teams choose and operate PostgreSQL replication/failover, Kafka broker/topic durability, Elasticsearch redundancy and other service HA.
 
-Obtain documented durable-write/acknowledgement semantics, failure/reconnect behavior, supported client settings, maintenance expectations and endpoints. Appchi client configuration must match that contract; uncertain source publication retains one internal UUID across attempts; client resubmission is new. Product command idempotency remains unchanged.
+Obtain documented durable-write/acknowledgement semantics, failure/reconnect behavior, supported client settings, maintenance expectations and endpoints. Keep client configuration must match that contract; uncertain source publication retains one internal UUID across attempts; client resubmission is new. Product command idempotency remains unchanged.
 
 The application supports restart-safe workers, durable coordination, readiness and graceful draining without relying on one process's memory for correctness. Arrange application replica/runtime placement and scaling through the deployment team's supported platform model and measured requirements. Do not prescribe cluster topology or claim unconfirmed failure guarantees.
 
@@ -127,7 +127,7 @@ Kafka may expire an acknowledged unprocessed receipt; the user explicitly accept
 
 Select a one-second due scan for maintenance transitions and recovery of missed pipeline wakeups. Use durable job claims with ten-second leases, renewed every three seconds, and generation/ownership fences checked at commit. Recheck the current maintenance revision and end under the selected tenant coordination boundary so extensions cannot expire early. Maintenance completion 4–11 now selects detailed proof/state ordering.
 
-Preserve hourly alert/incident inactivity sweeps and the existing operator thirty-second job sweep/five-minute reconciliation. Startup recovery finds overdue work while preserving original effective times and checking current eligibility. Use clock-health observations to warn Appchi above 100 milliseconds and escalate above one second through the owning team; host/database clock synchronization and repair belong to that team. A confirmed backward/untrusted authoritative clock fences timestamp-dependent admission and automatic/control transitions until trusted time catches up; do not rewrite historical times to recover.
+Preserve hourly alert/incident inactivity sweeps and the existing operator thirty-second job sweep/five-minute reconciliation. Startup recovery finds overdue work while preserving original effective times and checking current eligibility. Use clock-health observations to warn Keep above 100 milliseconds and escalate above one second through the owning team; host/database clock synchronization and repair belong to that team. A confirmed backward/untrusted authoritative clock fences timestamp-dependent admission and automatic/control transitions until trusted time catches up; do not rewrite historical times to recover.
 
 ## 16. Dependency recovery guarantees and application recovery
 
@@ -135,13 +135,13 @@ Validate supplied service guarantees without inventing infrastructure RPO/RTO. A
 
 ## 17. Backup ownership and recovery handoff
 
-Dedicated technology teams own backup methods, frequency, retention, encryption/key custody, locations, monitoring, restore execution and infrastructure recovery exercises. Record actual team policies without inventing Appchi defaults.
+Dedicated technology teams own backup methods, frequency, retention, encryption/key custody, locations, monitoring, restore execution and infrastructure recovery exercises. Record actual team policies without inventing Keep defaults.
 
-Appchi supplies authoritative-data inventory, product lifecycle/deletion requirements, schema/version compatibility, credential/deletion safety constraints and post-restore verification. Agree how independently current recovery evidence is protected and provided. The owning teams supply recoverability evidence and limitations; Appchi verifies application correctness during coordinated exercises. No teams have been contacted or service guarantees assumed.
+Keep supplies authoritative-data inventory, product lifecycle/deletion requirements, schema/version compatibility, credential/deletion safety constraints and post-restore verification. Agree how independently current recovery evidence is protected and provided. The owning teams supply recoverability evidence and limitations; Keep verifies application correctness during coordinated exercises. No teams have been contacted or service guarantees assumed.
 
 ## 18. Application restore fencing and deletion safety
 
-After service restoration, keep affected application paths fenced until current deployment authority, tenant order, clocks, pending-work identities and independent credential/deletion evidence are verified. Infrastructure teams protect and recover that evidence through an agreed interface; Appchi supplies and consumes the logical IDs and versions.
+After service restoration, keep affected application paths fenced until current deployment authority, tenant order, clocks, pending-work identities and independent credential/deletion evidence are verified. Infrastructure teams protect and recover that evidence through an agreed interface; Keep supplies and consumes the logical IDs and versions.
 
 Before physical application-content deletion, require confirmation that its minimal identity/version purge fence is protected under the agreed recovery contract. Otherwise delay physical purge while retaining logical inaccessibility. Keep minimal fences until a safe replay horizon is proved using actual service retention/restore policies and application consumer progress.
 
@@ -149,17 +149,17 @@ Preserve operator supplement decision 28: invalidate unprovable credentials; kee
 
 ## 19. Capacity input to the operating teams
 
-Appchi measures per-delivery growth, new/update ratios, retained history, backlog, query pressure and processing demand and supplies these to the teams. Sustained all day, normal input is 5.76 million deliveries/day and peak input is 21.6 million/day, not distinct alert counts.
+Keep measures per-delivery growth, new/update ratios, retained history, backlog, query pressure and processing demand and supplies these to the teams. Sustained all day, normal input is 5.76 million deliveries/day and peak input is 21.6 million/day, not distinct alert counts.
 
 Owning teams decide physical sizing, replicas, headroom, expansion, forecasts and infrastructure alert thresholds. Agree allocated capacity and observable exhaustion behavior for safe application backpressure. Retain generated test data to expose growth. Agreed product-visible alert/history lifetimes remain requirements; reconcile infrastructure policies rather than silently deleting required application records earlier.
 
 ## 20. Application observability and telemetry ownership
 
-Appchi emits outcomes/latency, Kafka partition lag/age/retention risk, non-alert job depth, blocked processing/proof, correlation health, scheduler/projection lag and UI acknowledgement coverage through supported company observability interfaces. Use Prometheus-compatible metrics where provided. Dedicated teams monitor their services and expose agreed health/incident signals.
+Keep emits outcomes/latency, Kafka partition lag/age/retention risk, non-alert job depth, blocked processing/proof, correlation health, scheduler/projection lag and UI acknowledgement coverage through supported company observability interfaces. Use Prometheus-compatible metrics where provided. Dedicated teams monitor their services and expose agreed health/incident signals.
 
 Observability/technology teams own telemetry storage/retention and infrastructure audit policy. Obtain sufficient measurements or supported aggregates for rolling 30-day application SLIs; record any compatibility gap. Retain 1% successful application trace sampling with bounded error coverage within the collector team's limits.
 
-Appchi redacts secrets/alert bodies from diagnostics, avoids high-cardinality source values as metric labels and scopes tenant-visible health. Already selected product alert/incident/operator history and audit lifetimes remain product contracts, distinct from infrastructure logs. Send application recovery/privileged-action audit events to the agreed destination; its infrastructure retention is not prescribed here.
+Keep redacts secrets/alert bodies from diagnostics, avoids high-cardinality source values as metric labels and scopes tenant-visible health. Already selected product alert/incident/operator history and audit lifetimes remain product contracts, distinct from infrastructure logs. Send application recovery/privileged-action audit events to the agreed destination; its infrastructure retention is not prescribed here.
 
 ## 21. Operational alerting
 
@@ -169,13 +169,13 @@ For each SLO separately, compute burn rate as observed bad fraction divided by i
 
 Ratio-based paging requires at least 100 observations in the long window and twenty in the short one. Independently probe every ten seconds; three consecutive failures trigger outage handling even at low volume. Accepted-data loss, tenant isolation failure, unsafe primary state and unprovable credential restoration require immediate escalation. Escalate an unrecoverable tenant head/proof gap after one minute; warn when maintenance execution lag exceeds five seconds and page above thirty seconds. Preserve existing operator fifteen-minute persistent-failure signals.
 
-Route Appchi symptoms to application support and underlying-service incidents to their owning teams through existing independent company on-call mechanisms. Appchi is not its own sole outage notifier. Deduplicate and clear application signals on verified recovery; the owning teams set and operate their infrastructure monitors. This design does not send messages, create external alerts or schedule automations.
+Route Keep symptoms to application support and underlying-service incidents to their owning teams through existing independent company on-call mechanisms. Keep is not its own sole outage notifier. Deduplicate and clear application signals on verified recovery; the owning teams set and operate their infrastructure monitors. This design does not send messages, create external alerts or schedule automations.
 
 ## 22. Error-budget policy
 
 Correctness, tenant isolation and accepted-work safety are never permitted failures merely because a budget remains. With more than 50% of the relevant budget remaining, use normal change controls. At 25–50%, require owner review of risky changes and pause production chaos exercises. Below 25%, defer nonessential high-risk changes and prioritize reliability. An exhausted budget freezes feature rollouts affecting the failing component; recovery, security and reliability fixes remain allowed. Resume after a documented repair, owner review and positive remaining budget.
 
-Do not lower objectives retroactively or reset budgets after incidents. Record a material-breach follow-up within two working days. Review objectives monthly for the first three months after launch, then quarterly. These are engineering objectives, not a customer contractual SLA. The change policy applies to Appchi releases only; it does not authorize freezing another team's releases or overriding its change/incident process.
+Do not lower objectives retroactively or reset budgets after incidents. Record a material-breach follow-up within two working days. Review objectives monthly for the first three months after launch, then quarterly. These are engineering objectives, not a customer contractual SLA. The change policy applies to Keep releases only; it does not authorize freezing another team's releases or overriding its change/incident process.
 
 ## 23. Qualification and fault tests
 

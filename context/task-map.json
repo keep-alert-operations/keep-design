@@ -240,48 +240,48 @@
     }
   ],
   "scope_sections": {
-    "appchi-design/verification/verification-plan.md": [
+    "keep-design/verification/verification-plan.md": [
       "Additional scalability regressions — 2026-10-06",
       "Worker scope correction"
     ]
   },
   "find_roots": [
     {
-      "path": "appchi-design/specs",
+      "path": "keep-design/specs",
       "authority": "normative"
     },
     {
-      "path": "appchi-design/verification",
+      "path": "keep-design/verification",
       "authority": "verification"
     },
     {
-      "path": "appchi-design/decisions/design-register.md",
+      "path": "keep-design/decisions/design-register.md",
       "authority": "normative"
     },
     {
-      "path": "appchi-design/decisions",
+      "path": "keep-design/decisions",
       "authority": "historical"
     },
     {
-      "path": "appchi-design/architecture",
+      "path": "keep-design/architecture",
       "authority": "normative"
     },
     {
-      "path": "appchi-design/context/README.md",
+      "path": "keep-design/context/README.md",
       "authority": "instruction"
     },
     {
-      "path": "appchi-delivery/docs",
+      "path": "keep-delivery/docs",
       "authority": "instruction"
     },
     {
-      "path": "appchi-delivery/status",
+      "path": "keep-delivery/status",
       "authority": "evidence"
     }
   ],
   "sources": {
     "system-baseline": {
-      "path": "appchi-design/specs/spec-alerts-management-system.md",
+      "path": "keep-design/specs/spec-alerts-management-system.md",
       "authority": "normative",
       "sections": [
         "Product model",
@@ -292,7 +292,7 @@
       "include_preamble": true
     },
     "scope-core": {
-      "path": "appchi-design/specs/spec-worker-scope.md",
+      "path": "keep-design/specs/spec-worker-scope.md",
       "authority": "scope",
       "sections": [
         "2. Assignment and data lifetime automation",
@@ -302,7 +302,7 @@
       "include_preamble": true
     },
     "scope-maintenance": {
-      "path": "appchi-design/specs/spec-worker-scope.md",
+      "path": "keep-design/specs/spec-worker-scope.md",
       "authority": "scope",
       "sections": [
         "1. Maintenance without a scheduler"
@@ -310,7 +310,7 @@
       "include_preamble": true
     },
     "scope-operators": {
-      "path": "appchi-design/specs/spec-worker-scope.md",
+      "path": "keep-design/specs/spec-worker-scope.md",
       "authority": "scope",
       "sections": [
         "3. Request-owned operator provisioning"
@@ -318,7 +318,7 @@
       "include_preamble": true
     },
     "scope-live": {
-      "path": "appchi-design/specs/spec-worker-scope.md",
+      "path": "keep-design/specs/spec-worker-scope.md",
       "authority": "scope",
       "sections": [
         "6. Live updates inside the Product API"
@@ -326,7 +326,7 @@
       "include_preamble": true
     },
     "repository-boundaries": {
-      "path": "appchi-design/specs/spec-repository-layout.md",
+      "path": "keep-design/specs/spec-repository-layout.md",
       "authority": "normative",
       "sections": [
         "Ownership",
@@ -335,7 +335,7 @@
       "include_preamble": true
     },
     "shared-command-contract": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "5. Common HTTP and JSON contract",
@@ -346,7 +346,7 @@
       "include_preamble": true
     },
     "shared-ui-contract": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "3. Navigation and visual system",
@@ -355,7 +355,7 @@
       "include_preamble": true
     },
     "shared-collections": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "8. Collection reads and search consistency"
@@ -363,7 +363,7 @@
       "include_preamble": true
     },
     "incident-baseline": {
-      "path": "appchi-design/specs/spec-incident-operations.md",
+      "path": "keep-design/specs/spec-incident-operations.md",
       "authority": "normative",
       "sections": [
         "1. Creation and origin (I1)",
@@ -376,7 +376,7 @@
       "include_preamble": true
     },
     "incident-mutations": {
-      "path": "appchi-design/specs/spec-incident-operations.md",
+      "path": "keep-design/specs/spec-incident-operations.md",
       "authority": "normative",
       "sections": [
         "8. Incident notes (I5)",
@@ -388,7 +388,7 @@
       "include_preamble": true
     },
     "incident-membership": {
-      "path": "appchi-design/specs/spec-incident-operations.md",
+      "path": "keep-design/specs/spec-incident-operations.md",
       "authority": "normative",
       "sections": [
         "5. Linking and unlinking (I3)",
@@ -401,7 +401,7 @@
       "include_preamble": true
     },
     "incident-search": {
-      "path": "appchi-design/specs/spec-incident-operations.md",
+      "path": "keep-design/specs/spec-incident-operations.md",
       "authority": "normative",
       "sections": [
         "14. Incident list and search (I5)",
@@ -410,7 +410,7 @@
       "include_preamble": true
     },
     "incident-http-storage": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "10. Incident routes and aggregate contracts",
@@ -419,7 +419,7 @@
       "include_preamble": true
     },
     "correlation-membership": {
-      "path": "appchi-design/specs/spec-correlation-rules.md",
+      "path": "keep-design/specs/spec-correlation-rules.md",
       "authority": "normative",
       "sections": [
         "9. Reset and release boundaries (C2–C3, C6–C8)",
@@ -431,7 +431,7 @@
       "include_preamble": true
     },
     "correlation-evaluation": {
-      "path": "appchi-design/specs/spec-correlation-rules.md",
+      "path": "keep-design/specs/spec-correlation-rules.md",
       "authority": "normative",
       "sections": [
         "2. Grouping values and identity (C4, C6)",
@@ -447,7 +447,7 @@
       "include_preamble": true
     },
     "correlation-management": {
-      "path": "appchi-design/specs/spec-correlation-rules.md",
+      "path": "keep-design/specs/spec-correlation-rules.md",
       "authority": "normative",
       "sections": [
         "1. Rule and condition names (C4, C6)",
@@ -460,7 +460,7 @@
       "include_preamble": true
     },
     "correlation-persistence": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "9. Correlation APIs, editor and diagnostics",
@@ -469,7 +469,7 @@
       "include_preamble": true
     },
     "maintenance-semantics": {
-      "path": "appchi-design/specs/spec-maintenance-operations.md",
+      "path": "keep-design/specs/spec-maintenance-operations.md",
       "authority": "normative",
       "sections": [
         "5. Qualification and before/after proof",
@@ -482,7 +482,7 @@
       "include_preamble": true
     },
     "maintenance-management": {
-      "path": "appchi-design/specs/spec-maintenance-operations.md",
+      "path": "keep-design/specs/spec-maintenance-operations.md",
       "authority": "normative",
       "sections": [
         "1. Window identity and editable content",
@@ -499,7 +499,7 @@
       "include_preamble": true
     },
     "pipeline-maintenance": {
-      "path": "appchi-design/specs/spec-kafka-alert-pipeline.md",
+      "path": "keep-design/specs/spec-kafka-alert-pipeline.md",
       "authority": "normative",
       "sections": [
         "4. Manual changes and correlation",
@@ -508,7 +508,7 @@
       "include_preamble": true
     },
     "native-contract": {
-      "path": "appchi-design/specs/spec-alert-operations.md",
+      "path": "keep-design/specs/spec-alert-operations.md",
       "authority": "normative",
       "sections": [
         "Input and normalized fields",
@@ -520,7 +520,7 @@
       "include_preamble": true
     },
     "pipeline-events": {
-      "path": "appchi-design/specs/spec-kafka-alert-pipeline.md",
+      "path": "keep-design/specs/spec-kafka-alert-pipeline.md",
       "authority": "normative",
       "sections": [
         "1. Authority and topology",
@@ -532,7 +532,7 @@
       "include_preamble": true
     },
     "event-encoding": {
-      "path": "appchi-design/specs/spec-alert-history-technical.md",
+      "path": "keep-design/specs/spec-alert-history-technical.md",
       "authority": "normative",
       "sections": [
         "13. Kafka topics and event encoding",
@@ -542,7 +542,7 @@
       "include_preamble": true
     },
     "shared-contract-generation": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "2. Repository, generated contracts and documentation",
@@ -551,7 +551,7 @@
       "include_preamble": true
     },
     "database-contract": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "11. Shared PostgreSQL conventions",
@@ -561,7 +561,7 @@
       "include_preamble": true
     },
     "database-authority": {
-      "path": "appchi-design/specs/spec-alert-history-technical.md",
+      "path": "keep-design/specs/spec-alert-history-technical.md",
       "authority": "normative",
       "sections": [
         "8. PostgreSQL physical record families",
@@ -571,7 +571,7 @@
       "include_preamble": true
     },
     "migration-rollout": {
-      "path": "appchi-design/specs/spec-repository-layout.md",
+      "path": "keep-design/specs/spec-repository-layout.md",
       "authority": "normative",
       "sections": [
         "Alembic migration execution (REV-38)"
@@ -579,7 +579,7 @@
       "include_preamble": true
     },
     "identity-session": {
-      "path": "appchi-design/specs/spec-identity-configuration.md",
+      "path": "keep-design/specs/spec-identity-configuration.md",
       "authority": "normative",
       "sections": [
         "1. Ownership and realm boundary",
@@ -597,7 +597,7 @@
       "include_preamble": true
     },
     "tenant-access": {
-      "path": "appchi-design/specs/spec-tenant-access.md",
+      "path": "keep-design/specs/spec-tenant-access.md",
       "authority": "normative",
       "sections": [
         "3. Grant model and changes",
@@ -614,7 +614,7 @@
       "include_preamble": true
     },
     "live-protocol": {
-      "path": "appchi-design/specs/spec-alert-history-technical.md",
+      "path": "keep-design/specs/spec-alert-history-technical.md",
       "authority": "normative",
       "sections": [
         "18. Durable live state and SSE protocol",
@@ -625,7 +625,7 @@
       "include_preamble": true
     },
     "live-non-alert": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "18. Non-alert events and background work"
@@ -633,7 +633,7 @@
       "include_preamble": true
     },
     "cel-search": {
-      "path": "appchi-design/specs/spec-alert-history-technical.md",
+      "path": "keep-design/specs/spec-alert-history-technical.md",
       "authority": "normative",
       "sections": [
         "1. Authority and implementation boundary",
@@ -647,7 +647,7 @@
       "include_preamble": true
     },
     "search-progress": {
-      "path": "appchi-design/specs/spec-alert-history-technical.md",
+      "path": "keep-design/specs/spec-alert-history-technical.md",
       "authority": "normative",
       "sections": [
         "15. Projection ordering and deletion markers",
@@ -658,7 +658,7 @@
       "include_preamble": true
     },
     "pipeline-search": {
-      "path": "appchi-design/specs/spec-kafka-alert-pipeline.md",
+      "path": "keep-design/specs/spec-kafka-alert-pipeline.md",
       "authority": "normative",
       "sections": [
         "6. Search reconciliation, progress and rebuild"
@@ -666,7 +666,7 @@
       "include_preamble": true
     },
     "delivery-contract": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "22. OpenShift workloads and readiness",
@@ -680,7 +680,7 @@
       "include_preamble": true
     },
     "reliability-gates": {
-      "path": "appchi-design/specs/spec-reliability-operations.md",
+      "path": "keep-design/specs/spec-reliability-operations.md",
       "authority": "normative",
       "sections": [
         "1. Preserved requirements and ownership",
@@ -695,7 +695,7 @@
       "include_preamble": true
     },
     "release-identity": {
-      "path": "appchi-design/specs/spec-repository-layout.md",
+      "path": "keep-design/specs/spec-repository-layout.md",
       "authority": "normative",
       "sections": [
         "Workspace and release identity"
@@ -703,7 +703,7 @@
       "include_preamble": true
     },
     "alert-lifecycle": {
-      "path": "appchi-design/specs/spec-alert-operations.md",
+      "path": "keep-design/specs/spec-alert-operations.md",
       "authority": "normative",
       "sections": [
         "14. Source versus manual ordering and revisions",
@@ -725,7 +725,7 @@
       "include_preamble": true
     },
     "operators-management": {
-      "path": "appchi-design/specs/spec-operator-operations.md",
+      "path": "keep-design/specs/spec-operator-operations.md",
       "authority": "normative",
       "sections": [
         "1. IDs and names",
@@ -750,7 +750,7 @@
       "include_preamble": true
     },
     "pipeline-provisioning": {
-      "path": "appchi-design/specs/spec-kafka-alert-pipeline.md",
+      "path": "keep-design/specs/spec-kafka-alert-pipeline.md",
       "authority": "normative",
       "sections": [
         "7. Kong policy and provisioning"
@@ -758,7 +758,7 @@
       "include_preamble": true
     },
     "presets": {
-      "path": "appchi-design/specs/spec-preset-operations.md",
+      "path": "keep-design/specs/spec-preset-operations.md",
       "authority": "normative",
       "sections": [
         "1. Identity, ownership and permissions",
@@ -778,7 +778,7 @@
       "include_preamble": true
     },
     "dashboards": {
-      "path": "appchi-design/specs/spec-dashboard-operations.md",
+      "path": "keep-design/specs/spec-dashboard-operations.md",
       "authority": "normative",
       "sections": [
         "1. Identity, names and permissions",
@@ -799,7 +799,7 @@
       "include_preamble": true
     },
     "recovery-boundaries": {
-      "path": "appchi-design/specs/spec-system-completion.md",
+      "path": "keep-design/specs/spec-system-completion.md",
       "authority": "normative",
       "sections": [
         "19. Unified retention and configuration history",
@@ -809,7 +809,7 @@
       "include_preamble": true
     },
     "recovery-proofs": {
-      "path": "appchi-design/specs/spec-alert-history-technical.md",
+      "path": "keep-design/specs/spec-alert-history-technical.md",
       "authority": "normative",
       "sections": [
         "23. Logical purge and bounded physical cleanup",
@@ -821,7 +821,7 @@
       "include_preamble": true
     },
     "verify-incidents": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Incidents",
@@ -830,7 +830,7 @@
       "include_preamble": true
     },
     "verify-correlation": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Correlation",
@@ -839,7 +839,7 @@
       "include_preamble": true
     },
     "verify-maintenance": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Maintenance",
@@ -848,7 +848,7 @@
       "include_preamble": true
     },
     "verify-events": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Kafka-first redesign (REV-33)",
@@ -858,7 +858,7 @@
       "include_preamble": true
     },
     "verify-database": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Alembic migration conversion (REV-38)",
@@ -867,7 +867,7 @@
       "include_preamble": true
     },
     "verify-identity": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Identity",
@@ -877,7 +877,7 @@
       "include_preamble": true
     },
     "verify-live": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "REV-36 Product API live publishing",
@@ -886,7 +886,7 @@
       "include_preamble": true
     },
     "verify-search": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Alerts",
@@ -896,7 +896,7 @@
       "include_preamble": true
     },
     "verify-system": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Cross-system acceptance",
@@ -905,7 +905,7 @@
       "include_preamble": true
     },
     "verify-alerts": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Alerts",
@@ -915,7 +915,7 @@
       "include_preamble": true
     },
     "verify-operators": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Operators",
@@ -924,7 +924,7 @@
       "include_preamble": true
     },
     "verify-shared-views": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Presets",
@@ -934,7 +934,7 @@
       "include_preamble": true
     },
     "verify-recovery": {
-      "path": "appchi-design/verification/verification-plan.md",
+      "path": "keep-design/verification/verification-plan.md",
       "authority": "verification",
       "sections": [
         "Reliability",
@@ -943,19 +943,19 @@
       "include_preamble": true
     },
     "frontend-guide": {
-      "path": "appchi-frontend/README.md",
+      "path": "keep-frontend/README.md",
       "authority": "implementation",
       "sections": [],
       "include_preamble": true
     },
     "contracts-guide": {
-      "path": "appchi-contracts/README.md",
+      "path": "keep-contracts/README.md",
       "authority": "implementation",
       "sections": [],
       "include_preamble": true
     },
     "migration-guide": {
-      "path": "appchi-migrations/README.md",
+      "path": "keep-migrations/README.md",
       "authority": "implementation",
       "sections": [],
       "intents": [
@@ -965,7 +965,7 @@
       "include_preamble": true
     },
     "workspace-development": {
-      "path": "appchi-delivery/docs/repository-workspace.md",
+      "path": "keep-delivery/docs/repository-workspace.md",
       "authority": "implementation",
       "sections": [
         "Checkout and dependencies",
@@ -975,7 +975,7 @@
       "include_preamble": true
     },
     "delivery-readiness": {
-      "path": "appchi-delivery/status/delivery-readiness.md",
+      "path": "keep-delivery/status/delivery-readiness.md",
       "authority": "evidence",
       "sections": [
         "Service bindings",
@@ -986,7 +986,7 @@
       "include_preamble": true
     },
     "implementation-checkpoint": {
-      "path": "appchi-delivery/status/implementation-status.md",
+      "path": "keep-delivery/status/implementation-status.md",
       "authority": "evidence",
       "sections": [
         "Executed evidence and current checkpoint",
@@ -997,7 +997,7 @@
       "include_preamble": true
     },
     "release-artifacts": {
-      "path": "appchi-delivery/docs/runbooks/release-artifacts.md",
+      "path": "keep-delivery/docs/runbooks/release-artifacts.md",
       "authority": "implementation",
       "sections": [],
       "intents": [
@@ -1007,25 +1007,25 @@
       "include_preamble": true
     },
     "restore-runbook": {
-      "path": "appchi-delivery/docs/runbooks/restore-fencing.md",
+      "path": "keep-delivery/docs/runbooks/restore-fencing.md",
       "authority": "implementation",
       "sections": [],
       "include_preamble": true
     },
     "design-guide": {
-      "path": "appchi-design/README.md",
+      "path": "keep-design/README.md",
       "authority": "instruction",
       "sections": [],
       "include_preamble": true
     },
     "workspace-instructions": {
-      "path": "appchi-delivery/workspace/AGENTS.md",
+      "path": "keep-delivery/workspace/AGENTS.md",
       "authority": "instruction",
       "sections": [],
       "include_preamble": true
     },
     "policy-dependencies": {
-      "path": "appchi-delivery/docs/agent-workflows.md",
+      "path": "keep-delivery/docs/agent-workflows.md",
       "authority": "instruction",
       "sections": [
         "Make changes across repositories coherently",
@@ -1038,7 +1038,7 @@
       "include_preamble": true
     },
     "policy-database": {
-      "path": "appchi-delivery/docs/agent-workflows.md",
+      "path": "keep-delivery/docs/agent-workflows.md",
       "authority": "instruction",
       "sections": [
         "Database, cutover and release discipline"
@@ -1050,7 +1050,7 @@
       "include_preamble": true
     },
     "policy-delivery": {
-      "path": "appchi-delivery/docs/agent-workflows.md",
+      "path": "keep-delivery/docs/agent-workflows.md",
       "authority": "instruction",
       "sections": [
         "Database, cutover and release discipline",
@@ -1064,7 +1064,7 @@
       "include_preamble": true
     },
     "policy-documentation": {
-      "path": "appchi-delivery/docs/agent-workflows.md",
+      "path": "keep-delivery/docs/agent-workflows.md",
       "authority": "instruction",
       "sections": [
         "Documentation and verification",
@@ -1073,13 +1073,13 @@
       "include_preamble": true
     },
     "architecture-overview": {
-      "path": "appchi-design/architecture/README.md",
+      "path": "keep-design/architecture/README.md",
       "authority": "normative",
       "sections": [],
       "include_preamble": true
     },
     "spec-map": {
-      "path": "appchi-design/specs/spec-alerts-management-system.md",
+      "path": "keep-design/specs/spec-alerts-management-system.md",
       "authority": "normative",
       "sections": [
         "Specification map"
@@ -1087,7 +1087,7 @@
       "include_preamble": true
     },
     "policy-design-first": {
-      "path": "appchi-delivery/docs/agent-workflows.md",
+      "path": "keep-delivery/docs/agent-workflows.md",
       "authority": "instruction",
       "sections": [
         "Read the design first"
@@ -1095,7 +1095,7 @@
       "include_preamble": true
     },
     "reliability-failures": {
-      "path": "appchi-design/specs/spec-reliability-operations.md",
+      "path": "keep-design/specs/spec-reliability-operations.md",
       "authority": "normative",
       "sections": [
         "8. Request timeouts and retries",
@@ -1108,7 +1108,7 @@
       "include_preamble": true
     },
     "kafka-first-runbook": {
-      "path": "appchi-delivery/docs/runbooks/kafka-first.md",
+      "path": "keep-delivery/docs/runbooks/kafka-first.md",
       "authority": "instruction",
       "sections": [
         "Workload bindings",
@@ -1117,7 +1117,7 @@
       "include_preamble": true
     },
     "development-runbook": {
-      "path": "appchi-delivery/docs/runbooks/development.md",
+      "path": "keep-delivery/docs/runbooks/development.md",
       "authority": "instruction",
       "sections": [
         "Prerequisites and configuration",
@@ -1134,7 +1134,7 @@
       "title": "System overview and boundaries",
       "covers": "Product model, services and data authority, cross-system invariants, repository boundaries and current worker scope.",
       "ask_like": [
-        "How does Appchi work end to end?",
+        "How does Keep work end to end?",
         "Which service owns which data?",
         "What does the current worker scope defer?"
       ],
@@ -1178,7 +1178,7 @@
         }
       ],
       "repositories": [
-        "appchi-design"
+        "keep-design"
       ],
       "checks": [
         "Resolve specification/code discrepancies before changing behavior; consult each affected repository README for checks."
@@ -1207,8 +1207,8 @@
         "spec map"
       ],
       "path_globs": [
-        "appchi-design/decisions/*",
-        "appchi-design/verification/*"
+        "keep-design/decisions/*",
+        "keep-design/verification/*"
       ],
       "requires": [],
       "orientation": [
@@ -1227,8 +1227,8 @@
         }
       ],
       "repositories": [
-        "appchi-design",
-        "appchi-delivery"
+        "keep-design",
+        "keep-delivery"
       ],
       "checks": [
         "Use only IDs that appear in a governing heading, register row or decision; never invent one."
@@ -1262,9 +1262,9 @@
         "receipt"
       ],
       "path_globs": [
-        "appchi-ingestion/src/appchi/ingestion/*.py",
-        "appchi-processor/src/appchi/*.py",
-        "appchi-processor/src/appchi/processor/*.py"
+        "keep-ingestion/src/keep/ingestion/*.py",
+        "keep-processor/src/keep/*.py",
+        "keep-processor/src/keep/processor/*.py"
       ],
       "requires": [
         "behavior"
@@ -1309,10 +1309,10 @@
         }
       ],
       "repositories": [
-        "appchi-ingestion",
-        "appchi-processor",
-        "appchi-contracts",
-        "appchi-domain"
+        "keep-ingestion",
+        "keep-processor",
+        "keep-contracts",
+        "keep-domain"
       ],
       "checks": [
         "Apply the pipeline replay, ordering and recovery scenarios from the verification plan with real services where required."
@@ -1343,10 +1343,10 @@
         "occurrence"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/alerts/*.py",
-        "appchi-domain/src/appchi/alerts/*.py",
-        "appchi-frontend/src/components/alerts.tsx",
-        "appchi-frontend/src/components/alert-*.tsx"
+        "keep-api/src/keep/alerts/*.py",
+        "keep-domain/src/keep/alerts/*.py",
+        "keep-frontend/src/components/alerts.tsx",
+        "keep-frontend/src/components/alert-*.tsx"
       ],
       "requires": [
         "behavior"
@@ -1385,10 +1385,10 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-processor",
-        "appchi-frontend"
+        "keep-api",
+        "keep-domain",
+        "keep-processor",
+        "keep-frontend"
       ],
       "checks": [
         "Follow API/domain/processor guidance for source/manual ordering, derived status, actor/history proof, no-op commands and tenant isolation."
@@ -1415,11 +1415,11 @@
         "schema compatibility"
       ],
       "path_globs": [
-        "appchi-contracts/src/appchi/ingestion/*.py",
-        "appchi-contracts/schemas/alerts.*.schema.json",
-        "appchi-contracts/src/appchi/event_models.py",
-        "appchi-processor/src/appchi/kafka_source.py",
-        "appchi-ingestion/src/appchi/ingestion/kafka_admission.py"
+        "keep-contracts/src/keep/ingestion/*.py",
+        "keep-contracts/schemas/alerts.*.schema.json",
+        "keep-contracts/src/keep/event_models.py",
+        "keep-processor/src/keep/kafka_source.py",
+        "keep-ingestion/src/keep/ingestion/kafka_admission.py"
       ],
       "requires": [
         "behavior"
@@ -1449,13 +1449,13 @@
         }
       ],
       "repositories": [
-        "appchi-contracts",
-        "appchi-api",
-        "appchi-ingestion",
-        "appchi-processor",
-        "appchi-correlation",
-        "appchi-indexer",
-        "appchi-frontend"
+        "keep-contracts",
+        "keep-api",
+        "keep-ingestion",
+        "keep-processor",
+        "keep-correlation",
+        "keep-indexer",
+        "keep-frontend"
       ],
       "checks": [
         "Read contracts and producer/consumer READMEs; regenerate with existing tools, run drift/compatibility and affected consumer checks, and identify actual producer revisions."
@@ -1490,9 +1490,9 @@
         "projection"
       ],
       "path_globs": [
-        "appchi-indexer/src/appchi/search/*.py",
-        "appchi-api/src/appchi/search_routes.py",
-        "appchi-api/src/appchi/search_clients.py"
+        "keep-indexer/src/keep/search/*.py",
+        "keep-api/src/keep/search_routes.py",
+        "keep-api/src/keep/search_clients.py"
       ],
       "requires": [
         "behavior"
@@ -1529,9 +1529,9 @@
         }
       ],
       "repositories": [
-        "appchi-domain",
-        "appchi-indexer",
-        "appchi-api"
+        "keep-domain",
+        "keep-indexer",
+        "keep-api"
       ],
       "checks": [
         "Follow indexer/domain/API test guidance; serialize native CEL suites, verify exact counts, tenant isolation, ordering, missed-hint reconciliation and rebuild proof."
@@ -1559,9 +1559,9 @@
         "invalidation"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/live.py",
-        "appchi-domain/src/appchi/alert_notifications.py",
-        "appchi-frontend/src/lib/live-stream.ts"
+        "keep-api/src/keep/live.py",
+        "keep-domain/src/keep/alert_notifications.py",
+        "keep-frontend/src/lib/live-stream.ts"
       ],
       "requires": [
         "behavior"
@@ -1593,9 +1593,9 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend"
+        "keep-api",
+        "keep-domain",
+        "keep-frontend"
       ],
       "checks": [
         "Use API/frontend checks for lost/duplicate hints, connected-tenant reconciliation, reconnect, access loss, shutdown and visible freshness."
@@ -1626,8 +1626,8 @@
         "deletion"
       ],
       "path_globs": [
-        "appchi-domain/src/appchi/recovery/*.py",
-        "appchi-api/src/appchi/recovery/*.py"
+        "keep-domain/src/keep/recovery/*.py",
+        "keep-api/src/keep/recovery/*.py"
       ],
       "requires": [
         "behavior"
@@ -1659,9 +1659,9 @@
         }
       ],
       "repositories": [
-        "appchi-domain",
-        "appchi-api",
-        "appchi-delivery"
+        "keep-domain",
+        "keep-api",
+        "keep-delivery"
       ],
       "checks": [
         "Follow delivery recovery runbooks and owning-repository checks; preserve read-time windows and retirement/revocation fences while automation remains deferred."
@@ -1683,9 +1683,9 @@
         "incident report"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/incidents/*.py",
-        "appchi-domain/src/appchi/incidents/*.py",
-        "appchi-frontend/src/components/incident*.tsx"
+        "keep-api/src/keep/incidents/*.py",
+        "keep-domain/src/keep/incidents/*.py",
+        "keep-frontend/src/components/incident*.tsx"
       ],
       "requires": [
         "behavior"
@@ -1719,9 +1719,9 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend"
+        "keep-api",
+        "keep-domain",
+        "keep-frontend"
       ],
       "checks": [
         "Choose applicable incident acceptance scenarios, apply current worker scope, and read the affected repository test guidance."
@@ -1776,8 +1776,8 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain"
+        "keep-api",
+        "keep-domain"
       ],
       "checks": [
         "Use API/domain test guidance for uncertain retries, stale revisions, all-or-nothing writes, audit and permissions."
@@ -1800,7 +1800,7 @@
         "move alert"
       ],
       "path_globs": [
-        "appchi-frontend/src/components/incident-membership.tsx"
+        "keep-frontend/src/components/incident-membership.tsx"
       ],
       "requires": [
         "incidents",
@@ -1832,9 +1832,9 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-correlation"
+        "keep-api",
+        "keep-domain",
+        "keep-correlation"
       ],
       "checks": [
         "Use incident and affected correlation tests for competing owners, atomic moves, multi-alert conflicts and fresh-transition boundaries."
@@ -1860,9 +1860,9 @@
         "sort incidents"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/incidents/listing.py",
-        "appchi-domain/src/appchi/incidents/counts.py",
-        "appchi-frontend/src/components/incident-list.tsx"
+        "keep-api/src/keep/incidents/listing.py",
+        "keep-domain/src/keep/incidents/counts.py",
+        "keep-frontend/src/components/incident-list.tsx"
       ],
       "requires": [
         "incidents"
@@ -1889,9 +1889,9 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend"
+        "keep-api",
+        "keep-domain",
+        "keep-frontend"
       ],
       "checks": [
         "Follow API/frontend test guidance for tenant-scoped list/search, stable ordering, cursors, current note text and browser errors."
@@ -1916,11 +1916,11 @@
         "attach"
       ],
       "path_globs": [
-        "appchi-correlation/src/appchi/correlation/*.py",
-        "appchi-domain/src/appchi/correlation/*.py",
-        "appchi-api/src/appchi/correlation/*.py",
-        "appchi-frontend/src/components/rules-pages.tsx",
-        "appchi-frontend/src/components/correlation-tester.tsx"
+        "keep-correlation/src/keep/correlation/*.py",
+        "keep-domain/src/keep/correlation/*.py",
+        "keep-api/src/keep/correlation/*.py",
+        "keep-frontend/src/components/rules-pages.tsx",
+        "keep-frontend/src/components/correlation-tester.tsx"
       ],
       "requires": [
         "behavior"
@@ -1962,9 +1962,9 @@
         }
       ],
       "repositories": [
-        "appchi-correlation",
-        "appchi-domain",
-        "appchi-api"
+        "keep-correlation",
+        "keep-domain",
+        "keep-api"
       ],
       "checks": [
         "Read correlation/domain/API test guidance; serialize native CEL suites and cover reset, replay, evidence expiry, all-eligible attachments and concurrency."
@@ -1987,9 +1987,9 @@
         "suppress"
       ],
       "path_globs": [
-        "appchi-domain/src/appchi/maintenance/*.py",
-        "appchi-api/src/appchi/maintenance/*.py",
-        "appchi-frontend/src/components/maintenance-*.tsx"
+        "keep-domain/src/keep/maintenance/*.py",
+        "keep-api/src/keep/maintenance/*.py",
+        "keep-frontend/src/components/maintenance-*.tsx"
       ],
       "requires": [
         "behavior"
@@ -2026,9 +2026,9 @@
         }
       ],
       "repositories": [
-        "appchi-domain",
-        "appchi-processor",
-        "appchi-api"
+        "keep-domain",
+        "keep-processor",
+        "keep-api"
       ],
       "checks": [
         "Use domain/processor/API guidance for delayed input, repeats, overlapping causes, no backfill and current source-driven release; do not treat elapsed time as release."
@@ -2052,10 +2052,10 @@
         "count batch"
       ],
       "path_globs": [
-        "appchi-frontend/src/components/presets-pages.tsx",
-        "appchi-frontend/src/components/dashboards-pages.tsx",
-        "appchi-frontend/src/components/dashboard-*.tsx",
-        "appchi-frontend/src/lib/dashboard-layout.ts"
+        "keep-frontend/src/components/presets-pages.tsx",
+        "keep-frontend/src/components/dashboards-pages.tsx",
+        "keep-frontend/src/components/dashboard-*.tsx",
+        "keep-frontend/src/lib/dashboard-layout.ts"
       ],
       "requires": [
         "behavior"
@@ -2090,9 +2090,9 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend"
+        "keep-api",
+        "keep-domain",
+        "keep-frontend"
       ],
       "checks": [
         "Use API/frontend checks for exact count provenance, references, concurrent saves, responsive layout and saved/shared behavior; personal views remain excluded."
@@ -2105,7 +2105,7 @@
       "covers": "Operator lifecycle and API keys, Kong gateway policy, synchronous provisioning and shared Grafana routing.",
       "ask_like": [
         "How is a new operator key provisioned in Kong?",
-        "How do Grafana alerts reach Appchi?"
+        "How do Grafana alerts reach Keep?"
       ],
       "aliases": [
         "operator key",
@@ -2117,8 +2117,8 @@
         "gateway"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/operators/*.py",
-        "appchi-contracts/src/appchi/operators/*.py"
+        "keep-api/src/keep/operators/*.py",
+        "keep-contracts/src/keep/operators/*.py"
       ],
       "requires": [
         "shared-commands"
@@ -2146,9 +2146,9 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-ingestion",
-        "appchi-contracts"
+        "keep-api",
+        "keep-ingestion",
+        "keep-contracts"
       ],
       "checks": [
         "Use API/ingestion test guidance for partial remote operations, explicit retry, generation/all-node proof, exact routing labels, secret disposal and denial barriers."
@@ -2182,10 +2182,10 @@
         "visibility"
       ],
       "path_globs": [
-        "appchi-api/src/appchi/identity/*.py",
-        "appchi-domain/src/appchi/identity/*.py",
-        "appchi-api/src/appchi/tenant_routes.py",
-        "appchi-frontend/src/components/directory-picker.tsx"
+        "keep-api/src/keep/identity/*.py",
+        "keep-domain/src/keep/identity/*.py",
+        "keep-api/src/keep/tenant_routes.py",
+        "keep-frontend/src/components/directory-picker.tsx"
       ],
       "requires": [
         "behavior"
@@ -2216,10 +2216,10 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain",
-        "appchi-frontend",
-        "appchi-delivery"
+        "keep-api",
+        "keep-domain",
+        "keep-frontend",
+        "keep-delivery"
       ],
       "checks": [
         "Read API/domain/delivery guidance; test current grants, known revocations, trusted publication, expiry, tenant isolation and restore gates."
@@ -2266,8 +2266,8 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-domain"
+        "keep-api",
+        "keep-domain"
       ],
       "checks": [
         "Read affected API and domain READMEs; verify authorization, conflict, retry/no-op and atomic history behavior."
@@ -2301,9 +2301,9 @@
         "transaction"
       ],
       "path_globs": [
-        "appchi-migrations/src/appchi/migration_sql/*",
-        "appchi-migrations/src/appchi/migration_alembic/*",
-        "appchi-migrations/src/appchi/migrate.py"
+        "keep-migrations/src/keep/migration_sql/*",
+        "keep-migrations/src/keep/migration_alembic/*",
+        "keep-migrations/src/keep/migrate.py"
       ],
       "requires": [
         "behavior"
@@ -2337,9 +2337,9 @@
         }
       ],
       "repositories": [
-        "appchi-migrations",
-        "appchi-domain",
-        "appchi-delivery"
+        "keep-migrations",
+        "keep-domain",
+        "keep-delivery"
       ],
       "checks": [
         "Follow migrations README for checksum/history integrity, supported upgrades, schema/privilege checks and affected writers using isolated PostgreSQL."
@@ -2366,11 +2366,11 @@
         "status code"
       ],
       "path_globs": [
-        "appchi-contracts/schemas/product.openapi.json",
-        "appchi-contracts/schemas/openapi.json",
-        "appchi-contracts/schemas/ingestion.openapi.json",
-        "appchi-contracts/src/appchi/models.py",
-        "appchi-frontend/src/lib/generated.ts"
+        "keep-contracts/schemas/product.openapi.json",
+        "keep-contracts/schemas/openapi.json",
+        "keep-contracts/schemas/ingestion.openapi.json",
+        "keep-contracts/src/keep/models.py",
+        "keep-frontend/src/lib/generated.ts"
       ],
       "requires": [
         "behavior"
@@ -2405,10 +2405,10 @@
         }
       ],
       "repositories": [
-        "appchi-api",
-        "appchi-ingestion",
-        "appchi-contracts",
-        "appchi-frontend"
+        "keep-api",
+        "keep-ingestion",
+        "keep-contracts",
+        "keep-frontend"
       ],
       "checks": [
         "Read producer, contracts and frontend READMEs; generate schemas/types using repository tools and run drift plus affected producer/consumer compatibility checks."
@@ -2422,7 +2422,7 @@
       "ask_like": [
         "What happens when Kafka is down during admission?",
         "What are the request timeouts?",
-        "Which metrics and alerts does Appchi emit?"
+        "Which metrics and alerts does Keep emit?"
       ],
       "aliases": [
         "timeout",
@@ -2472,10 +2472,10 @@
         }
       ],
       "repositories": [
-        "appchi-ingestion",
-        "appchi-processor",
-        "appchi-api",
-        "appchi-delivery"
+        "keep-ingestion",
+        "keep-processor",
+        "keep-api",
+        "keep-delivery"
       ],
       "checks": [
         "Use the reliability fault and recovery scenarios from the verification plan; synthetic local results are not production qualification."
@@ -2503,9 +2503,9 @@
         "styling"
       ],
       "path_globs": [
-        "appchi-frontend/src/app/*.css",
-        "appchi-frontend/src/app/styles/*.css",
-        "appchi-frontend/src/components/icons.tsx"
+        "keep-frontend/src/app/*.css",
+        "keep-frontend/src/app/styles/*.css",
+        "keep-frontend/src/components/icons.tsx"
       ],
       "requires": [],
       "orientation": [],
@@ -2525,7 +2525,7 @@
         }
       ],
       "repositories": [
-        "appchi-frontend"
+        "keep-frontend"
       ],
       "checks": [
         "Use frontend README checks and inspect affected rendered states; identify approved domain-specific visual guidance when applicable."
@@ -2585,7 +2585,7 @@
         }
       ],
       "repositories": [
-        "appchi-frontend"
+        "keep-frontend"
       ],
       "checks": [
         "Run relevant frontend README type/build and browser workflows; distinguish controlled API fixtures from real integrated behavior."
@@ -2617,8 +2617,8 @@
         "workspace bootstrap"
       ],
       "path_globs": [
-        "appchi-delivery/scripts/local*",
-        "appchi-delivery/docs/runbooks/development.md"
+        "keep-delivery/scripts/local*",
+        "keep-delivery/docs/runbooks/development.md"
       ],
       "requires": [],
       "orientation": [],
@@ -2638,7 +2638,7 @@
         }
       ],
       "repositories": [
-        "appchi-delivery"
+        "keep-delivery"
       ],
       "checks": [
         "Record commands, revisions, results and skipped checks; old evidence is not proof for changed code."
@@ -2667,9 +2667,9 @@
       "path_globs": [
         "*/pyproject.toml",
         "*/poetry.lock",
-        "appchi-frontend/package.json",
-        "appchi-frontend/package-lock.json",
-        "appchi-delivery/workspace/manifest.json"
+        "keep-frontend/package.json",
+        "keep-frontend/package-lock.json",
+        "keep-delivery/workspace/manifest.json"
       ],
       "requires": [],
       "orientation": [],
@@ -2699,7 +2699,7 @@
         }
       ],
       "repositories": [
-        "appchi-delivery"
+        "keep-delivery"
       ],
       "checks": [
         "Inspect affected manifests, locks and READMEs; record actual source revisions and local overrides, validate Poetry locks and run the affected consumer checks."
@@ -2727,9 +2727,9 @@
         "qualification"
       ],
       "path_globs": [
-        "appchi-delivery/deploy/*",
-        "appchi-delivery/workspace/manifest.json",
-        "appchi-delivery/status/delivery-readiness.md"
+        "keep-delivery/deploy/*",
+        "keep-delivery/workspace/manifest.json",
+        "keep-delivery/status/delivery-readiness.md"
       ],
       "requires": [
         "behavior"
@@ -2765,7 +2765,7 @@
         }
       ],
       "repositories": [
-        "appchi-delivery"
+        "keep-delivery"
       ],
       "checks": [
         "Read current delivery README/runbooks and manifest; record revisions, dirty state, images, migrations, configuration and executed evidence. Deployment authorization remains separate."
@@ -2792,10 +2792,10 @@
         "agent instructions"
       ],
       "path_globs": [
-        "appchi-design/context/*",
-        "appchi-design/AGENTS.md",
-        "appchi-delivery/workspace/AGENTS.md",
-        "appchi-delivery/workspace/CLAUDE.md"
+        "keep-design/context/*",
+        "keep-design/AGENTS.md",
+        "keep-delivery/workspace/AGENTS.md",
+        "keep-delivery/workspace/CLAUDE.md"
       ],
       "requires": [],
       "orientation": [],
@@ -2820,8 +2820,8 @@
         }
       ],
       "repositories": [
-        "appchi-design",
-        "appchi-delivery"
+        "keep-design",
+        "keep-delivery"
       ],
       "checks": [
         "Use design README/check_docs and delivery documentation/context checks; preserve all 55 issue IDs and decision numbering, and synchronize canonical/installed instructions when affected."

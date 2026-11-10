@@ -33,11 +33,11 @@
 These cases supplement the existing stronger sustained/recovery and enabled-rule
 qualification requirements; executed outcomes belong in delivery.
 
-**REV-35 scope:** directory polling and its five-minute LDAP-change propagation cases are future qualification. Current identity acceptance must cover explicit complete bootstrap/refresh, unknown-user/team refusal without evidence, last-trusted authorization, immediate Appchi grant edits, known revocation/logout/session expiry and unchanged restore gates. See [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
+**REV-35 scope:** directory polling and its five-minute LDAP-change propagation cases are future qualification. Current identity acceptance must cover explicit complete bootstrap/refresh, unknown-user/team refusal without evidence, last-trusted authorization, immediate Keep grant edits, known revocation/logout/session expiry and unchanged restore gates. See [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
 **REV-34 scope:** [Worker scope](../specs/spec-worker-scope.md) supersedes acceptance requirements for deferred schedulers. Existing timer/fan-out and automatic-cleanup scenarios are future qualification, not active release gates. Pre-cutover maintenance history still requires compatibility checks.
 
-Required acceptance cases for the selected design. Record executions, environment/version, workload, results and defects during implementation. No tests are reported as executed here. Link failures to [Design register](../decisions/design-register.md) and release evidence to [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md).
+Required acceptance cases for the selected design. Record executions, environment/version, workload, results and defects during implementation. No tests are reported as executed here. Link failures to [Design register](../decisions/design-register.md) and release evidence to [Delivery readiness](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md).
 
 ## Alerts
 
@@ -228,7 +228,7 @@ service, check the request parameters for each state and detection, merging with
 parameters already in the configured address, and each result: a count with its
 threshold color, Team not found, No count, and a timeout, error status, redirect,
 oversized or non-JSON reply showing the last count greyed with its age. Without
-`APPCHI_TICKET_COUNT_URL` the type is disabled and panels say ServiceNow isn't
+`KEEP_TICKET_COUNT_URL` the type is disabled and panels say ServiceNow isn't
 connected. Answers are reused for 30 seconds and concurrent requests for the same
 query share one call. The address's path and query never appear in responses or
 logs. Only super admins see the Integrations page and its Test connection action.
@@ -258,7 +258,7 @@ Qualify canonical-name collisions, reserved Global/name reuse, atomic creation, 
 
 Run the primary 250/second concentrated-tenant workload for 24 hours, including retained data growth, and larger representative cases for four hours each. Repeat the primary path for v1 and v2 and characterize Grafana adapter overhead. Exercise the selected mixes, valid maximum sizes/batches, UI views and combined rules. Record a ten-minute startup period separately, without hiding subsequent growing backlog. Verify per-logical-key source append order and per-tenant changed order, headroom and all applicable latency objectives.
 
-Appchi owns application load/correctness tests. Coordinate dependency fault injection and recovery in approved environments: owning teams perform infrastructure failover/restoration and Appchi verifies resulting application behavior. Also test the sixty-second overload burst; two-hour durable backlog and 500/second recovery; tenant fairness; post-commit disconnects; duplicate/reordered messages; leader loss and dependency outages; maintenance expiry racing edits/deletion; restored revoked credentials; deletion/replay protection; and full search rebuild. Require zero cross-tenant effects, duplicate internal effects or application-caused loss of retained acknowledged inputs or revoked-key activation. Assess infrastructure disaster-loss behavior against supplied service contracts rather than assuming a zero-loss capability. A profile is qualified only if its correctness and applicable objectives pass. Executed local checks are recorded separately in implementation status.
+Keep owns application load/correctness tests. Coordinate dependency fault injection and recovery in approved environments: owning teams perform infrastructure failover/restoration and Keep verifies resulting application behavior. Also test the sixty-second overload burst; two-hour durable backlog and 500/second recovery; tenant fairness; post-commit disconnects; duplicate/reordered messages; leader loss and dependency outages; maintenance expiry racing edits/deletion; restored revoked credentials; deletion/replay protection; and full search rebuild. Require zero cross-tenant effects, duplicate internal effects or application-caused loss of retained acknowledged inputs or revoked-key activation. Assess infrastructure disaster-loss behavior against supplied service contracts rather than assuming a zero-loss capability. A profile is qualified only if its correctness and applicable objectives pass. Executed local checks are recorded separately in implementation status.
 
 ## Cross-system acceptance
 
@@ -372,7 +372,7 @@ Verify the [normative Kafka pipeline](../specs/spec-kafka-alert-pipeline.md) sep
 - Migration: old work drained, new groups start at captured topic boundaries, active legacy writers refused, incompatible saved correlation CEL/grouping blocked by parsed field reference, edited rule starts fresh epoch, old event schema never consumed as new.
 - Recovery: retained minimal delivery/key fences, outstanding publication/proof holds, missing protected replay baseline keeps restore closed, explicit Kafka low-watermark loss interval and reviewed reset. No client receipt service or zero-loss promise beyond supplied retention.
 
-Production capacity, multi-node failover/rebalance, clock-discontinuity and rollback-survival runs remain required even when focused local tests pass. Actual results and remaining gaps belong in [implementation evidence](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/kafka-first-implementation.md).
+Production capacity, multi-node failover/rebalance, clock-discontinuity and rollback-survival runs remain required even when focused local tests pass. Actual results and remaining gaps belong in [implementation evidence](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/kafka-first-implementation.md).
 
 ## Kafka topic incarnation (REV-41)
 

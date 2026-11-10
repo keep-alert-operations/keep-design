@@ -100,7 +100,7 @@ API/ingress deadlines remain unchanged. Qualify connection loss, slow dependenci
 concurrent callers and the complete proxy chain before deployment.
 
 The Product API mounts the qualified operator binding and management credentials.
-Use a separate `APPCHI_OPERATOR_DATABASE_URL` with the existing provisioning-role
+Use a separate `KEEP_OPERATOR_DATABASE_URL` with the existing provisioning-role
 privileges, a shared one-connection pool per API process and the existing global
 remote lease. Ordinary API SQL retains its RLS connection. Account for this extra
 connection per replica in the supplied allocation; never mount these credentials
@@ -118,14 +118,14 @@ revocation disposal and restore denial fences remain mandatory.
 directory worker from the current release and list automatic identity refresh as
 nice-to-have. This supersedes REV-34's unchanged directory-worker deployment and
 the earlier requirement to qualify five-minute LDAP membership/disablement
-propagation through automatic Appchi polling. That propagation target is deferred
+propagation through automatic Keep polling. That propagation target is deferred
 with the worker; the current release does not claim it.
 
 **Assistant-selected boundary:** preserve Keycloak OIDC login, immutable identity
-bindings, Appchi-owned grants and the accepted PostgreSQL identity checkpoint.
+bindings, Keep-owned grants and the accepted PostgreSQL identity checkpoint.
 Existing eligible linked users use the last trusted checkpoint without an age
-cutoff. Current Appchi grant edits, known revocations, signed provider logout and
-session expiry still apply. Do not treat token group claims as Appchi permissions
+cutoff. Current Keep grant edits, known revocations, signed provider logout and
+session expiry still apply. Do not treat token group claims as Keep permissions
 or quietly introduce another background poller or login-time identity replacement.
 
 Explicit, complete trusted publication remains available for initial bootstrap,
@@ -161,7 +161,7 @@ processor, indexer, correlation, frontend and backend; live publishing runs insi
 the Product API under REV-36, while explicit recovery/proof helpers remain.
 This is not a claim of exactly six running processes or replicas.
 The directory role is deferred by REV-35; explicit one-off publication remains.
-See [implementation evidence](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/worker-scope-implementation.md).
+See [implementation evidence](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/worker-scope-implementation.md).
 
 ## 6. Live updates inside the Product API
 

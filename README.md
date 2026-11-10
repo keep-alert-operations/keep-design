@@ -1,8 +1,8 @@
-# appchi-design
+# keep-design
 
 Authoritative system specifications, design decisions, architecture and verification requirements.
 
-See [system design](https://github.com/appchi-alert-operations/appchi-design), [workspace setup](https://github.com/appchi-alert-operations/appchi-delivery) and [source provenance](SOURCE.md).
+See [system design](https://github.com/keep-alert-operations/keep-design), [workspace setup](https://github.com/keep-alert-operations/keep-delivery) and [source provenance](SOURCE.md).
 
 ## Reading order
 

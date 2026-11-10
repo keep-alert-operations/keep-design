@@ -14,13 +14,13 @@ Give each tenant an application-generated immutable UUID and immutable kind (`sp
 
 Trim surrounding Unicode whitespace, normalize the display name to NFC and require 1–128 Unicode code points. Reject remaining control/format characters and line/paragraph separators. Preserve capitalization and internal spaces. Compare names using a separately stored canonical key: NFD, default full case folding, then NFC. This completes the existing case-insensitive global uniqueness rule, including the reserved Global name. Apply the same procedure on creation and rename, and enforce uniqueness atomically.
 
-Use one versioned normalization profile across API replicas; record its Unicode table version at implementation and keep it fixed across routine runtime upgrades. Changing the profile requires collision detection and an explicit migration before activation. The selected algorithm uses [Unicode normalization](https://www.unicode.org/reports/tr15/) and [default case-folding definitions](https://www.unicode.org/versions/latest/core-spec/chapter-3/); the length and character restrictions are Appchi choices. These tenant-name rules do not modify operator names, LDAP labels or source alert fields.
+Use one versioned normalization profile across API replicas; record its Unicode table version at implementation and keep it fixed across routine runtime upgrades. Changing the profile requires collision detection and an explicit migration before activation. The selected algorithm uses [Unicode normalization](https://www.unicode.org/reports/tr15/) and [default case-folding definitions](https://www.unicode.org/versions/latest/core-spec/chapter-3/); the length and character restrictions are Keep choices. These tenant-name rules do not modify operator names, LDAP labels or source alert fields.
 
 Provision Global through idempotent initialization before admitting alerts. Reuse its immutable UUID on repeated/concurrent initialization; never reset its data. Enforce one global-kind row and the reserved, non-editable display name `Global`. Route v1 by that identity, not a supplied name. If the singleton/name cannot be established consistently, keep ingestion unready. Global has no local grants or managed v2 operators. No role may rename it, delete a tenant or disable a tenant.
 
 ## 2. Tenant creation
 
-Creation accepts a name and 1–100 initial user/team grants, with at least one eligible local administrator after expansion. Any supported tenant role may appear among those grants. Resolve directory evidence before the commit; a user need not have signed into Appchi previously to receive a grant.
+Creation accepts a name and 1–100 initial user/team grants, with at least one eligible local administrator after expansion. Any supported tenant role may appear among those grants. Resolve directory evidence before the commit; a user need not have signed into Keep previously to receive a grant.
 
 Commit the tenant, name claim, initial grants, revision, audit and command receipt in one PostgreSQL transaction. A failure creates none of them. Return 201 only after commit. Creation does not provision a Keycloak realm, operator, Grafana resource, default preset or dashboard. Operators retain their separately selected setup flow. Initialize the tenant revision to 1; the server determines the specific-tenant kind and identity.
 
@@ -46,7 +46,7 @@ Tenant admins can search company users/teams when managing their tenant's grants
 
 Require 2–100 code points for company-directory search terms, treat them as literal data, and return 50 results by default with a maximum of 200. Flatten team previews with cycle-safe deduplication and the selected complete-membership semantics. Directory searches do not create users or modify LDAP. During outages, clearly label available cached results and do not present an incomplete cached search as the complete company directory.
 
-Assignee selection retains its existing separate contract: editors may search users with effective edit or higher in that tenant, and assignment grants no access. All authenticated eligible company users still enter Appchi without an invitation or an application-access group. No invitation, approval or access-request workflow is added initially.
+Assignee selection retains its existing separate contract: editors may search users with effective edit or higher in that tenant, and assignment grants no access. All authenticated eligible company users still enter Keep without an invitation or an application-access group. No invitation, approval or access-request workflow is added initially.
 
 ## 6. Directory identity lifecycle
 
@@ -60,7 +60,7 @@ A verified re-enable of the same immutable individual may restore its still-curr
 
 Global has a read-only access-policy view for global super-admins: every eligible authenticated company user has edit, and the designated LDAP team supplies administration. Expose no editable local grant list for Global, including redundant view/edit grants. The universal baseline cannot be removed through tenant permission commands. This completes the previously selected prohibition on local Global admin grants.
 
-The designated global-super-admin group remains controlled deployment configuration, never a tenant permission field. Its bootstrap, replacement and empty/deleted-group recovery follow identity supplement 12. Neither tenant admin nor Keycloak console administrator status independently grants Appchi global privilege.
+The designated global-super-admin group remains controlled deployment configuration, never a tenant permission field. Its bootstrap, replacement and empty/deleted-group recovery follow identity supplement 12. Neither tenant admin nor Keycloak console administrator status independently grants Keep global privilege.
 
 ## 8. Permission matrix
 
@@ -74,7 +74,7 @@ Apply this matrix only where the resource lifecycle already permits the action. 
 | Persist shared presets/dashboards; execute permitted alert, incident, note, correlation and maintenance edits | No | Yes | Yes | Yes |
 | Manage operators/API keys, copy keys, or read their protected management audit | No | No | Yes | Yes |
 | Rename a specific tenant, manage its grants, inspect permission/team rosters, read tenant/access-change audit | No | No | Own administered tenants | Every specific tenant |
-| Create specific tenants; read Appchi's platform access audit | No | No | No | Yes |
+| Create specific tenants; read Keep's platform access audit | No | No | No | Yes |
 | Administer Global or read its tenant/access-change audit | No | No | No local admin role | Yes |
 | Delete/disable a tenant, rename Global, delete an incident manually, or disable an operator | No | No | No | No |
 
@@ -136,11 +136,11 @@ Use the system directory-synchronizer actor, directory revision and observation 
 
 ## 15. Platform access audit
 
-Provide a separate Appchi platform access trail readable only by current global super-admins. Record global-super-admin mapping activation/replacement, observed effective global-privilege gains/losses, identity-binding conflicts and their resolution, authorization recovery gates/resumption, and successful management actions that needed global privilege. Include tenant/resource references and operation metadata for privileged actions, without copying full resource content or credentials. Tenant-specific actions also retain their normal tenant/resource audit record.
+Provide a separate Keep platform access trail readable only by current global super-admins. Record global-super-admin mapping activation/replacement, observed effective global-privilege gains/losses, identity-binding conflicts and their resolution, authorization recovery gates/resumption, and successful management actions that needed global privilege. Include tenant/resource references and operation metadata for privileged actions, without copying full resource content or credentials. Tenant-specific actions also retain their normal tenant/resource audit record.
 
 Choose 365 elapsed days for this platform access trail as an assistant-selected alignment with the user's tenant audit period and existing operator audit. Operational authentication attempts, MFA resets, routine reads and provider/infrastructure diagnostics remain in their approved logging services under those owners' retention policies; this choice does not impose a new infrastructure log policy.
 
-Configuration activation records identify the trusted deployment operation and actor when supplied by the controlled deployment process; otherwise identify the configuration-loader system actor. Provider-console changes are not falsely attributed to an Appchi user. Repeated reports of the same unresolved binding/configuration fault do not append duplicate product events; record the first detected condition and its resolution, with repeated attempts in operational diagnostics. During an empty-super-admin-group incident, repair remains available through the established directory/deployment procedure and operational evidence, without granting another application user platform-audit access.
+Configuration activation records identify the trusted deployment operation and actor when supplied by the controlled deployment process; otherwise identify the configuration-loader system actor. Provider-console changes are not falsely attributed to a Keep user. Repeated reports of the same unresolved binding/configuration fault do not append duplicate product events; record the first detected condition and its resolution, with repeated attempts in operational diagnostics. During an empty-super-admin-group incident, repair remains available through the established directory/deployment procedure and operational evidence, without granting another application user platform-audit access.
 
 ## 16. Audit records and atomicity
 

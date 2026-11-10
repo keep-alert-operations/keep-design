@@ -6,7 +6,7 @@ from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[1]
 SIBLING_REPOSITORIES = {
-    f'appchi-{name}' for name in (
+    f'keep-{name}' for name in (
         'frontend', 'api', 'ingestion', 'processor', 'correlation', 'indexer',
         'domain', 'contracts', 'migrations', 'delivery',
     )
@@ -14,7 +14,7 @@ SIBLING_REPOSITORIES = {
 
 
 def heading_titles(lines):
-    """ATX/setext titles outside fenced code, matching appchi-delivery/scripts/context.py."""
+    """ATX/setext titles outside fenced code, matching keep-delivery/scripts/context.py."""
     titles, fence, previous = [], None, None
     for line in lines:
         marker = re.match(r'^ {0,3}(`{3,}|~{3,})(.*)$', line)
@@ -74,7 +74,7 @@ references += [(f'scope_sections[{path}]', path, titles)
                for path, titles in catalog.get('scope_sections', {}).items()]
 for label, path, wanted in references:
     parts = PurePosixPath(path).parts
-    if parts[0] != 'appchi-design':
+    if parts[0] != 'keep-design':
         continue
     target = ROOT.joinpath(*parts[1:])
     if not target.is_file():
@@ -89,12 +89,12 @@ for label, path, wanted in references:
                           f'exactly once in {path} (found {found})')
 register = (ROOT / 'decisions/design-register.md').read_text(encoding='utf-8')
 ids = {int(value) for value in re.findall(r'^(?:\|\s*|##\s*)REV-(\d+)', register, re.M)}
-if ids != set(range(1, 67)):
-    errors.append('Expected REV-01 through REV-66')
+if ids != set(range(1, 68)):
+    errors.append('Expected REV-01 through REV-67')
 if errors:
     raise SystemExit('\n'.join(errors))
 print(f'Local document targets, fences, {sections} design-owned catalog sections '
       'and review identifiers passed.')
 if deferred:
     print(f'Deferred {len(deferred)} context links to absent sibling checkouts; '
-          'run appchi-delivery/qualification/check_context.py in the complete workspace.')
+          'run keep-delivery/qualification/check_context.py in the complete workspace.')
