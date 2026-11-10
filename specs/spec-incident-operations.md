@@ -1,5 +1,7 @@
 # Incidents
 
+**Later user decision — 2026-11-10 (REV-70):** an incident can carry one ServiceNow ticket link, which editors link, change or unlink and can start from ServiceNow's prefilled new incident form; Keep never calls ServiceNow; see [section 15](#15-detail-and-mutation-ux-i3-i5) and the [register](../decisions/design-register.md#rev-70--servicenow-tickets-on-incidents-2026-11-10).
+
 **Later user decision — 2026-11-03 (REV-59):** an alert opened from an incident's linked alerts keeps that incident as its path; see [section 15](#15-detail-and-mutation-ux-i3-i5) and the [register](../decisions/design-register.md#rev-59--incident-path-on-alert-details-2026-11-03).
 
 **Later user decision — 2026-11-01 (REV-56):** incident list rows show their link counts as the detail computes them; see [section 14](#14-incident-list-and-search-i5) and the [register](../decisions/design-register.md#rev-56--link-counts-on-incident-list-rows-2026-11-01).
@@ -113,6 +115,8 @@ Default to active incidents, sorted by last qualifying activity descending, then
 ### 15. Detail and mutation UX (I3, I5)
 
 **Alert path (REV-59).** Opening an alert from the linked-alerts table shows Incidents and the incident title as the alert detail's breadcrumb, with a Back to incident action. Previous and Next step through the visible page of linked alerts, skipping unavailable references. The source is remembered for the opened alert in the browser tab, so a direct alert link starts at Feed.
+
+**ServiceNow ticket (REV-70).** When `KEEP_SERVICENOW_URL` is set, or a ticket is already linked, the Status and Assignee panel ends with a ServiceNow ticket row. A linked ticket shows its number (or "ServiceNow ticket") as a link opening the stored address in a new tab, with who linked it and when. Editors get Create in ServiceNow… and Link existing ticket… while none is linked and Change… (Link a different ticket…, Unlink ticket) once one is, in every status. Link accepts a link under the configured ServiceNow or a bare ticket number and checks it as the user types; Create opens ServiceNow's new incident form prefilled with Ticket Title and Description and then links the created ticket in its second step. The ticket command follows section 18; a stale revision keeps the dialog's entry and shows the other person's ticket. See the [register](../decisions/design-register.md#rev-70--servicenow-tickets-on-incidents-2026-11-10).
 
 **Current scope (REV-34):** Inactivity and retention deadlines are stored but not enforced, so do not present them as upcoming automatic actions; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other detail and mutation rules below remain normative.
 

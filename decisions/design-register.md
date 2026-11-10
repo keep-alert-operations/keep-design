@@ -1805,3 +1805,69 @@ The user approved the canvas at https://claude.ai/artifact/GUkDWqBYr5DjzkMyMJacp
 This extends, for `incident_count` panels, sections 2, 3 and 11 and the APIs of
 section 14; other panel types are unchanged. Original issue IDs and REV numbering are
 unchanged. Executed evidence belongs in delivery.
+## REV-70 — ServiceNow tickets on incidents (2026-11-10)
+
+User decision. An incident can carry one ServiceNow ticket: editors link an existing
+ticket, change or remove the link, or open ServiceNow's new incident form filled in
+from the incident and then link the ticket they created there, like KeepHQ's ticketing
+options on an incident
+([incident operations 15 and 18](../specs/spec-incident-operations.md#15-detail-and-mutation-ux-i3-i5)).
+The user approved the design from the canvas at
+https://claude.ai/artifact/3qmYSHaGt7j1gYD31qssFT and the plan, and said "build it",
+after renaming the Create dialog's first field to "Ticket Title".
+
+- **Keep never calls ServiceNow (user decision, 2026-11-10, accepting the plan's
+  default for its open question).** As in KeepHQ, Keep stores only the ticket's link
+  and optional number; it never reads, creates or changes tickets and holds no
+  ServiceNow credentials. Creating opens ServiceNow's new incident form in a new
+  browser tab with its short description ("Ticket Title" in the dialog, at most 160
+  characters, starting as the incident title) and description (starting as the
+  incident description followed by its severity and a link back to the Keep
+  incident) filled in through `sysparm_query`, with `^` written as `^^`; the
+  description is shortened so the address stays within 4,000 characters. Keep writes
+  nothing at that step. The dialog's second step links the new ticket with the same
+  checks as linking an existing one. The standard `incident.do` form is used. The
+  incident list and incident search are unchanged.
+- **Stored on the incident (assistant-selected, 2026-11-10).** The ticket is part of
+  the incident aggregate, not a generic enrichment: `ticket_url`, `ticket_number`,
+  `ticket_linked_at` and `ticket_linked_by` on `incidents` (migration 0069). One
+  ticket per incident. Linking, changing and unlinking are one command,
+  `POST /incidents/{id}/ticket` with `url` and `number` (both null to unlink), under
+  the incident command contract: `edit` permission, expected revision, idempotent
+  command identity, 409 on a stale revision with nothing changed. An effective change
+  advances the revision and records one `ticket` activity with the new and previous
+  link and number; a no-op records nothing. It is allowed in every status, and
+  resolving or reopening never changes it. It is not qualifying activity, so it does
+  not move last activity.
+- **Which links are accepted (assistant-selected, 2026-11-10).** The deployment names
+  its ServiceNow in `KEEP_SERVICENOW_URL`: an `https` address with a host and an
+  optional base path, no user name, password, query or fragment, mounted into the
+  Product API. It is not a secret. Loopback `http` is accepted only in development.
+  An unusable value is logged and treated as unset. A saved link must have that
+  scheme, host and port, a path under that base path, no user name or password, no
+  spaces or control characters and at most 2,048 characters; otherwise 422
+  `ticket_url_invalid`. A number is optional, letters then digits
+  (`^[A-Z]{2,8}[0-9]{4,12}$` after upper-casing), and requires a link. The dialog
+  accepts a bare number and builds
+  `<KEEP_SERVICENOW_URL>/nav_to.do?uri=task.do%3Fsysparm_query%3Dnumber%3D<number>`;
+  it takes the number from a pasted link that contains `number=`, and otherwise offers
+  an optional number field. Without `KEEP_SERVICENOW_URL`, linking returns 409
+  `servicenow_not_configured`, unlinking still works, the ticket row is hidden on
+  incidents with no ticket, and a ticket linked earlier still shows and opens.
+  `GET /servicenow/status` tells the browser whether it is configured and its address.
+- **Who sees what (assistant-selected, 2026-11-10).** The ticket row sits at the
+  bottom of the incident's Status and Assignee panel. Everyone who can read the
+  incident sees the ticket number (or "ServiceNow ticket" when none was given) as a
+  link that opens the stored address in a new tab without a referrer, and who linked
+  it and when. Editors also get Create in ServiceNow… and Link existing ticket… while
+  none is linked, and Change… (Link a different ticket…, Unlink ticket) once one is.
+  Activity shows ServiceNow ticket linked, changed or unlinked. Super admins see a
+  read-only "ServiceNow tickets on incidents" card on Admin › Integrations.
+- **Improvements over KeepHQ (assistant-selected, 2026-11-10).** Links are checked
+  against the configured ServiceNow on the server, tickets can be unlinked and
+  changed, every change is in the incident's activity, and the created ticket is
+  linked back in the same dialog.
+
+Alert behavior, incident membership, lifecycle and correlation are unchanged.
+Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
+delivery.
