@@ -18,7 +18,7 @@ The user's team owns Keycloak configuration and operation for this integration. 
 
 Use a dedicated production realm named `keep`, with separate `keep-dev` and `keep-staging` realms and credentials. Keep tenants share the production realm; creating a tenant does not create a Keycloak realm, client or role. Use the existing installation rather than introducing another identity product. Actual hostnames and the installed release are deployment facts to inventory, not values to invent.
 
-The user approved an Keep-branded username/password form on 2026-09-27. Implement it as the `keep` Keycloak login theme for the `keep-web` client, with the approved centered card, light/dark appearance, password visibility control, provider errors and directory-support help. This supersedes the earlier restriction to minimal standard-page branding. Submit credentials directly to Keycloak's generated form action and retain its authentication/session checks; do not add an Keep password API or authentication extension. Keep unrelated clients and console administration on their existing themes. Turn off self-registration, social sign-in, direct password grants, implicit flow, device/CIBA grants for this client, service-account grants and offline access. Users do not create a second Keep password.
+The user approved a Keep-branded username/password form on 2026-09-27. Implement it as the `keep` Keycloak login theme for the `keep-web` client, with the approved centered card, light/dark appearance, password visibility control, provider errors and directory-support help. This supersedes the earlier restriction to minimal standard-page branding. Submit credentials directly to Keycloak's generated form action and retain its authentication/session checks; do not add a Keep password API or authentication extension. Keep unrelated clients and console administration on their existing themes. Turn off self-registration, social sign-in, direct password grants, implicit flow, device/CIBA grants for this client, service-account grants and offline access. Users do not create a second Keep password.
 
 ## 2. Login flow and browser boundary
 
@@ -54,7 +54,7 @@ The code-flow/PKCE choice follows [OAuth security best practice](https://www.rfc
 
 Require the company username and LDAP password at fresh authentication for all human Keep users. Local development uses the native credentials defined in section 14. Do not require a one-time code or authenticator enrollment for Keep admission, including users with previously enrolled factors. A valid Keycloak SSO session can satisfy a subsequent application login without prompting again. Password authentication is not repeated on every API request or tenant switch. The backend validates protected authentication evidence for the configured password flow; it must not require an OTP method claim.
 
-Password changes and account unlock requests go through the existing company directory process. Keycloak must not write LDAP passwords or profile attributes. Do not use an Keep local password or automatic email-based account linking as a bypass. Lost-factor recovery for separate Keycloak console administrators remains the user's team's responsibility through the established identity-verification process.
+Password changes and account unlock requests go through the existing company directory process. Keycloak must not write LDAP passwords or profile attributes. Do not use a Keep local password or automatic email-based account linking as a bypass. Lost-factor recovery for separate Keycloak console administrators remains the user's team's responsibility through the established identity-verification process.
 
 Enable temporary Keycloak brute-force protection: five failed attempts trigger a 15-minute temporary login lock; no permanent automatic lock. This is an additional application setting, not a modification of LDAP's own password policy. Require MFA for separate Keycloak console administrators. Keycloak console administration and Keep global-super-admin membership are separate privileges.
 
@@ -105,7 +105,7 @@ Keycloak groups/roles and browser token claims are not authoritative Keep tenant
 manual identity refresh. The automatic polling algorithm and timing budgets below
 are deferred design references, not current deployment or release gates.
 
-Use an Keep background directory reader with a read-only LDAP connection to obtain account eligibility, group edges and complete transitive membership. This avoids making live authorization depend on login-time JWT groups or on Keycloak changed-user synchronization detecting every group-edge change.
+Use a Keep background directory reader with a read-only LDAP connection to obtain account eligibility, group edges and complete transitive membership. This avoids making live authorization depend on login-time JWT groups or on Keycloak changed-user synchronization detecting every group-edge change.
 
 Track the designated global-super-admin group, teams referenced by tenant grants, their transitive children, active-session users, directly granted users and current assignees. Support bounded directory search for administrative user/team selection. Before accepting a previously unknown principal or team grant, obtain the required complete eligibility evidence. Do not enumerate the entire company directory for every request.
 
