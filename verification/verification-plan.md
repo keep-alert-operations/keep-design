@@ -246,6 +246,18 @@ no referrer, is named by its text, works by keyboard, keeps the count panel's pr
 link working, and is inactive while panels are arranged. The dialog shows the
 button in its preview before saving.
 
+### Grafana panels (REV-68)
+
+Verify that a Grafana panel saves its address, reloads, copies, keeps its type and
+shows to viewers and in fullscreen, and that each address check rejects in the stated
+order in the dialog, with the API returning 422 `grafana_url_invalid` for a new or
+changed address that is not allowed while an unchanged stored address still saves.
+Check the frame's sandbox, no-referrer and lazy loading, that it follows the viewer's
+light or dark theme, that embed code yields its `src`, that a blocked or turned-off
+panel never creates a frame, that moving and resizing work over frames, and that
+`KEEP_GRAFANA_PANEL_ORIGINS` entries with a base path, loopback `http` in development
+and ignored entries behave as stated. Only super admins see the Integrations card.
+
 ## Tenants and access
 
 **Current scope (REV-34):** Physical audit cleanup is deferred; verify the 365-day read-time boundary rather than protected cleanup; see [worker scope](../specs/spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Other cases remain required.

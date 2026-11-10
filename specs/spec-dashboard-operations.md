@@ -35,6 +35,10 @@ ServiceNow incidents a team has, from the ticket counting service, with an optio
 title, a team, a ticket state, a detection method and count thresholds. It references
 no preset and is never part of a count batch. See [REV-65](../decisions/design-register.md#rev-65--servicenow-ticket-panels-2026-11-09).
 
+**Later user decision — 2026-11-10 (REV-68):** a `grafana` panel frames one live
+Grafana panel from an allowed Grafana, with an optional title and one panel address.
+It references no preset and is never part of a count batch. See [REV-68](../decisions/design-register.md#rev-68--grafana-panels-2026-11-10).
+
 ## 3. Panel titles and content
 
 **Later user decision — 2026-11-09 (REV-63):** a table panel shows its preset's
@@ -45,6 +49,11 @@ hidden from the right, keeping Alert; extra rows scroll inside the panel.
 **Later user decision — 2026-11-09 (REV-65):** a ServiceNow panel's default title is
 "<team> tickets". Under the title it states the team, ticket state and detection
 method. Its count comes from outside Keep and the panel dialog says so.
+
+**Later user decision — 2026-11-10 (REV-68):** a Grafana panel has no default title;
+untitled, the frame fills the panel. Its content comes from Grafana in the viewer's
+theme, checked against the allowed Grafana before every render; a failed check shows
+"Grafana panel blocked" with the reason instead of the frame.
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
 
@@ -262,6 +271,12 @@ says whether the counting service is configured, and `POST /tenants/{tenant_id}/
 returns one result per query. Super admins read `GET /admin/integrations/ticket-count`
 and run `POST /admin/integrations/ticket-count/test`.
 
+**Later user decision — 2026-11-10 (REV-68):** `grafana` panels carry `url`. A save
+whose Grafana panel address is new or changed and not allowed returns 422
+`grafana_url_invalid`. `GET /tenants/{tenant_id}/grafana-panels/status` returns whether
+Grafana panels are on and the allowed Grafana; super admins read
+`GET /admin/integrations/grafana-panels`, which also lists ignored entries.
+
 **Later user decision — 2026-11-09 (REV-66):** every panel object may carry `link`,
 `null` or `{url, label}`. Panels saved before REV-66 read back with `link: null`, and
 retries of commands sent without `link` still match their receipts. An invalid
@@ -322,6 +337,10 @@ footer link to the preset, all reachable by keyboard.
 
 **Later user decision — 2026-11-09 (REV-65):** a ServiceNow panel is labeled by its
 title and its count or state in words, so the threshold color is never the only cue.
+
+**Later user decision — 2026-11-10 (REV-68):** a Grafana panel's frame is titled by the
+panel title or "Grafana panel"; its loading, blocked and turned-off states are stated in
+words. Keyboard focus can enter the framed Grafana panel.
 
 **Later user decision — 2026-11-09 (REV-66):** a panel link is a real link named by
 its button text with "(opens in a new tab)"; hovering or focusing it shows the
