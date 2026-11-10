@@ -44,7 +44,7 @@ hidden from the right, keeping Alert; extra rows scroll inside the panel.
 
 **Later user decision — 2026-11-09 (REV-65):** a ServiceNow panel's default title is
 "<team> tickets". Under the title it states the team, ticket state and detection
-method. Its count comes from outside Appchi and the panel dialog says so.
+method. Its count comes from outside Keep and the panel dialog says so.
 
 Without a custom title, show the current preset name; a preset rename updates that title automatically. Custom titles are optional trimmed NFC single-line text, 1–120 code points when present, using the same character exclusions as names. Clearing a title restores the preset-name default. Always expose the preset name/link even with a custom title. Show the exact logical-alert count, freshness state and an accessible explanation of color. Show zero only for a successful exact zero result. No abbreviated rounded number replaces the exact accessible value; use locale separators and allow a compact abbreviation only alongside the full value.
 

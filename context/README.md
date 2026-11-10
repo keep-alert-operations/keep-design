@@ -1,4 +1,4 @@
-# Appchi context map
+# Keep context map
 
 This is navigation over the existing requirements, code and evidence. It helps an
 agent reach the right sources for any request — a question, a change, a bug
@@ -17,12 +17,12 @@ topics; see the [design register](../decisions/design-register.md#context-topics
 
 - [Task map](task-map.json) is the editable catalog. Design owns source authority,
   topics, intents, section references and required/related relationships.
-- The topic index inside the workspace [AGENTS.md](../../appchi-delivery/workspace/AGENTS.md),
+- The topic index inside the workspace [AGENTS.md](../../keep-delivery/workspace/AGENTS.md),
   the [visual map](map.md) and the topic pages such as [incidents](topics/incidents.md)
   are generated. Edit the catalog and regenerate them; do not edit them alone.
 - [Routing cases](evaluation-cases.json) test the catalog and resolver. They are
   deterministic fixtures, **not behavioral evaluations of an agent**.
-- [Resolver](../../appchi-delivery/scripts/context.py) and its checks belong to
+- [Resolver](../../keep-delivery/scripts/context.py) and its checks belong to
   delivery. Each repository still owns its implementation and verification tools.
 - Workspace and repository `AGENTS.md` files remain the native instruction
   entrypoints. Read applicable scoped instructions before editing any repository.
@@ -34,7 +34,7 @@ repositories are missing inputs; do not create substitute specifications.
 ## Intents say what to do
 
 An intent is the kind of request. It decides which topic fields a plan shows, adds
-any Appchi-specific reading, and lists steps and a finish line. Generic procedure
+any Keep-specific reading, and lists steps and a finish line. Generic procedure
 stays in the shared eng-* skills; intents only point to them.
 
 | Intent | For | Adds |
@@ -66,13 +66,13 @@ Areas group topics in the index and map.
 
 ## Get a plan
 
-Pick the intent and topics from the index by meaning, then from `appchi-delivery`:
+Pick the intent and topics from the index by meaning, then from `keep-delivery`:
 
 ```powershell
 python scripts/context.py list
 python scripts/context.py plan --intent question --topic alert-pipeline --topic recovery --content
 python scripts/context.py plan --task "Why does a dashboard count differ from the alert list?"
-python scripts/context.py plan --path appchi-api/src/appchi/incidents/listing.py
+python scripts/context.py plan --path keep-api/src/keep/incidents/listing.py
 python scripts/context.py find "scheduler cadence"
 python scripts/context.py read --source incident-baseline
 ```
@@ -178,7 +178,7 @@ open the relevant heading. Required and related meanings are written in topic
 pages; the standard graph does not enforce them. The resolver's plan is the
 explicit reading selection.
 
-Regenerate and check from `appchi-delivery`:
+Regenerate and check from `keep-delivery`:
 
 ```powershell
 python scripts/context.py render
@@ -186,7 +186,7 @@ python scripts/context.py check
 ```
 
 `render` writes the map, the topic pages and the index block between the markers in
-`appchi-delivery/workspace/AGENTS.md`; it refuses to overwrite unowned files and
+`keep-delivery/workspace/AGENTS.md`; it refuses to overwrite unowned files and
 reports stale generated pages for explicit removal. Generated files are reviewable
 artifacts; retain catalog and generated navigation together. Design's
 `python scripts/check_docs.py`, which also runs in design CI, checks that every
@@ -240,9 +240,9 @@ and inputs. Measure requirement coverage, missed dependencies, acceptance,
 unnecessary reading, tokens, time and human corrections across repeated trials.
 Include questions, deferred behavior and resume cases. No performance improvement
 is claimed by adding this catalog or passing its deterministic checks. The
-[2026-10-24 planning trials](../../appchi-delivery/qualification/context-eval-2026-10-24/results.md)
+[2026-10-24 planning trials](../../keep-delivery/qualification/context-eval-2026-10-24/results.md)
 of the earlier route layer showed no token saving, and the
-[2026-11-01 paired trial](../../appchi-delivery/qualification/context-eval-2026-11-01/results.md)
+[2026-11-01 paired trial](../../keep-delivery/qualification/context-eval-2026-11-01/results.md)
 of routes against topics showed level quality, fewer tool calls and slightly more
 tokens, with one run per cell.
 
@@ -251,4 +251,4 @@ This approach applies the progressive-reading and repository-navigation ideas in
 and [Anthropic's context engineering guidance](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents).
 [Obsidian's graph documentation](https://help.obsidian.md/plugins/graph) explains
 the optional human browsing surface. These references inform the implementation;
-Appchi specifications remain the product authority.
+Keep specifications remain the product authority.

@@ -1,4 +1,4 @@
-# Independent Appchi repositories
+# Independent Keep repositories
 
 Status: user-authorized repository split, 2026-10-01 (REV-37). This supersedes
 the monorepo and shared backend image selections in system completion. Product
@@ -8,33 +8,34 @@ behavior, database transaction boundaries and current worker scope are unchanged
 
 | Repository | Authoritative contents |
 |---|---|
-| appchi-frontend | Next.js application, UI tests, generated HTTP types, Keycloak theme, frontend image |
-| appchi-api | Product routes, human sessions, management commands, synchronous operator provisioning, live publishing and SSE |
-| appchi-ingestion | Public v1 and private v2/Grafana Kafka admission, gateway proof, Kong policy, ingestion image |
-| appchi-processor | Kafka source consumer, alert source processing and source transaction entrypoint |
-| appchi-correlation | Changed-record consumer and correlation worker entrypoint |
-| appchi-indexer | Elasticsearch writer, changed-record consumer, reconciliation, local search bootstrap |
-| appchi-domain | Shared Python domain rules, persistence helpers, authority/recovery checks and infrastructure adapters |
-| appchi-contracts | Native/Kafka wire models, serialization and generated HTTP/event schema artifacts |
-| appchi-migrations | Complete ordered Alembic/PostgreSQL migration chain and checksum-verifying migration runner/image |
-| appchi-delivery | Workspace setup/AGENTS, deployment templates, local dependency services, system tests, runbooks, implementation evidence and revision inventory |
-| appchi-design | Normative specifications, decision register, architecture/design assets and acceptance requirements |
+| keep-frontend | Next.js application, UI tests, generated HTTP types, Keycloak theme, frontend image |
+| keep-api | Product routes, human sessions, management commands, synchronous operator provisioning, live publishing and SSE |
+| keep-ingestion | Public v1 and private v2/Grafana Kafka admission, gateway proof, Kong policy, ingestion image |
+| keep-processor | Kafka source consumer, alert source processing and source transaction entrypoint |
+| keep-correlation | Changed-record consumer and correlation worker entrypoint |
+| keep-indexer | Elasticsearch writer, changed-record consumer, reconciliation, local search bootstrap |
+| keep-domain | Shared Python domain rules, persistence helpers, authority/recovery checks and infrastructure adapters |
+| keep-contracts | Native/Kafka wire models, serialization and generated HTTP/event schema artifacts |
+| keep-migrations | Complete ordered Alembic/PostgreSQL migration chain and checksum-verifying migration runner/image |
+| keep-delivery | Workspace setup/AGENTS, deployment templates, local dependency services, system tests, runbooks, implementation evidence and revision inventory |
+| keep-design | Normative specifications, decision register, architecture/design assets and acceptance requirements |
 
-The service name is **Ingestion API**. The repository is `appchi-ingestion`.
-Network ingress remains a network concept. Repository renames do not rename
-wire fields, Kafka roles, native endpoints, deployed database roles or the
-existing `appchi-web` OIDC client ID. Such migrations require explicit contracts.
+The service name is **Ingestion API**. The repository is `keep-ingestion`.
+Network ingress remains a network concept. A repository rename alone does not
+rename wire fields, Kafka roles, native endpoints, deployed database roles or the
+OIDC client ID; such migrations require explicit contracts. [REV-67](../decisions/design-register.md#rev-67--the-system-is-named-keep-2026-11-10)
+is that contract for the rename from Appchi to Keep, including migration `0066`.
 
 ## Package and runtime boundaries
 
 Assistant-selected implementation details:
 
-- Python distributions own disjoint modules in the `appchi` namespace under
+- Python distributions own disjoint modules in the `keep` namespace under
   `src/`. Namespace paths support coordinated editable development; no source
   file has two runtime owners. Contracts may not depend on domain or applications;
   domain may not import service implementations. Services depend on contracts and
   domain, never another service. Delivery may depend on all packages for system tests.
-- `appchi-domain` is a versioned library, with no process, port or deployment.
+- `keep-domain` is a versioned library, with no process, port or deployment.
   Shared transactional helpers accept the existing connection. Repository
   boundaries do not introduce HTTP calls inside PostgreSQL transactions or give
   each service an independently managed copy of the shared database schema.
@@ -54,7 +55,7 @@ Assistant-selected implementation details:
   compatible producer and consumer checks before downstream pins are advanced.
   The user selected Poetry for all Python repositories on 2026-10-12; current
   commands and the preserved resolution constraints are documented in delivery's
-  [workspace setup](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/repository-workspace.md).
+  [workspace setup](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/repository-workspace.md).
 - Contracts owns the checked schema artifacts. Delivery generates product and
   ingestion OpenAPI from their separate installed producers, then merges the
   compatible documents for frontend type generation. Producers never load their

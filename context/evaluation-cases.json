@@ -5,7 +5,7 @@
       "id": "appearance-only",
       "task": "Adjust dashboard spacing with no saved-layout or behavior change.",
       "paths": [
-        "appchi-frontend/src/app/styles/dashboards.css"
+        "keep-frontend/src/app/styles/dashboards.css"
       ],
       "topics": [
         "ui-appearance"
@@ -27,7 +27,7 @@
       "id": "css-path",
       "task": "Tighten the visual gap. ",
       "paths": [
-        "appchi-frontend/src/app/styles/incidents.css"
+        "keep-frontend/src/app/styles/incidents.css"
       ],
       "topics": [],
       "must_include_topics": [
@@ -122,7 +122,7 @@
       "id": "incident-membership-path",
       "task": "Fix atomic moves.",
       "paths": [
-        "appchi-frontend/src/components/incident-membership.tsx"
+        "keep-frontend/src/components/incident-membership.tsx"
       ],
       "topics": [],
       "must_include_topics": [
@@ -141,7 +141,7 @@
       "id": "incident-list-path",
       "task": "Fix cursor ordering.",
       "paths": [
-        "appchi-api/src/appchi/incidents/listing.py"
+        "keep-api/src/keep/incidents/listing.py"
       ],
       "topics": [],
       "must_include_topics": [
@@ -283,7 +283,7 @@
       "id": "live-path",
       "task": "Repair lost invalidation hints.",
       "paths": [
-        "appchi-api/src/appchi/live.py"
+        "keep-api/src/keep/live.py"
       ],
       "topics": [],
       "must_include_topics": [
@@ -341,7 +341,7 @@
       "id": "migration-path",
       "task": "Add an index using the forward migration chain.",
       "paths": [
-        "appchi-migrations/src/appchi/migration_sql/0051_example.sql"
+        "keep-migrations/src/keep/migration_sql/0051_example.sql"
       ],
       "topics": [],
       "must_include_topics": [
@@ -421,7 +421,7 @@
       "id": "dependency-path",
       "task": "Update an internal package pin.",
       "paths": [
-        "appchi-api/poetry.lock"
+        "keep-api/poetry.lock"
       ],
       "topics": [],
       "must_include_topics": [
@@ -533,7 +533,7 @@
       "id": "path-separators",
       "task": "Fix cursor ordering.",
       "paths": [
-        "appchi-api\\src\\appchi\\incidents\\listing.py"
+        "keep-api\\src\\keep\\incidents\\listing.py"
       ],
       "topics": [],
       "must_include_topics": [
@@ -586,7 +586,7 @@
       "id": "product-openapi-path",
       "task": "Inspect the changed artifact.",
       "paths": [
-        "appchi-contracts/schemas/product.openapi.json"
+        "keep-contracts/schemas/product.openapi.json"
       ],
       "topics": [],
       "must_include_topics": [
@@ -604,7 +604,7 @@
       "id": "combined-openapi-path",
       "task": "Inspect the changed artifact.",
       "paths": [
-        "appchi-contracts/schemas/openapi.json"
+        "keep-contracts/schemas/openapi.json"
       ],
       "topics": [],
       "must_include_topics": [
@@ -622,7 +622,7 @@
       "id": "ingestion-openapi-path",
       "task": "Inspect the changed artifact.",
       "paths": [
-        "appchi-contracts/schemas/ingestion.openapi.json"
+        "keep-contracts/schemas/ingestion.openapi.json"
       ],
       "topics": [],
       "must_include_topics": [
@@ -640,7 +640,7 @@
       "id": "received-event-schema-path",
       "task": "Inspect the changed artifact.",
       "paths": [
-        "appchi-contracts/schemas/alerts.received.v2.schema.json"
+        "keep-contracts/schemas/alerts.received.v2.schema.json"
       ],
       "topics": [],
       "must_include_topics": [
@@ -658,7 +658,7 @@
       "id": "changed-event-model-path",
       "task": "Inspect the changed artifact.",
       "paths": [
-        "appchi-contracts/src/appchi/event_models.py"
+        "keep-contracts/src/keep/event_models.py"
       ],
       "topics": [],
       "must_include_topics": [
@@ -676,7 +676,7 @@
       "id": "native-input-model-path",
       "task": "Inspect the changed artifact.",
       "paths": [
-        "appchi-contracts/src/appchi/ingestion/native.py"
+        "keep-contracts/src/keep/ingestion/native.py"
       ],
       "topics": [],
       "must_include_topics": [
@@ -694,7 +694,7 @@
       "id": "shared-http-model-path",
       "task": "Inspect the changed artifact.",
       "paths": [
-        "appchi-contracts/src/appchi/models.py"
+        "keep-contracts/src/keep/models.py"
       ],
       "topics": [],
       "must_include_topics": [
@@ -1059,7 +1059,7 @@
     },
     {
       "id": "ldap-group-not-correlation",
-      "task": "LDAP group removals take far longer than five minutes to reach Appchi.",
+      "task": "LDAP group removals take far longer than five minutes to reach Keep.",
       "paths": [],
       "topics": [],
       "must_include_topics": [

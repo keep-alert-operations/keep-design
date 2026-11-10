@@ -1,4 +1,4 @@
-# appchi-design
+# keep-design
 
 Authoritative system specifications, design decisions, architecture and verification requirements.
 
@@ -9,8 +9,8 @@ README guidance and affected checks. For behavior, architecture or cross-reposit
 changes, include relevant system design, current worker scope and affected contracts.
 Read source introductions/scope corrections with selected sections; expand when new
 dependencies or uncertainty appear. All applicable requirements remain binding.
-If working from a standalone clone, use the canonical [workspace guidance](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/workspace/AGENTS.md)
-and [design](https://github.com/appchi-alert-operations/appchi-design/tree/main/specs).
+If working from a standalone clone, use the canonical [workspace guidance](https://github.com/keep-alert-operations/keep-delivery/blob/main/workspace/AGENTS.md)
+and [design](https://github.com/keep-alert-operations/keep-design/tree/main/specs).
 
 This repository owns its source, tests and artifact. Runtime imports must not
 depend on another service repository. Shared packages may depend only on their

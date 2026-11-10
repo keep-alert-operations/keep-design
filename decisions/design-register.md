@@ -1,6 +1,6 @@
 # Design register
 
-All 55 original issue identifiers are retained below. Status: **design closed** for the initial release. The domain specifications own the contracts; this index records coverage. [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#evidence-register) tracks implementation, supplied service facts and executed qualification separately. Record newly discovered gaps here without reusing or deleting an identifier.
+All 55 original issue identifiers are retained below. Status: **design closed** for the initial release. The domain specifications own the contracts; this index records coverage. [Delivery readiness](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md#evidence-register) tracks implementation, supplied service facts and executed qualification separately. Record newly discovered gaps here without reusing or deleting an identifier.
 
 ## A. Identity, tenant administration, and permissions
 
@@ -30,7 +30,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | O1 | V1 unauthenticated Global and v2 immutable operator tenant routing, strict batches and Grafana native-equivalent adapter are selected in alert/operator supplements. No alternate routing or credential bypass is introduced. |
 | O2 | Operator names/ownership/lifecycle, admin-only management, retained-alert guard, verified gateway denial plus Kafka drain, and Grafana-gated rename/delete are complete in operator operations; physical records and saga integration in system completion 13/17–20. |
 | O3 | One current key plus a 24-hour retiring overlap, repeatable copy-only retrieval, encryption, immediate local invalidation and verified all-node revocation completion, exact admission and restore denial fences remain operator operations 4–14/28 and Kafka pipeline 7. Secret/runtime integration is complete in system completion 13/20–22. |
-| O4 | Mandatory shared Grafana contact point/policy, exact Appchi - {operator name}=true matcher, safe external writer, durable setup/rename/delete/cancel and adapter contracts remain operator operations 15–28; capability acceptance is system completion 24. |
+| O4 | Mandatory shared Grafana contact point/policy, exact Keep - {operator name}=true matcher, safe external writer, durable setup/rename/delete/cancel and adapter contracts remain operator operations 15–28; capability acceptance is system completion 24. |
 
 ## Q. CEL, filtering, sorting, and pagination
 
@@ -141,15 +141,15 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Resolution |
 |---|---|---|
-| REV-12 | U1, U2, U3, U5 | User supplied a full-system visual reference and requested the entire UI adopt it. Shared system section 3 records its left rail, typography and original fixed light palette, which superseded automatic OS theme selection at the time. REV-42 later replaces the colors with the Ocean palette and keeps the rest of the reference. REV-20 later adds user-selectable dark mode while retaining this light reference as default. Assistant-selected adaptations retain responsive stacking, real API data, existing authorization and conflict/recovery controls; illustrative prototype counts and people are not application defaults. See [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md). |
-| REV-13 | U1, U5, I4 | User reported gaps between the implemented UI and the reference and asked for an exact match. Every screen now uses the reference page frame, grid tables and controls (see [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md)). Assistant-selected read-time enrichment adds optional current-directory labels beside principal ids — `assignee_display_name`, `acknowledged_by_display_name`, `created_by_display_name`, `updated_by_display_name` — plus `active_incident_id`/`active_incident_title` on alerts and `origin_rule_id`/`origin_rule_name` on incidents. These are presentation labels for current records; recorded history keeps its captured labels per REV-10. **Open gap:** incident activity stores only `actor_id`, so the UI cannot show captured actor names there without new persisted evidence; historical names are not rebuilt from today's directory. |
-| REV-14 | Q4, U1, U5 | Continuation review found the redesigned table ignored saved/draft preset columns and always indicated descending last-received sorting. Corrected custom field order and actual sort indicators under the existing [preset column contract](../specs/spec-preset-operations.md#4-columns-and-sorting). Assistant-selected presentation adaptation retains the reference's compact default grouping and uses individual columns for custom selections; row navigation and suppression remain visible independently of Message. Added browser regressions, and scoped the saved-preview pagination assertion to its cursor request rather than the last concurrent count request. See [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md). |
+| REV-12 | U1, U2, U3, U5 | User supplied a full-system visual reference and requested the entire UI adopt it. Shared system section 3 records its left rail, typography and original fixed light palette, which superseded automatic OS theme selection at the time. REV-42 later replaces the colors with the Ocean palette and keeps the rest of the reference. REV-20 later adds user-selectable dark mode while retaining this light reference as default. Assistant-selected adaptations retain responsive stacking, real API data, existing authorization and conflict/recovery controls; illustrative prototype counts and people are not application defaults. See [UI mapping](https://github.com/keep-alert-operations/keep-frontend/blob/main/docs/ui-design.md). |
+| REV-13 | U1, U5, I4 | User reported gaps between the implemented UI and the reference and asked for an exact match. Every screen now uses the reference page frame, grid tables and controls (see [UI mapping](https://github.com/keep-alert-operations/keep-frontend/blob/main/docs/ui-design.md)). Assistant-selected read-time enrichment adds optional current-directory labels beside principal ids — `assignee_display_name`, `acknowledged_by_display_name`, `created_by_display_name`, `updated_by_display_name` — plus `active_incident_id`/`active_incident_title` on alerts and `origin_rule_id`/`origin_rule_name` on incidents. These are presentation labels for current records; recorded history keeps its captured labels per REV-10. **Open gap:** incident activity stores only `actor_id`, so the UI cannot show captured actor names there without new persisted evidence; historical names are not rebuilt from today's directory. |
+| REV-14 | Q4, U1, U5 | Continuation review found the redesigned table ignored saved/draft preset columns and always indicated descending last-received sorting. Corrected custom field order and actual sort indicators under the existing [preset column contract](../specs/spec-preset-operations.md#4-columns-and-sorting). Assistant-selected presentation adaptation retains the reference's compact default grouping and uses individual columns for custom selections; row navigation and suppression remain visible independently of Message. Added browser regressions, and scoped the saved-preview pagination assertion to its cursor request rather than the last concurrent count request. See [UI mapping](https://github.com/keep-alert-operations/keep-frontend/blob/main/docs/ui-design.md). |
 
 ## User sign-in direction — 2026-09-24
 
 | Review ID | Original coverage | Resolution |
 |---|---|---|
-| REV-15 | A2, N2, U5 | User requested removal of the one-time-code step and username/password-only Appchi login. [Identity section 3](../specs/spec-identity-configuration.md#3-username-and-password-authentication) supersedes the earlier assistant-selected application TOTP requirement. Assistant-selected migration disables local application OTP execution/enrollment, preserves existing accounts and passwords, and requires protected password evidence in the backend. Separate Keycloak console MFA and production LDAP identity ownership remain unchanged; no shared service was modified. |
+| REV-15 | A2, N2, U5 | User requested removal of the one-time-code step and username/password-only Keep login. [Identity section 3](../specs/spec-identity-configuration.md#3-username-and-password-authentication) supersedes the earlier assistant-selected application TOTP requirement. Assistant-selected migration disables local application OTP execution/enrollment, preserves existing accounts and passwords, and requires protected password evidence in the backend. Separate Keycloak console MFA and production LDAP identity ownership remain unchanged; no shared service was modified. |
 | REV-16 | A2, U5 | User reported the raw expired/consumed sign-in transaction error. Assistant-selected recovery sends HTML browser callbacks with unavailable transactions to a public page with an explicit fresh sign-in link. No rejected code is exchanged and no session is created; JSON clients retain 401 and existing ten-minute expiry/one-use checks remain authoritative. Corrected stale authenticator-code copy in the sign-in shell. See [identity section 2](../specs/spec-identity-configuration.md#2-login-flow-and-browser-boundary). |
 
 ## Preset creation correction — 2026-09-24
@@ -174,7 +174,7 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Resolution |
 |---|---|---|
-| REV-20 | U1, U5 | User requested dark mode after the full-system light visual reference. Shared system section 3 now requires an explicit Light/Dark choice for Appchi-owned screens, superseding REV-12's fixed-light behavior. Assistant-selected behavior retains the light palette (the Ocean palette since REV-42) by default, independent of OS preference, and persists the user's choice locally across navigation and reloads without identity or tenant data. Both palettes keep readable controls, status text and focus. External Keycloak pages retain their separate theme. |
+| REV-20 | U1, U5 | User requested dark mode after the full-system light visual reference. Shared system section 3 now requires an explicit Light/Dark choice for Keep-owned screens, superseding REV-12's fixed-light behavior. Assistant-selected behavior retains the light palette (the Ocean palette since REV-42) by default, independent of OS preference, and persists the user's choice locally across navigation and reloads without identity or tenant data. Both palettes keep readable controls, status text and focus. External Keycloak pages retain their separate theme. |
 
 ## Dashboard refresh correction — 2026-09-24
 
@@ -192,7 +192,7 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | ID | Original coverage | Resolution |
 |---|---|---|
-| REV-23 | U1, U5, N2 | User approved implementing the Appchi login mock after requesting a custom form backed by Keycloak. The `appchi` client login theme supersedes minimal stock-page branding and REV-20's separate-theme limitation. Assistant-selected integration preserves Keycloak's generated form action, code flow/PKCE and console theme; only an initial 401 `unauthenticated` starts login automatically, preserving the requested local path. Explicit logout, expired callbacks, access denial and service failures retain recovery controls. Light/dark preference is local to each origin. Identity sections 1–2 and shared system section 3 record the contract. |
+| REV-23 | U1, U5, N2 | User approved implementing the Keep login mock after requesting a custom form backed by Keycloak. The `keep` client login theme supersedes minimal stock-page branding and REV-20's separate-theme limitation. Assistant-selected integration preserves Keycloak's generated form action, code flow/PKCE and console theme; only an initial 401 `unauthenticated` starts login automatically, preserving the requested local path. Explicit logout, expired callbacks, access denial and service failures retain recovery controls. Light/dark preference is local to each origin. Identity sections 1–2 and shared system section 3 record the contract. |
 | REV-24 | U1, U5 | User requested an icon-based Light/Dark switch after reviewing the account menu. The signed-in account menu and signed-out application state now share an accessible sun/moon switch; existing preference persistence and the light default remain. The UI mapping records the control. |
 
 ## Preset alert return navigation — 2026-09-27
@@ -218,7 +218,7 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Decision / correction |
 |---|---|---|
-| REV-29 | Q2, U2 | User requested that alert CEL conditions use field names directly (for example, `application`) without requiring `alert.`. Assistant-selected compatibility retains `alert.field` for saved source, keeps the existing context allow-lists, and treats bare identifiers as additive within `appchi-cel-v1` because old expression meaning is unchanged. The editor, chips, functions, quick views and new examples use bare identifiers; stored source is not rewritten. |
+| REV-29 | Q2, U2 | User requested that alert CEL conditions use field names directly (for example, `application`) without requiring `alert.`. Assistant-selected compatibility retains `alert.field` for saved source, keeps the existing context allow-lists, and treats bare identifiers as additive within `keep-cel-v1` because old expression meaning is unchanged. The editor, chips, functions, quick views and new examples use bare identifiers; stored source is not rewritten. |
 
 ## Local correlation preview — 2026-09-27
 
@@ -242,7 +242,7 @@ Review validation checks documentation consistency, identifiers, local links and
 
 | Review ID | Original coverage | Decision / correction |
 |---|---|---|
-| REV-33 | L1–L4, C1–C8, D1–D4, N1, R1–R4 | User accepted Kafka-first admission, no Appchi PG ingress dependency, transactional source changed+offset publication, tenant Kafka correlation order, ignored manual edits except resolve, inline maintenance effects, best-effort search hints with reconciliation, and actual Kong policy enforcement. [Kafka-first pipeline](../specs/spec-kafka-alert-pipeline.md) records all eight assistant-selected technical decisions and the accepted Kafka retention-loss limitation. Implementation/qualification evidence remains separate. |
+| REV-33 | L1–L4, C1–C8, D1–D4, N1, R1–R4 | User accepted Kafka-first admission, no Keep PG ingress dependency, transactional source changed+offset publication, tenant Kafka correlation order, ignored manual edits except resolve, inline maintenance effects, best-effort search hints with reconciliation, and actual Kong policy enforcement. [Kafka-first pipeline](../specs/spec-kafka-alert-pipeline.md) records all eight assistant-selected technical decisions and the accepted Kafka retention-loss limitation. Implementation/qualification evidence remains separate. |
 
 ## REV-34 — User-deferred workers and synchronous provisioning (2026-09-30)
 
@@ -256,7 +256,7 @@ source-time release/cutover, unchanged history access windows and assignee maski
 durable partial-operation recovery, HTTP budgets, isolated provisioning connection
 and expiry disposal on the next successful mutation. Original issue IDs remain.
 Implementation/qualification evidence is tracked separately in
-[worker-scope implementation](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/worker-scope-implementation.md).
+[worker-scope implementation](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/worker-scope-implementation.md).
 
 ## REV-35 — Directory worker nice-to-have (2026-09-30)
 
@@ -279,8 +279,8 @@ reconciliation remain. Existing IDs and prior worker deferrals are preserved.
 ## REV-37 — Independent Git repositories (2026-10-01)
 
 User decision: implement the agreed eleven-repository split inside the existing
-GitHub organization, retain the original repository, use `appchi-frontend`,
-`appchi-ingestion` and `appchi-migrations`, and work from a parent directory with
+GitHub organization, retain the original repository, use `keep-frontend`,
+`keep-ingestion` and `keep-migrations`, and work from a parent directory with
 system-wide AGENTS.md. [Repository layout](../specs/spec-repository-layout.md)
 records ownership and assistant-selected packaging, immutable dependency pins,
 HTTP/worker entrypoint separation, schema generation and workspace conventions.
@@ -311,7 +311,7 @@ no production readiness, automatic retries or infrastructure guarantees.
 ## Scalability and code review observations — 2026-10-06
 
 The user requested a system-wide review against 5,000 deliveries/minute,
-100 active users and 50 tenants. The [review evidence](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/qualification/scalability-review-2026-10-06.md)
+100 active users and 50 tenants. The [review evidence](https://github.com/keep-alert-operations/keep-delivery/blob/main/qualification/scalability-review-2026-10-06.md)
 records implementation findings under the existing N1/reliability, search/live,
 maintenance and correlation contracts: serial refresh-bound indexing, failed
 projection isolation, browser search amplification, blocking async paths,
@@ -439,7 +439,7 @@ requires one-second compiler jobs in a replaceable worker process; options A–C
 are implementation choices within it. Because A and B change process isolation,
 resource use and lifecycle, the user is asked to choose:
 
-- **A. Persistent compiler worker.** A long-lived process per Appchi process takes
+- **A. Persistent compiler worker.** A long-lived process per Keep process takes
   compile requests from a queue and is restarted after a crash or deadline. Open
   questions: one process would see sources from many tenants in turn, so recycling
   after N compiles or any error; concurrency and pool size; memory limits; eager or
@@ -448,7 +448,7 @@ resource use and lifecycle, the user is asked to choose:
   compiler modules preloaded. Each compile still runs in a fresh child forked from a
   server that never sees expression text, so per-compile isolation and the deadline
   measurement stay as they are. Open questions: accepting one long-lived helper
-  process per Appchi process; Windows development keeps `spawn`; behaviour of the
+  process per Keep process; Windows development keeps `spawn`; behaviour of the
   native CEL module after fork must be qualified on the Linux image.
 - **C. Keep spawn.** Rely on cache sizing; misses stay slow.
 
@@ -460,7 +460,7 @@ Assistant-selected under the existing CEL contracts: test, validation, search,
 count and configuration save handlers keep fresh compiled instances, because they
 build no native handle or one per request. Alert, incident and admin mutation handlers already prepare
 inline with reused programs on each server thread, as the workers do.
-`APPCHI_CEL_CACHE_ENTRIES` keeps its 4096 default with documented sizing guidance;
+`KEEP_CEL_CACHE_ENTRIES` keeps its 4096 default with documented sizing guidance;
 evictions log a rate-limited warning without source text. See the domain
 `docs/cel-implementation.md`. Original issue IDs and REV numbering are unchanged.
 Executed evidence belongs in delivery.
@@ -648,7 +648,7 @@ Assistant-selected details:
   maintenance budgets no longer need `qualified`. The API startup rule refusing an
   unqualified capacity profile outside `development` is unchanged; it also covers
   ingestion and search budgets.
-- The domain helper `appchi.shared.capacity` defines `UNLIMITED` as 2^53−1
+- The domain helper `keep.shared.capacity` defines `UNLIMITED` as 2^53−1
   (9,007,199,254,740,991), safe for PostgreSQL `LIMIT budget+1` and JSON. A missing
   or null budget is unlimited; a configured value must be an integer from 1 to
   `UNLIMITED`, otherwise the operation fails with `capacity_profile_invalid` (503).
@@ -672,7 +672,7 @@ Assistant-selected details:
   baselines were measured with correlation and maintenance off and do not describe
   the always-on default.
 - The disposable CEL compile process is started as a plain subprocess that imports
-  only `appchi.cel.compiler`. A spawned multiprocessing child re-imported the
+  only `keep.cel.compiler`. A spawned multiprocessing child re-imported the
   calling service's entrypoint first (about 1.2 s for the processor and correlation
   workers here), so every compile in those workers exceeded the unchanged
   one-second deadline once maintenance windows were always compiled. Request,
@@ -747,7 +747,7 @@ refuse a recreated topic. Assistant-selected details, recorded in
 - Every retained source failure logs partition, offset, reason, exception class and the
   AppError code or SQLSTATE, in the message itself because no log handler is
   configured. Exception text is never logged.
-- `python -m appchi.kafka_cutover --record-topic-identity` records the IDs for a
+- `python -m keep.kafka_cutover --record-topic-identity` records the IDs for a
   cutover from before 0054 and as the last step of a reviewed reset. It requires
   stopped pipeline groups and refuses (`kafka_topic_history_mismatch`) unless each
   partition ends at or beyond PostgreSQL's recorded positions and last source result
@@ -777,7 +777,7 @@ with the Ocean palette, in light and dark.
   and severity keep their red, orange, amber and green meanings; text, placeholders
   included, meets 4.5:1; selection, caret, scrollbars, focus rings and native control
   accents follow the palette; shadows are navy-tinted. The values are recorded in the
-  [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md).
+  [UI mapping](https://github.com/keep-alert-operations/keep-frontend/blob/main/docs/ui-design.md).
 - The four unchosen prototypes and Ocean's own structural changes (labelled sidebar,
   Mulish type, firing-dot halo) are not adopted; their branches stay local until the
   user decides.
@@ -1351,7 +1351,7 @@ implementation ([preset sections 3, 8 and 16](../specs/spec-preset-operations.md
   longer says others still hear it. Both behaviors are unchanged.
 - **Blocked sound (user decision, 2026-11-03).** Browsers refuse sound until the page
   receives a user gesture, so a freshly loaded screen shows that the alarm is waiting
-  and starts it on the next click on the page. Appchi cannot remove this step.
+  and starts it on the next click on the page. Keep cannot remove this step.
 - **Assistant-selected details.** An omitted `noisy` in create or replace means false,
   and false is left out of command fingerprints so retries of earlier commands still
   match, as for `group_by`. Migration 0061 adds `presets.noisy boolean NOT NULL DEFAULT
@@ -1548,7 +1548,7 @@ belongs in delivery.
 ## REV-65 — ServiceNow ticket panels (2026-11-09)
 
 User decision. A new dashboard panel type, `servicenow`, shows how many ServiceNow
-incidents a team has right now, as a number colored by thresholds, like Keep's
+incidents a team has right now, as a number colored by thresholds, like KeepHQ's
 "Service Now" widget
 ([dashboard operations 2, 3, 11, 12, 14 and 16](../specs/spec-dashboard-operations.md#2-saved-definition-and-initial-state)).
 The user approved the design from the canvas at
@@ -1563,15 +1563,15 @@ https://claude.ai/artifact/Cz4RDE8QUBt35p4d1KrZ1e and removed its queue link.
   "ServiceNow tickets".
 - **Where the count comes from (user decision, 2026-11-09).** The company's ticket
   counting service, the same one Keep uses, answers one HTTP GET per query. The
-  panel's settings become query parameters exactly as Keep sends them: `team`,
+  panel's settings become query parameters exactly as KeepHQ sends them: `team`,
   `state` (`new`, `in_progress` or `all`) and `system_failure` (`true` for Hamal,
   `false` for Direct, absent for All). Parameters already in the configured address
   are kept; the panel's values replace same-named ones. `{"count": n}` shows n. How
-  the service queries ServiceNow is outside Appchi.
+  the service queries ServiceNow is outside Keep.
 - **Configuration (user decision, 2026-11-09).** The service address is deployment
   configuration, like the Grafana connection
   ([operator operations 14](../specs/spec-operator-operations.md#14-platform-grafana-configuration-and-compatibility)):
-  the secret `APPCHI_TICKET_COUNT_URL`, `https` only, mounted only into the Product
+  the secret `KEEP_TICKET_COUNT_URL`, `https` only, mounted only into the Product
   API, and it may carry an access key. Nobody edits it in the UI. Super admins see a
   read-only Integrations page with its status, host, last answer or error and a Test
   connection action; the path and query are never shown or logged. While it is not
@@ -1583,7 +1583,7 @@ https://claude.ai/artifact/Cz4RDE8QUBt35p4d1KrZ1e and removed its queue link.
   seconds. Panels refresh about every 60 seconds, on Refresh counts and when the tab
   becomes visible again, so a shown count can be up to about 90 seconds old. This
   is separate from alert counts, which section 12 still never reuses.
-- **Results that differ from Keep (user decision, 2026-11-09, accepting the canvas).**
+- **Results that differ from KeepHQ (user decision, 2026-11-09, accepting the canvas).**
   A "Team not found" answer, with a 2xx or 4xx status, shows Team not found instead
   of 0. Valid JSON without a whole-number count shows No count instead of 0. A
   timeout, connection error, other error status, redirect, oversized or non-JSON
@@ -1602,7 +1602,7 @@ https://claude.ai/artifact/Cz4RDE8QUBt35p4d1KrZ1e and removed its queue link.
   not follow redirects, ask for an uncompressed reply and read at most 64 KiB. At most
   20 requests per process run at once; a query that finds no free slot within 3
   seconds is reported unavailable without being remembered as a service failure. An
-  optional `APPCHI_TICKET_COUNT_CA_FILE` names a trusted CA for the service. Teams are free text because the
+  optional `KEEP_TICKET_COUNT_CA_FILE` names a trusted CA for the service. Teams are free text because the
   service lists no teams. ServiceNow panels are not part of count batches; a new one
   starts at 3 × 3. Viewers see them, as for every panel.
 
@@ -1647,3 +1647,48 @@ This extends section 2's panel definition and section 3's panel content for ever
 panel type; counts, thresholds, references and layout are unchanged. Original issue
 IDs and REV numbering are unchanged; REV-65 (ServiceNow ticket panels) was built in
 parallel and merged first. Executed evidence belongs in delivery.
+
+## REV-67 — The system is named Keep (2026-11-10)
+
+User decision. The system formerly named Appchi is named **Keep** everywhere: the
+product name in the UI and documents, the eleven repositories (`keep-<part>`), the
+GitHub organization (`keep-alert-operations`), the local workspace folder
+(`keep-workspace`) and every internal identifier. The organization's current system,
+the KeepHQ fork, is called **KeepHQ** in these documents so the two stay distinct.
+The user asked for this on 2026-11-10 and approved the plan, choosing the full rename
+over a visible-names-only rename.
+
+- **Internal identifiers (user decision, 2026-11-10).** The Python namespace is `keep`
+  (distributions `keep-contracts`, `keep-domain`, `keep-api` and so on); environment
+  variables are `KEEP_*`; gateway headers are `X-Keep-*`; Kafka topics are
+  `keep.<environment>.alerts.*`; the Keycloak realm, web client and login theme are
+  `keep`, `keep-web` and `keep`; Elasticsearch, Redis, cache, image and template names
+  use `keep-`; Grafana contact points are named `Keep - <operator>`; browser storage
+  keys use `keep`. This supersedes the repository-layout rule that renaming a
+  repository leaves these names unchanged.
+- **Stored format tags (user decision, 2026-11-10).** Version and format tags that are
+  written into stored data or used in hashes, identifiers and encryption (for example
+  `keep-cel-v1`, `keep-grafana-v1`, `keep-visibility-sample-v1`, the `keep:1:`
+  encryption context and the recovery evidence tags) are renamed too. Data written
+  under the Appchi tags cannot be read after the rename: an environment upgraded from
+  an Appchi release starts with empty application data, Kafka topics, search indexes
+  and identity realm. The user accepted this because no production environment exists.
+- **Database (assistant-selected, 2026-11-10).** Migrations `0001`–`0065` keep their
+  exact bytes and checksums and still create `appchi_*` roles and `appchi.tenant_id`
+  policies. Migration `0066` renames the `appchi_api`, `appchi_worker` and
+  `appchi_recovery` roles to `keep_*`, rewrites every policy to read `keep.tenant_id`
+  and moves the visibility sampling check to the new tag. When another database in the
+  same cluster already renamed the roles, `0066` moves this database's policies,
+  privileges, memberships and ownership to the `keep_*` roles and drops the re-created
+  `appchi_*` roles once nothing uses them. Login roles and the migration identity are
+  created outside the chain and use the `keep_` names from the delivery templates.
+- **Kept as they were (assistant-selected, 2026-11-10).** Git history, the `SOURCE.md`
+  origin records, migration SQL `0001`–`0065` with their checksums, the historical
+  architecture image and dated screenshots in delivery evidence. The CI secret
+  `APPCHI_REPOSITORIES_TOKEN` keeps its name until it is re-added under a new name,
+  because its value cannot be read back. Records written before 2026-11-10 were
+  written under the name Appchi; their names were updated by this decision.
+
+Behavior, contracts other than the renamed identifiers, data authority and worker
+scope are unchanged. Original issue IDs and REV numbering are unchanged. Executed
+evidence belongs in delivery.

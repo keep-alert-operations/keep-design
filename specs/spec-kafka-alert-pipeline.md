@@ -7,8 +7,8 @@
 Normative redesign accepted by the user on 2026-09-30 (REV-33). PostgreSQL remains
 the alert, history, incident and configuration authority. This supplement governs
 the alert transport, ordering and recovery contracts. Implementation and executed
-evidence are tracked separately in [implementation status](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/implementation-status.md)
-and [the implementation record](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/kafka-first-implementation.md).
+evidence are tracked separately in [implementation status](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/implementation-status.md)
+and [the implementation record](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/kafka-first-implementation.md).
 
 ## 1. Authority and topology
 
@@ -16,7 +16,7 @@ and [the implementation record](https://github.com/appchi-alert-operations/appch
 
 ```mermaid
 flowchart LR
-  Client[Native client / Grafana] --> Gateway[Kong Key Auth + Appchi policy for v2]
+  Client[Native client / Grafana] --> Gateway[Kong Key Auth + Keep policy for v2]
   Gateway --> Ingress[Ingestion API]
   V1[Unauthenticated native v1] --> Ingress
   Ingress --> Received[Kafka alerts.received]
@@ -33,7 +33,7 @@ flowchart LR
   Manual -. best-effort after commit .-> Changed
 ```
 
-Ingress never connects to Appchi PostgreSQL for authorization, routing, admission,
+Ingress never connects to Keep PostgreSQL for authorization, routing, admission,
 backlog checks or acknowledgement. Configure the immutable Global UUID for v1.
 V2 accepts only verified private-mTLS gateway context. Native identity formulas,
 strict native schemas, tenant ownership and the separate Grafana adapter remain.
@@ -286,10 +286,10 @@ boundary. Never replay source lifecycle or correlation actions during rebuild.
 
 **Current scope (REV-34):** Provisioning and revocation finish inside the HTTP request and never return pending; revocation reports success only after verified remote denial; see [worker scope](spec-worker-scope.md#3-request-owned-operator-provisioning). Plugin, policy-generation and all-node proof rules below remain normative.
 
-**Assistant-selected implementation:** package the Lua appchi-policy plugin with
+**Assistant-selected implementation:** package the Lua keep-policy plugin with
 Kong OSS Key Auth. Store a nonsecret operator policy in Kong's own PostgreSQL database,
 with a monotonic generation and a trigger rejecting older or conflicting same-generation
-writes. This is separate from Appchi PostgreSQL. Query policy without an authorization
+writes. This is separate from Keep PostgreSQL. Query policy without an authorization
 cache; missing/unavailable/malformed policy fails closed. **Assistant-selected gateway errors:** inactive/prepared/revoked/expired credentials return 401; unavailable policy or clock proof returns 503. Prepared credentials deny.
 Current credentials allow; retiring credentials require a fixed UTC expiry and deny
 at equality or later. Denial policies persist across cleanup and stale worker retries.
@@ -297,14 +297,14 @@ at equality or later. Denial policies persist across cleanup and stale worker re
 The plugin validates immutable operator/tenant association, credential ID/state,
 expiry and generation, strips untrusted identity/key headers, and supplies trusted
 context over the pinned private-mTLS boundary. Grafana routing keeps exactly
-`Appchi - {operator name}` with literal value `true`.
+`Keep - {operator name}` with literal value `true`.
 
 Provisioning first installs the credential and a deny policy, verifies preparation
 and Grafana, then commits activation intent/current state with the fixed retiring
 deadline. A separate phase distributes the active policy and verifies every serving
 node before completion or Copy. Rename/cancellation also verify the final policy.
 Revoke erases ciphertext immediately and returns pending until denial is verified;
-updating Appchi PostgreSQL alone is not gateway revocation. Denial distribution runs
+updating Keep PostgreSQL alone is not gateway revocation. Denial distribution runs
 even when Grafana is unavailable. A denied credential needs no plaintext to prove
 policy denial; active proof exercises actual Key Auth as well as policy.
 
@@ -324,7 +324,7 @@ before the final retained-alert guard. It cannot rely on an empty old PG inbox.
 Fence old ingress, drain its pending source/outbox/correlation/projection work with
 the compatible old workers, then stop those workers. Capture topic boundaries and
 initialize new protocol consumer groups there before admitting schema-2 records.
-Record partition counts, offsets and protocol activation durably. Enable the separate immutable ingress configuration `APPCHI_KAFKA_ADMISSION_ENABLED=true` only after this succeeds; it defaults false and does not query PG. Never run legacy
+Record partition counts, offsets and protocol activation durably. Enable the separate immutable ingress configuration `KEEP_KAFKA_ADMISSION_ENABLED=true` only after this succeeds; it defaults false and does not query PG. Never run legacy
 relay/hint workers alongside the new source/correlation/index groups. Old receiver
 credentials require the actual plugin/policy migration and all-node proof. Rollback
 after new admission requires draining that protocol with compatible consumers; an

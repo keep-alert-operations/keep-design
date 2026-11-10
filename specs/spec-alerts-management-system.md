@@ -1,12 +1,12 @@
-# Appchi system design
+# Keep system design
 
 **Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
 **Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
 
-Appchi is an internal, multi-tenant alerts management system. It receives v1/v2 alerts, maintains one evolving row per logical alert with source and activity history, and provides CEL feeds, shared presets, incidents, automatic correlation, maintenance suppression and shared count dashboards.
+Keep is an internal, multi-tenant alerts management system. It receives v1/v2 alerts, maintains one evolving row per logical alert with source and activity history, and provides CEL feeds, shared presets, incidents, automatic correlation, maintenance suppression and shared count dashboards.
 
-This specification set defines the initial release. Application implementation and production qualification are separate work; [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md) records the required service inputs and evidence.
+This specification set defines the initial release. Application implementation and production qualification are separate work; [Delivery readiness](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md) records the required service inputs and evidence.
 
 ## Specification map
 
@@ -33,7 +33,7 @@ Each contract has one authoritative home. Read the relevant domain document toge
 Supporting records are separate from runtime contracts:
 
 - [Verification plan](../verification/verification-plan.md): required acceptance scenarios.
-- [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md): service bindings, CI, rollout, runbooks and DEL-01–DEL-08 evidence.
+- [Delivery readiness](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md): service bindings, CI, rollout, runbooks and DEL-01–DEL-08 evidence.
 - [Design register](../decisions/design-register.md): coverage of the 55 original issues and corrections from this review.
 - [Decision history](../decisions/design-decisions-2026-09-22.md): provenance of the final all-subject choices; current specifications govern details.
 
@@ -94,8 +94,8 @@ flowchart LR
 | Elasticsearch | Rebuildable current-alert/current-note search projection | May lag; a searchable watermark proves visibility. Never authorizes access or supplies authoritative history. |
 | Kafka | Self-contained received alerts and transactional changed transport | Broker acknowledgement precedes 202. Delivery UUID/proof prevents duplicate application; per-key source order and per-tenant changed order govern their respective consumers. Retention can lose unprocessed accepted records. |
 | Redis | Low-latency invalidation hints | Loss is repaired by PostgreSQL generation reconciliation and polling. |
-| Keycloak / LDAP | Human authentication / company identity and nested membership | Appchi combines a valid session, accepted directory evidence and current product grants on every authorization decision. |
-| Kong / Grafana | Operator authentication / shared remote alert delivery configuration | Kong Key Auth plus Appchi policy verifies credential/tenant/generation; all-node proof gates the remote saga. Ingress verifies private mTLS context. |
+| Keycloak / LDAP | Human authentication / company identity and nested membership | Keep combines a valid session, accepted directory evidence and current product grants on every authorization decision. |
+| Kong / Grafana | Operator authentication / shared remote alert delivery configuration | Kong Key Auth plus Keep policy verifies credential/tenant/generation; all-node proof gates the remote saga. Ingress verifies private mTLS context. |
 | Protected recovery evidence | Minimal retirement, revocation and replay fences surviving database rollback | Restore and physical cleanup are gated by the independently supplied durability contract. |
 
 ### Admission and processing
@@ -140,7 +140,7 @@ The sustained ingestion requirement is 250 deliveries/second company-wide, inclu
 
 These targets do not establish measured capacity. Before enabling affected capabilities, qualify combined workloads and record numeric application budgets, connection/resource allocations and service capability evidence.
 
-The user's team owns Appchi and Keycloak configuration/operation. Dedicated teams own LDAP, PostgreSQL, Elasticsearch, Kafka, Redis, OpenShift, Kong, Grafana and their infrastructure policy, HA, backups, retention, allocation and service recovery. Appchi defines its schemas, client behavior and product data lifetimes, then validates the supplied service contracts. Installed versions, endpoints, credentials, named contacts and actual recovery guarantees belong in the environment manifest.
+The user's team owns Keep and Keycloak configuration/operation. Dedicated teams own LDAP, PostgreSQL, Elasticsearch, Kafka, Redis, OpenShift, Kong, Grafana and their infrastructure policy, HA, backups, retention, allocation and service recovery. Keep defines its schemas, client behavior and product data lifetimes, then validates the supplied service contracts. Installed versions, endpoints, credentials, named contacts and actual recovery guarantees belong in the environment manifest.
 
 ## Initial-release exclusions
 

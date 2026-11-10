@@ -2,7 +2,7 @@
 
 The user delegated completion of every remaining product and technical subject on 2026-09-22. **The 68 numbered decisions listed here are assistant-selected.** Their full contracts are in the linked specifications. Earlier user decisions remain unchanged; this list reports the additions from this final completion, not earlier sessions' decisions.
 
-This is a provenance record, not an additional normative contract. Current specifications govern details. Later clarifications are recorded in the [design register](design-register.md#documentation-review--2026-09-22); implementation and executed evidence are tracked in [Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md#evidence-register).
+This is a provenance record, not an additional normative contract. Current specifications govern details. Later clarifications are recorded in the [design register](design-register.md#documentation-review--2026-09-22); implementation and executed evidence are tracked in [Delivery readiness](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md#evidence-register).
 
 ## Maintenance — 20 decisions
 
@@ -114,8 +114,8 @@ Details: [System completion 26–30](../specs/spec-system-completion.md#26-ci-an
 
 ## Later user direction — 2026-09-24
 
-The user requested username/password-only Appchi login and removal of the one-time
-code. This supersedes the earlier assistant-selected TOTP requirement for Appchi
+The user requested username/password-only Keep login and removal of the one-time
+code. This supersedes the earlier assistant-selected TOTP requirement for Keep
 users, including global administrators. Separate Keycloak console MFA remains in
 place. [Identity section 3](../specs/spec-identity-configuration.md#3-username-and-password-authentication)
 and REV-15 in the [design register](design-register.md) record this correction;
@@ -143,11 +143,11 @@ identified a separate workspace-lifetime issue (REV-19). A shared operational
 layout now retains the session-owning workspace across route changes while
 preserving the existing authorization and tenant-isolation rules.
 
-The user supplied the [Option B full-system visual reference](https://claude.ai/artifact/XMD6gScr8TVDnWvYtcvNWP) and requested its application throughout the frontend. This superseded the earlier visual shell and OS-selected theme, while preserving the domain contracts and original decision numbering. The user's later dark-mode request supersedes the reference's fixed-light behavior, while retaining its light palette as the default. [REV-12 and REV-20](design-register.md) and [shared system section 3](../specs/spec-system-completion.md#3-navigation-and-visual-system) record the visual contract. The [UI mapping](https://github.com/appchi-alert-operations/appchi-frontend/blob/main/docs/ui-design.md) distinguishes the user's reference from assistant-selected responsive, theme and live-data adaptations. On 2026-10-26 the user kept this design and replaced only its colors with the Ocean palette, in light and dark ([REV-42](design-register.md#rev-42--ocean-palette-on-the-existing-design-2026-10-26)).
+The user supplied the [Option B full-system visual reference](https://claude.ai/artifact/XMD6gScr8TVDnWvYtcvNWP) and requested its application throughout the frontend. This superseded the earlier visual shell and OS-selected theme, while preserving the domain contracts and original decision numbering. The user's later dark-mode request supersedes the reference's fixed-light behavior, while retaining its light palette as the default. [REV-12 and REV-20](design-register.md) and [shared system section 3](../specs/spec-system-completion.md#3-navigation-and-visual-system) record the visual contract. The [UI mapping](https://github.com/keep-alert-operations/keep-frontend/blob/main/docs/ui-design.md) distinguishes the user's reference from assistant-selected responsive, theme and live-data adaptations. On 2026-10-26 the user kept this design and replaced only its colors with the Ocean palette, in light and dark ([REV-42](design-register.md#rev-42--ocean-palette-on-the-existing-design-2026-10-26)).
 
-The user's local v2 setup request is recorded as REV-22. Assistant-selected dedicated Kong/Grafana and a private serving-member proof keep the existing operator/key, tenant-routing and mTLS contracts. Only the isolated initial development gate may be bootstrapped; recovery/production gates remain intact. [Operator section 29](../specs/spec-operator-operations.md#29-isolated-local-development) defines this scope and [local v2 setup](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/docs/local-v2.md) records runtime details.
+The user's local v2 setup request is recorded as REV-22. Assistant-selected dedicated Kong/Grafana and a private serving-member proof keep the existing operator/key, tenant-routing and mTLS contracts. Only the isolated initial development gate may be bootstrapped; recovery/production gates remain intact. [Operator section 29](../specs/spec-operator-operations.md#29-isolated-local-development) defines this scope and [local v2 setup](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/local-v2.md) records runtime details.
 
-The user approved implementing the custom Appchi sign-in mock on 2026-09-27 (REV-23). The selected Keycloak client theme provides the approved form while retaining code flow and PKCE. Assistant-selected entry behavior starts login on the initial unauthenticated session response and preserves safe return paths; logout and recovery pages require an explicit new attempt. Appearance is stored separately on the application and identity origins. This supersedes the earlier minimal stock-theme restriction without changing the original decision numbers.
+The user approved implementing the custom Keep sign-in mock on 2026-09-27 (REV-23). The selected Keycloak client theme provides the approved form while retaining code flow and PKCE. Assistant-selected entry behavior starts login on the initial unauthenticated session response and preserves safe return paths; logout and recovery pages require an explicit new attempt. Appearance is stored separately on the application and identity origins. This supersedes the earlier minimal stock-theme restriction without changing the original decision numbers.
 
 The user requested an icon-based Light/Dark switch after reviewing the account menu on 2026-09-27 (REV-24). Both signed-in and signed-out application controls use the accessible sun/moon switch; persistence and the default palette are unchanged.
 
@@ -200,7 +200,7 @@ runtime, privilege and rollout details. Original decision numbers are unchanged.
 ## Later user decision — 2026-10-01 Alembic migrations
 
 REV-38 selects Alembic for the single PostgreSQL migration chain in
-`appchi-migrations`. The assistant-selected transition preserves immutable SQL,
+`keep-migrations`. The assistant-selected transition preserves immutable SQL,
 checksums and recorded history, verifies adoption of existing databases, and
 retains dedicated migration execution and transaction/privilege safeguards.
 [Repository layout](../specs/spec-repository-layout.md#alembic-migration-execution-rev-38)

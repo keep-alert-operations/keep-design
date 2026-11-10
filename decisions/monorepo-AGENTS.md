@@ -2,7 +2,7 @@
 
 ## Project and phase
 
-Appchi is an internal multi-tenant alerts management system with CEL feeds/shared
+Keep is an internal multi-tenant alerts management system with CEL feeds/shared
 presets, incidents/correlation, one-time maintenance and shared count dashboards.
 The initial-release product and application technical design is complete as of
 2026-09-22. Implementation is now authorized and in progress; production
@@ -35,7 +35,7 @@ reread affected normative supplements before changing behavior:
 
 The [grouped final decision list](design-decisions-2026-09-22.md) summarizes the
 68 choices made under the final all-subject delegation. [Design register](design-register.md) preserves all 55 original issue identifiers.
-[Delivery readiness](https://github.com/appchi-alert-operations/appchi-delivery/blob/main/status/delivery-readiness.md) tracks DEL-01–DEL-08; required test
+[Delivery readiness](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md) tracks DEL-01–DEL-08; required test
 scenarios live in [Verification plan](../verification/verification-plan.md).
 
 ## Decisions and gaps
@@ -74,11 +74,11 @@ scenarios live in [Verification plan](../verification/verification-plan.md).
 - Preserve fixed Global, no tenant delete/disable, existing role/admin continuity,
   365-day tenant/access audit, operator key/Grafana gates, alert/incident retention,
   no-backfill maintenance and shared preset/dashboard reference contracts.
-- One shared company Grafana; exact routing label is `Appchi - {operator name}` with
+- One shared company Grafana; exact routing label is `Keep - {operator name}` with
   literal string value `true`. Do not restore the superseded UUID label.
 - Other underlying technologies belong to dedicated operating teams. They own
   infrastructure retention, backups, HA, topology, allocation and recovery operations.
-  Appchi defines application behavior and validates supplied service contracts;
+  Keep defines application behavior and validates supplied service contracts;
   do not prescribe those teams' infrastructure policy.
 - No product notifications, recurring maintenance, personal presets/dashboards,
   enriched historical import or full event-sourcing architecture in the initial release.
