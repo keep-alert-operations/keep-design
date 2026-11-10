@@ -1692,3 +1692,77 @@ over a visible-names-only rename.
 Behavior, contracts other than the renamed identifiers, data authority and worker
 scope are unchanged. Original issue IDs and REV numbering are unchanged. Executed
 evidence belongs in delivery.
+
+## REV-68 — Grafana panels (2026-11-10)
+
+User decision. A new dashboard panel type, `grafana`, shows one live Grafana panel,
+framed straight from Grafana in the viewer's browser, like KeepHQ's Grafana panel
+widget ([dashboard operations 2, 3, 13, 14 and 16](../specs/spec-dashboard-operations.md#2-saved-definition-and-initial-state)).
+It is its own type because HTML panels remove iframes and stay that way (REV-57). The
+user approved the design from the canvas at
+https://claude.ai/artifact/LPwZUY8L9QzEKYuJkkisF4 and said "build it", after removing
+its theme option and moving its "Open in Grafana" button onto the address box.
+
+- **Settings (user decision, 2026-11-10).** A Grafana panel has an optional title
+  (blank by default, because Grafana draws the panel's own title) and one panel
+  address. The dialog accepts the address or Grafana's Share › Embed `<iframe>` code,
+  of which only the first iframe's `src` is used ("Using …" shows it), lists the
+  allowed Grafana, describes the address (dashboard, panel, time range, refresh,
+  variables) and previews the live panel. A button attached to the address box fills
+  the REV-66 panel link with the panel's full dashboard view in Grafana ("Open in
+  Grafana"). It appears last in the Panel type list as "Grafana panel"; a new one
+  starts at 6 × 6.
+- **Theme (user decision, 2026-11-10).** The panel always uses the viewer's Keep theme:
+  Keep sets Grafana's `theme` to `light` or `dark` when framing it. There is no setting,
+  and the saved address is not changed.
+- **Allowed Grafana (assistant-selected, 2026-11-10, accepting the design note).** The
+  deployment lists the Grafana instances panels may frame in
+  `KEEP_GRAFANA_PANEL_ORIGINS`: comma-separated `https` addresses, each an origin with an
+  optional base path for a Grafana served under a sub-path, mounted into the Product API.
+  It is not a secret. Loopback `http` is accepted only in development. Entries that are
+  unusable (another scheme, credentials, a query or fragment, Keep's own origin) are
+  ignored with a reason instead of failing start-up. An empty list turns Grafana panels
+  off: the type is listed but disabled, and existing panels keep their settings and say
+  Grafana panels are turned off. The shared company Grafana used for operator routing is
+  not allowed unless it is listed. Super admins see the list, the ignored entries and the
+  Grafana-side settings on a read-only Admin › Integrations card; nobody edits it in the UI.
+- **Address checks (assistant-selected, 2026-11-10).** In this order, the first failure
+  shown: not empty; embed code holds an iframe `src`; parses; `http` or `https` and
+  literally starts with `http://` or `https://`; not Keep's own origin; Grafana panels on;
+  no user name or password; `https` unless the host is loopback; origin and base path
+  allowed; path starts with the base path and `/d-solo/`; at most 2,048 characters.
+  Credentials and `http` come before the allowed list, unlike KeepHQ, because Keep's list
+  is `https` only and would otherwise hide the real problem. The browser checks on input
+  and before every render, so a panel saved through the API or whose Grafana was removed
+  from the list is never framed and shows "Grafana panel blocked" with the reason. The
+  Product API checks a Grafana panel's address on save when it is new or differs from
+  the same stored panel's, returning 422 `grafana_url_invalid`; an unchanged address
+  saves even after its Grafana was removed, so the dashboard stays editable. A copy
+  creates new panels, so its Grafana addresses are checked like new ones and a copy
+  holding a blocked panel is refused with the reason.
+- **Frame (assistant-selected, 2026-11-10).** `sandbox="allow-scripts allow-same-origin
+  allow-forms allow-popups allow-popups-to-escape-sandbox"`, no top navigation,
+  `referrerpolicy="no-referrer"`, `loading="lazy"`, the validated address only, titled by
+  the panel title or "Grafana panel". `allow-same-origin` grants Grafana's origin, never
+  Keep's, because Keep's own origin is refused. While panels are moved or resized a cover
+  sits over the frames. Grafana refreshes the panel on its own schedule; Refresh counts
+  does not reload it. The Product API never contacts Grafana for these panels.
+- **Data boundary (assistant-selected, 2026-11-10).** What a framed panel shows is
+  decided by Grafana and each viewer's own Grafana session (or Grafana's anonymous
+  access), not by Keep's tenants or roles; the panel dialog and Integrations card say
+  so. Only Grafana trusted as much as Keep should be listed.
+- **Not built (assistant-selected, 2026-11-10).** A `frame-src` Content-Security-Policy
+  limited to the allowed Grafana is left for a later decision: the UI's headers are
+  fixed when the image is built, so a per-deployment list needs a runtime proxy on every
+  request. Keep's pages keep `X-Frame-Options: DENY`. The Integrations card does not
+  count panels per Grafana, since that would read across tenants.
+- **Storage (assistant-selected, 2026-11-10).** `content` holds `{"url"}` beside the
+  REV-66 `link`; thresholds stay empty and no preset or image is referenced. Migration
+  `0067` widens the type check and requires a `url` string of 1–2,048 characters starting
+  with `http://` or `https://`, without rewriting rows. Grafana panels are not part of
+  count batches. Status for tenant readers is `GET /tenants/{tenant_id}/grafana-panels/status`
+  and for super admins `GET /admin/integrations/grafana-panels`.
+
+This adds a panel type beside sections 2, 3, 13, 14 and 16; other panel types are
+unchanged. Original issue IDs and REV numbering are unchanged. Executed evidence belongs
+in delivery.
