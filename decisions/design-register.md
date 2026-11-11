@@ -1917,3 +1917,29 @@ Global, operators, directory publication and its vacancy and restoration audit a
 unchanged; a tenant created without an administrator records no vacancy event,
 because it never had one. Original issue IDs and REV numbering are unchanged.
 Executed evidence belongs in delivery.
+
+## REV-72 — Global administration shows Integrations and Platform (2026-11-11)
+
+User decision. In the Global tenant, global super-admins get the Admin link at the
+foot of the rail, and its Administration tabs are only Integrations and Platform. The
+other Administration tabs (Operators, Permissions and Access audit) are not shown in
+Global ([system completion 3](../specs/spec-system-completion.md#3-navigation-and-visual-system),
+[tenant access 7](../specs/spec-tenant-access.md#7-global-permissions)). Before this,
+Global had no Admin link, and super-admins reached Integrations and Platform from a
+specific tenant.
+
+- **Where the Admin link opens (assistant-selected, 2026-11-11).** The Admin link opens
+  the first tab the user has in the current tenant: Integrations in Global, Operators in
+  a specific tenant. Users who aren't global super-admins have no Admin link in Global.
+  Specific tenants are unchanged: Operators for every reader, Permissions and Access
+  audit for tenant admins, and Integrations and Platform for global super-admins.
+- **Global's other Administration addresses (assistant-selected, 2026-11-11).**
+  `/tenants/{global}/operators`, `/permissions` and `/audit`, including operator detail
+  addresses, show the standard Page unavailable page for everyone. This removes the
+  read-only Global access-policy page that section 7 selected; Global's fixed policy is
+  unchanged and still has no editable grants. Global never holds managed operators
+  (operator operations 3), and the API still serves Global's permissions summary and
+  tenant/access audit to global super-admins; only the UI pages are gone.
+
+APIs, authorization, audit and operators are unchanged; no migration. Original issue
+IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

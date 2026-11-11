@@ -65,7 +65,9 @@ A verified re-enable of the same immutable individual may restore its still-curr
 
 ## 7. Global permissions
 
-Global has a read-only access-policy view for global super-admins: every eligible authenticated company user has edit, and the designated LDAP team supplies administration. Expose no editable local grant list for Global, including redundant view/edit grants. The universal baseline cannot be removed through tenant permission commands. This completes the previously selected prohibition on local Global admin grants.
+**Later user decision — 2026-11-11 (REV-72):** Global's Administration shows only Integrations and Platform, to global super-admins. Global has no Permissions or Access audit page, so the read-only access-policy view below is no longer shown; the policy itself is unchanged. See [REV-72](../decisions/design-register.md#rev-72--global-administration-shows-integrations-and-platform-2026-11-11).
+
+Global has a fixed access policy: every eligible authenticated company user has edit, and the designated LDAP team supplies administration. Expose no editable local grant list for Global, including redundant view/edit grants. The universal baseline cannot be removed through tenant permission commands. This completes the previously selected prohibition on local Global admin grants.
 
 The designated global-super-admin group remains controlled deployment configuration, never a tenant permission field. Its bootstrap, replacement and empty/deleted-group recovery follow identity supplement 12. Neither tenant admin nor Keycloak console administrator status independently grants Keep global privilege.
 
