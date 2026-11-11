@@ -1871,3 +1871,49 @@ after renaming the Create dialog's first field to "Ticket Title".
 Alert behavior, incident membership, lifecycle and correlation are unchanged.
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in
 delivery.
+
+## REV-71 — A new tenant starts without an administrator (2026-11-11)
+
+User decision. When a global super-admin creates a tenant on Admin › Platform, Keep no
+longer makes the creator its first administrator. The tenant is created with its name
+only, the browser goes straight to the new tenant's Permissions page, and that page
+requires adding an administrator
+([tenant access 2 and 4](../specs/spec-tenant-access.md#2-tenant-creation)). Asked
+whether the administrator should instead be chosen in the create form, so a tenant is
+never without one, the user chose to create the tenant first and require the
+administrator on its Permissions page.
+
+- **Creation (assistant-selected, 2026-11-11).** `POST /api/tenants` keeps
+  `initial_grants` required but accepts an empty list (0–100 grants). An empty list
+  creates the tenant without a local administrator. A non-empty list keeps the earlier
+  rule: it must include at least one eligible local administrator, so existing callers
+  behave as before. Creation stays one transaction with its audit and command receipt;
+  the `tenant-created` audit records the empty grant snapshot. The response still
+  reports the caller's inherited `admin` role. Platform creation in the UI always sends
+  an empty list. No migration is needed.
+- **The roster says whether an administrator exists (assistant-selected,
+  2026-11-11).** `GET /api/tenants/{id}/permissions` adds `meta.has_local_admin`,
+  counted the same way as the last-admin check: distinct eligible, undeleted users
+  reached through the tenant's own admin grants, including team members. It is also
+  false after a verified external vacancy, so the same page shows that repair
+  condition to global super-admins.
+- **How the administrator is required (assistant-selected, 2026-11-11).** The server
+  keeps the existing rule that every permission batch must leave at least one eligible
+  local administrator, so the first save of a tenant without one must add one; any
+  other batch returns 409 `last_admin_required` with nothing changed. In the UI, after
+  creation commits, the Platform page refreshes the signed-in user's tenant list and
+  opens `/tenants/{id}/permissions`. While `has_local_admin` is false, that page shows
+  a warning that the tenant has no administrator, the role for a new grant starts at
+  Admin, Save stays disabled until the draft sets at least one Admin grant, and leaving
+  the page (another page, another tenant, Back, or closing the tab) asks for
+  confirmation with a message that the tenant has no administrator. A super-admin who
+  confirms leaves the tenant without one: it keeps operating like a tenant after an
+  external vacancy, and the warning returns whenever its Permissions page is opened.
+  Leaving the Platform page after creation still asks before discarding an unsaved
+  source-repair reason; if the super-admin stays, the created-tenant message keeps
+  its Open tenant permissions button.
+
+Global, operators, directory publication and its vacancy and restoration audit are
+unchanged; a tenant created without an administrator records no vacancy event,
+because it never had one. Original issue IDs and REV numbering are unchanged.
+Executed evidence belongs in delivery.
