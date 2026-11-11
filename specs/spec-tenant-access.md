@@ -20,11 +20,18 @@ Provision Global through idempotent initialization before admitting alerts. Reus
 
 ## 2. Tenant creation
 
-Creation accepts a name and 1–100 initial user/team grants, with at least one eligible local administrator after expansion. Any supported tenant role may appear among those grants. Resolve directory evidence before the commit; a user need not have signed into Keep previously to receive a grant.
+**Later user decision — 2026-11-11 (REV-71):** a global super-admin may create a tenant
+with no grants, and creating a tenant never adds its creator. The new tenant starts
+without a local administrator, and its Permissions page then requires adding one. See
+[REV-71](../decisions/design-register.md#rev-71--a-new-tenant-starts-without-an-administrator-2026-11-11).
+
+Creation accepts a name and 0–100 initial user/team grants. An empty list creates the tenant without a local administrator; a non-empty list must include at least one eligible local administrator after expansion. Any supported tenant role may appear among those grants. Resolve directory evidence before the commit; a user need not have signed into Keep previously to receive a grant.
 
 Commit the tenant, name claim, initial grants, revision, audit and command receipt in one PostgreSQL transaction. A failure creates none of them. Return 201 only after commit. Creation does not provision a Keycloak realm, operator, Grafana resource, default preset or dashboard. Operators retain their separately selected setup flow. Initialize the tenant revision to 1; the server determines the specific-tenant kind and identity.
 
 An unknown principal or incomplete new team expansion cannot satisfy the administrator requirement. Use explicitly published trusted directory evidence; if unavailable within the existing request deadline, return 503 with a retry indication and leave creation uncommitted. An administrator must explicitly publish the required verification; no background directory job continues in this scope. Existing complete evidence remains usable under the selected outage policy; do not add a freshness cutoff.
+
+A tenant without an eligible local administrator keeps operating, as after a verified external vacancy (section 4), and global super-admins administer it through inherited access. Its permission roster reports that no eligible local administrator exists. Every permission batch must leave at least one, so the first saved batch adds one. The administration UI opens the new tenant's Permissions page as soon as creation commits and asks for confirmation before leaving that page while no administrator is saved; REV-71 defines that page's behavior.
 
 ## 3. Grant model and changes
 
@@ -34,7 +41,7 @@ Permission editing uses an atomic batch of 1–100 set/remove operations. Reject
 
 ## 4. Administrator continuity
 
-Serialize local permission changes per tenant and guard their identity revision. Count distinct eligible users reached through the tenant's own admin grants, including nested members. Inherited global-super-admin access alone still does not count. Recheck the resulting count at commit; reject a change leaving no eligible local admin with 409 `last_admin_required`.
+Serialize local permission changes per tenant and guard their identity revision. Count distinct eligible users reached through the tenant's own admin grants, including nested members. Inherited global-super-admin access alone still does not count. Recheck the resulting count at commit; reject a change leaving no eligible local admin with 409 `last_admin_required`. This includes a tenant created without grants (REV-71): its first permission batch must add an eligible local admin.
 
 Admins may remove or demote their own grant when another eligible local admin remains. If that change removes their access, return only the successful command receipt and their resulting access state, then remove the tenant from their UI; do not return newly protected grant/audit data. Reauthorize subsequent requests and retries normally.
 
@@ -107,10 +114,10 @@ Tenant commands are synchronous local transactions: 201 for creation, 200 for co
 | Route | Selected contract |
 |---|---|
 | `GET /api/tenants` | Authorized list, optional name query, cursor and limit. |
-| `POST /api/tenants` | Global super-admin; name, initial grants and command ID. |
+| `POST /api/tenants` | Global super-admin; name, initial grants (possibly none, REV-71) and command ID. |
 | `GET /api/tenants/{tenant_id}` | Tenant-readable metadata and caller role. |
 | `PATCH /api/tenants/{tenant_id}` | Rename only; name, expected revision and command ID. |
-| `GET /api/tenants/{tenant_id}/permissions` | Admin-only grants, eligibility diagnostics and revisions. |
+| `GET /api/tenants/{tenant_id}/permissions` | Admin-only grants, eligibility diagnostics, whether an eligible local admin exists (REV-71) and revisions. |
 | `PATCH /api/tenants/{tenant_id}/permissions` | Admin-only atomic set/remove batch; each item names an immutable principal ID and, for set, a role. |
 | `GET /api/tenants/{tenant_id}/permission-principals` | Admin-only company-directory search. |
 | `GET /api/tenants/{tenant_id}/permission-principals/{principal_id}/members` | Admin-only flattened preview for a verified team. |
