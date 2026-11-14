@@ -58,7 +58,7 @@ change alone does not return users to the initial session-check screen. Continue
 normal session revalidation, clear protected content on access loss or expiry,
 and reset tenant-scoped content and subscriptions when switching tenants.
 
-The later user-approved sign-in design uses the Keep Keycloak theme described in [identity section 1](spec-identity-configuration.md#1-ownership-and-realm-boundary). Its light/dark selection is stored on the identity origin, independently of the application origin, with light as the initial default. Only the appearance string is persisted; credentials remain in the normal Keycloak form submission.
+The later user-approved sign-in uses Authelia's stock portal with a Keep logo, described in [identity section 1](spec-identity-configuration.md#1-ownership-and-client-boundary); REV-73 dropped the earlier Keep Keycloak login theme. Its light/dark selection is stored on the identity origin, independently of the application origin, with light as the initial default. Only the appearance string is persisted; credentials remain in the normal Authelia portal submission.
 
 ## 4. Common interaction and information boundaries
 
@@ -276,11 +276,11 @@ Every profile contains workload generator seed/distribution, data sizes/history 
 
 See [delivery service bindings](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md#service-bindings).
 
-## 25. Team-owned Keycloak operations
+## 25. Team-owned Authelia operations
 
-Retain the selected existing internal Keycloak and dedicated environment realms. The Keep team owns sanitized realm/client/mapper configuration, theme/application password sign-in/console MFA/refresh policy, administrative access and upgrade/recovery verification. Require at least two individually accountable trained administrators, MFA, separate nonproduction credentials, and an audited privileged recovery procedure through the company's identity verification process. This is staffing responsibility, not invented employee assignments or a Keep-local super-admin bypass.
+Deploy the selected Authelia OIDC provider with dedicated environment configurations (REV-73 replaced Keycloak for air-gapped operability). The Keep team owns the sanitized Authelia YAML, OIDC client and claims/attribute-mapping configuration, portal password sign-in/refresh policy, administrative access and upgrade/recovery verification. Authelia is a single Go binary with one YAML file and separately injected secrets; it has no admin console or realm import. Require at least two individually accountable trained administrators, MFA for privileged configuration access, separate nonproduction credentials, and an audited privileged recovery procedure through the company's identity verification process. This is staffing responsibility, not invented employee assignments or a Keep-local super-admin bypass.
 
-Release realm/config changes through staging exports/diffs and reviewed deployment jobs, with secrets injected separately. Keep a safe configuration export with each release; it is not a backup of user/session/database state. Coordinate Keycloak's database/secret recovery with their owning services, then verify immutable LDAP bindings, application password sign-in, console MFA and revocation before login readiness. Test upgrades against the full sign-in/directory/logout matrix before production. Operational logging/retention uses the existing approved service; no new infrastructure backup schedule or HA topology is asserted. A Keycloak outage continues the already selected valid-local-session/last-known-identity behavior.
+Release YAML/config changes through staging diffs and reviewed deployment jobs, with secrets injected separately. Keep a safe configuration copy with each release; it is not a backup of user/session/database state. Coordinate Authelia's session-store/secret recovery with its owning services, then verify immutable LDAP bindings, the directory-identity claim, portal password sign-in and revocation before login readiness. Test upgrades against the full sign-in/directory/RP-initiated-logout matrix before production; back-channel logout is not configured (REV-73). Operational logging/retention uses the existing approved service; no new infrastructure backup schedule or HA topology is asserted. An Authelia outage continues the already selected valid-local-session/last-known-identity behavior.
 
 ## 26. CI and release artifacts
 

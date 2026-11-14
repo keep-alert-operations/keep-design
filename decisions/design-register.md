@@ -7,7 +7,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | ID | Selected contract and reference |
 |---|---|
 | A1 | Tenant identity, globally unique names, fixed Global, creation/rename and no delete/disable are selected in tenant/access 1–4/10–12; physical constraints and bootstrap in system completion 11–12/28. |
-| A2 | Team-owned internal Keycloak, LDAP immutable identity, nested memberships and OIDC/session settings are selected in identity configuration 1–14; runtime/schema and installed-version acceptance in system completion 1/12/24–25. |
+| A2 | Team-owned internal IdP, LDAP immutable identity, nested memberships and OIDC/session settings are selected in identity configuration 1–14; runtime/schema and installed-version acceptance in system completion 1/12/24–25. REV-73 replaces the Keycloak product with Authelia (OIDC protocol, LDAP directory authority and immutable binding unchanged). |
 | A3 | Five-minute normal-operation access-change enforcement and last-known trusted identity during refresh outages remain unchanged. Authorization guards, checkpoint persistence and restore gates are selected in identity configuration 6–12 and system completion 7/12/20. |
 | A4 | Highest-role grants, local-admin continuity, orphaned principals, eligible assignees and access-loss handling are selected in tenant/access and identity supplements; atomic enforcement is completed in system completion 7/12/17. |
 | A5 | The tenant/access permission matrix, Global/global-super-admin exceptions and 365-day admin-readable access audit are preserved. Resource UI/API enforcement and scoped physical records are complete in system completion 3–12. |
@@ -108,7 +108,7 @@ All 55 original issue identifiers are retained below. Status: **design closed** 
 | ID | Selected contract and reference |
 |---|---|
 | N1 | Capacity requirements are preserved; system completion 23 selects the combined measurement procedure, safety margin, versioned budgets and readiness enforcement. Actual numerical profile and results are required DEL-03 evidence, not unresolved architecture. |
-| N2 | System completion 1–2/21–25 selects frameworks/repository/workloads/security/Keycloak operation and required environment capability manifest. Dedicated teams retain infrastructure policy; actual service bindings/allocation are DEL-01/06. |
+| N2 | System completion 1–2/21–25 selects frameworks/repository/workloads/security/identity-provider operation (Authelia since REV-73) and required environment capability manifest. Dedicated teams retain infrastructure policy; actual service bindings/allocation are DEL-01/06. |
 | N3 | Selected SLOs, outage behavior and ownership remain reliability operations. System completion 20–25/29 closes application recovery/readiness/runbooks; actual service guarantees and observed SLOs remain DEL-01/05/08. |
 | N4 | System completion 26–30 selects CI, acceptance matrix, six delivery milestones, compatible rollout/rollback, support and evidence gates. Implementation/executed qualification is DEL-02–08, not a remaining design choice. |
 
@@ -770,8 +770,9 @@ with the Ocean palette, in light and dark.
 - Supersedes the color part of REV-12 (warm off-white backgrounds, warm gray rail, dark
   primary actions) and the light palette REV-20 retains as default. Layout, the
   76-pixel rail, Geist type, components, copy, behavior and the REV-20/REV-24 light
-  default with a persisted dark choice are unchanged. The REV-23 Keycloak theme uses
-  the same palette.
+  default with a persisted dark choice are unchanged. The REV-23 Keycloak login theme
+  used the same palette; REV-73 later drops that theme in favor of Authelia's stock
+  portal plus a Keep logo.
 - Assistant-selected details: every color is defined once per theme as a semantic
   role; Ocean blue marks primary actions, the active rail item and selection; status
   and severity keep their red, orange, amber and green meanings; text, placeholders
@@ -1661,8 +1662,9 @@ over a visible-names-only rename.
 - **Internal identifiers (user decision, 2026-11-10).** The Python namespace is `keep`
   (distributions `keep-contracts`, `keep-domain`, `keep-api` and so on); environment
   variables are `KEEP_*`; gateway headers are `X-Keep-*`; Kafka topics are
-  `keep.<environment>.alerts.*`; the Keycloak realm, web client and login theme are
-  `keep`, `keep-web` and `keep`; Elasticsearch, Redis, cache, image and template names
+  `keep.<environment>.alerts.*`; the OIDC web client is `keep-web` (the Keycloak realm
+  and login theme named here, `keep`, are retired by the REV-73 move to Authelia, which
+  has no realm or login theme); Elasticsearch, Redis, cache, image and template names
   use `keep-`; Grafana contact points are named `Keep - <operator>`; browser storage
   keys use `keep`. This supersedes the repository-layout rule that renaming a
   repository leaves these names unchanged.
@@ -1943,3 +1945,63 @@ specific tenant.
 
 APIs, authorization, audit and operators are unchanged; no migration. Original issue
 IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-73 — Replace Keycloak with Authelia for air-gapped operability (2026-11-14)
+
+User decision: replace the Keycloak product with **Authelia**, a lightweight
+single-binary OIDC provider, for the isolated/air-gapped Keep deployment. OIDC/SSO
+stays the protocol; only the identity product changes. The driver is air-gap
+operability: a single Go binary plus one YAML file and injected secrets stands up in
+an isolated environment without a JVM, realm import, login-theme build or admin
+console. This supersedes the Keycloak selection in
+[A2](#a-identity-tenant-administration-and-permissions),
+[REV-11](#implementation-clarifications--2026-09-23),
+[REV-23](#approved-login-design--2026-09-27) and the Keycloak theme reused by
+[REV-25](#preset-alert-return-navigation--2026-09-27)/REV-42, and annotates
+decisions 25 and 29 of the [decision history](design-decisions-2026-09-22.md). It
+closes, in favor of Authelia, the previously-open "identity supply entirely behind
+the IdP" question noted in [REV-34](#rev-34--user-deferred-workers-and-synchronous-provisioning-2026-09-30)
+and [REV-35](#rev-35--directory-worker-nice-to-have-2026-09-30): the directory, not
+the IdP, stays authoritative for users and nested groups.
+
+User-selected and assistant-selected details, recorded in
+[identity configuration](../specs/spec-identity-configuration.md):
+
+- **Directory authority unchanged.** LDAP/AD stays authoritative for users and
+  nested/transitive groups and is read by Keep's own directory reader (`ldap.py`).
+  Authelia only **authenticates** users against LDAP (read-only bind) and issues OIDC
+  tokens; it supplies no groups or roles in tokens. Keep tenant/permission data stays
+  in PostgreSQL.
+- **Immutable-ID linchpin retained.** Authelia must emit the raw immutable LDAP
+  attribute (for example `entryUUID`/`objectGUID`) verbatim as a protected custom
+  claim in a dedicated directory-identity scope, so the backend binds the OIDC subject
+  to the directory object. The immutable-ID plus nested/transitive-membership
+  requirement on the IdP/directory is unchanged and remains the hard requirement.
+- **Back-channel logout dropped.** OIDC back-channel (and front-channel) logout is no
+  longer a hard requirement: local logout, Keep's idle/absolute session TTLs and
+  PostgreSQL session revocation suffice for a single isolated app. RP-initiated
+  `end_session` logout (which Authelia supports) is retained. The `/auth/backchannel-logout`
+  route and its signed-token validation are removed.
+- **`acr` optional, `amr=pwd` retained.** Authelia's `acr` differs from Keycloak's
+  `acr=1`, so the backend no longer requires a specific `acr` value; the `amr=pwd`
+  password-evidence requirement is retained.
+- **Brute-force/lockout** is now provided by Authelia's regulation/ban rather than
+  Keycloak brute-force protection.
+- **Login appearance.** The branded Keycloak login theme is dropped in favor of
+  Authelia's stock portal plus a Keep logo.
+- **Local development** runs a small OpenLDAP + Authelia (replacing the section 14
+  local-Keycloak native-user exception), so development exercises the same production
+  `ldap.py` directory path. The dev-only Keycloak Admin-REST directory reader has been
+  removed from the code.
+
+The identity-related specifications ([identity configuration](../specs/spec-identity-configuration.md),
+[tenants and access](../specs/spec-tenant-access.md),
+[worker scope](../specs/spec-worker-scope.md),
+[system completion](../specs/spec-system-completion.md) 25,
+[alerts management overview](../specs/spec-alerts-management-system.md),
+[repository layout](../specs/spec-repository-layout.md) and the
+[architecture flow](../architecture/README.md)) replace their Keycloak product
+references with Authelia; the OIDC protocol, LDAP directory authority, immutable
+binding, sessions, grants and audit contracts are otherwise unchanged. Keycloak
+references retained in superseded decision entries above are historical. Original
+issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.

@@ -121,16 +121,16 @@ the earlier requirement to qualify five-minute LDAP membership/disablement
 propagation through automatic Keep polling. That propagation target is deferred
 with the worker; the current release does not claim it.
 
-**Assistant-selected boundary:** preserve Keycloak OIDC login, immutable identity
+**Assistant-selected boundary:** preserve Authelia OIDC login, immutable identity
 bindings, Keep-owned grants and the accepted PostgreSQL identity checkpoint.
 Existing eligible linked users use the last trusted checkpoint without an age
-cutoff. Current Keep grant edits, known revocations, signed provider logout and
+cutoff. Current Keep grant edits, known revocations, RP-initiated provider logout and
 session expiry still apply. Do not treat token group claims as Keep permissions
 or quietly introduce another background poller or login-time identity replacement.
 
 Explicit, complete trusted publication remains available for initial bootstrap,
 manual refresh, unknown-user/team admission and restore validation. Company LDAP
-remains authoritative; the local Keycloak development exception remains separate.
+remains authoritative; the local OpenLDAP and Authelia development stack remains separate.
 Without the required published evidence, new users/team grants remain unavailable
 with the existing dependency failure. Initial bootstrap and restore-integrity gates
 are not bypassed. Unknown identities requested by the API await explicit publication;
@@ -140,8 +140,9 @@ Local Start publishes once before starting API/UI. Local administrators use
 `scripts/local-identity.ps1 -Action Refresh` after identity changes; this action
 publishes once and does not start a worker. The company CLI permits `directory
 --once` with qualified bindings for the same operational purpose, but rejects
-continuous directory startup. Moving identity supply entirely behind Keycloak
-requires a separate integration decision; this deferral does not implement it.
+continuous directory startup. Moving identity supply entirely behind the identity
+provider would require a separate integration decision; REV-73 keeps the LDAP
+directory authoritative (read by `ldap.py`) and does not do this.
 
 ## 5. Nice-to-have components
 

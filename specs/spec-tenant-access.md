@@ -27,7 +27,7 @@ without a local administrator, and its Permissions page then requires adding one
 
 Creation accepts a name and 0–100 initial user/team grants. An empty list creates the tenant without a local administrator; a non-empty list must include at least one eligible local administrator after expansion. Any supported tenant role may appear among those grants. Resolve directory evidence before the commit; a user need not have signed into Keep previously to receive a grant.
 
-Commit the tenant, name claim, initial grants, revision, audit and command receipt in one PostgreSQL transaction. A failure creates none of them. Return 201 only after commit. Creation does not provision a Keycloak realm, operator, Grafana resource, default preset or dashboard. Operators retain their separately selected setup flow. Initialize the tenant revision to 1; the server determines the specific-tenant kind and identity.
+Commit the tenant, name claim, initial grants, revision, audit and command receipt in one PostgreSQL transaction. A failure creates none of them. Return 201 only after commit. Creation does not provision an OIDC client, operator, Grafana resource, default preset or dashboard. Operators retain their separately selected setup flow. Initialize the tenant revision to 1; the server determines the specific-tenant kind and identity.
 
 An unknown principal or incomplete new team expansion cannot satisfy the administrator requirement. Use explicitly published trusted directory evidence; if unavailable within the existing request deadline, return 503 with a retry indication and leave creation uncommitted. An administrator must explicitly publish the required verification; no background directory job continues in this scope. Existing complete evidence remains usable under the selected outage policy; do not add a freshness cutoff.
 
@@ -69,7 +69,7 @@ A verified re-enable of the same immutable individual may restore its still-curr
 
 Global has a fixed access policy: every eligible authenticated company user has edit, and the designated LDAP team supplies administration. Expose no editable local grant list for Global, including redundant view/edit grants. The universal baseline cannot be removed through tenant permission commands. This completes the previously selected prohibition on local Global admin grants.
 
-The designated global-super-admin group remains controlled deployment configuration, never a tenant permission field. Its bootstrap, replacement and empty/deleted-group recovery follow identity supplement 12. Neither tenant admin nor Keycloak console administrator status independently grants Keep global privilege.
+The designated global-super-admin group remains controlled deployment configuration, never a tenant permission field. Its bootstrap, replacement and empty/deleted-group recovery follow identity supplement 12. Neither tenant admin nor identity-provider administrator status independently grants Keep global privilege.
 
 ## 8. Permission matrix
 

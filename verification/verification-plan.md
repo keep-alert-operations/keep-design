@@ -329,16 +329,17 @@ The implementation must demonstrate: manual creation without alerts; explicit im
 
 ## Identity
 
-**Current scope (REV-35, REV-34):** LDAP-change propagation timing (item 2) and assignee cleanup (item 4) are future qualification; verify explicit publication instead; see [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Other items remain required.
+**Current scope (REV-35, REV-34):** LDAP-change propagation timing (item 3) and assignee cleanup (item 5) are future qualification; verify explicit publication instead; see [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Other items remain required.
 
-1. First and returning login with username/password only (including users with previously enrolled OTP), incorrect-password rejection, no application OTP enrollment/challenge, SSO return, idle expiry, 24-hour expiry, foreground dashboards and multiple-tab refresh races. Verify separate Keycloak console MFA/recovery.
+1. **Directory-identity claim (linchpin, REV-73) — verify first, before broader identity sign-off.** Prove Authelia emits the raw immutable LDAP attribute (for example `entryUUID`/`objectGUID`) verbatim in the dedicated directory-identity scope's custom claim: a user authenticated through Authelia against LDAP carries the exact directory bytes in the token; the backend binds `(issuer, sub)` to that immutable directory object; a user-editable attribute cannot manufacture the claim; a deleted-and-recreated account yields a different immutable ID and inherits no grants; and a conflicting mapping blocks admission with an operational error rather than merging by email or username. Run this against the local OpenLDAP + Authelia development stack, which exercises the same production `ldap.py` directory path.
+2. First and returning login with username/password only (including users with previously enrolled OTP), incorrect-password rejection, no application OTP enrollment/challenge, `amr=pwd` present while `acr` is treated as optional, SSO return, idle expiry, 24-hour expiry, foreground dashboards and multiple-tab refresh races. Verify that Authelia's own privileged configuration access (MFA) and recovery are separate from Keep admission.
    Expired, consumed and missing callback transactions offer browser retry without
    exchanging the rejected code or creating a session; JSON clients still receive
    401. Explicit retry must create a new transaction and permit valid sign-in.
-2. Direct/nested grant additions/removals, cycles, alternative paths, account disablement and super-admin loss, measured from the LDAP change through an already-open API/SSE session.
-3. Partial/paged LDAP failures, identity-provider failure, independently healthy LDAP/Keycloak paths, unknown-user login and verified recovery without empty-cache authorization changes.
-4. Last-admin protection and concurrent grant edits, external admin vacancy, assignee cleanup and inaccessible-tenant discovery checks.
-5. Local/provider logout, signed backchannel validation, delayed callbacks, known revocation during an outage, pod restart and stale database restore.
+3. Direct/nested grant additions/removals, cycles, alternative paths, account disablement and super-admin loss, measured from the LDAP change through an already-open API/SSE session. Groups and roles come from `ldap.py`, never from provider token claims.
+4. Partial/paged LDAP failures, identity-provider (Authelia) failure, independently healthy LDAP-reader and Authelia paths, unknown-user login and verified recovery without empty-cache authorization changes. Because Authelia authenticates against LDAP, a full LDAP outage also blocks fresh Authelia sign-in while linked principals keep valid local sessions.
+5. Last-admin protection and concurrent grant edits, external admin vacancy, assignee cleanup and inaccessible-tenant discovery checks.
+6. Local logout with PostgreSQL session revocation and RP-initiated (`end_session`) provider logout; verify that dropping back-channel logout (REV-73) still ends access through local logout, the idle/absolute session TTLs and PG revocation; known revocation during an outage, pod restart and stale database restore.
 
 ## Correlation
 
@@ -467,8 +468,9 @@ Production capacity, multi-node failover/rebalance, clock-discontinuity and roll
   uses the extended operator-only timeout and never advertises background progress.
 - Qualify actual backend/provisioning DB roles, proxy deadlines, shutdown/disconnect,
   fleet-wide gateway proof, production concurrency/capacity and migration rollback
-  independently of synthetic local tests. Identity/Keycloak replacement needs a
-  separate accepted design plus nested-group/freshness/outage qualification.
+  independently of synthetic local tests. The REV-73 Authelia replacement is the
+  accepted identity design; it still needs nested-group/freshness/outage
+  qualification and verification of the immutable-ID claim against the new provider.
 
 ## REV-36 Product API live publishing
 

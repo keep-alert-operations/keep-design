@@ -24,9 +24,9 @@ flowchart LR
     API --> REDIS[Redis hints]
     REDIS --> API
     API -->|SSE + PG reconciliation| UI
-    LDAP[Company LDAP] --> KC[Team-owned Keycloak]
-    KC --> API
-    LDAP -->|explicit trusted directory publication| PG
+    LDAP[Company LDAP] -->|read-only auth bind| KC[Team-owned Authelia OIDC]
+    KC -->|OIDC tokens + immutable-ID claim| API
+    LDAP -->|explicit trusted directory publication read by ldap.py| PG
     MIG[keep-migrations] -->|explicit ordered migration job| PG
 ```
 

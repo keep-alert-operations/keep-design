@@ -100,7 +100,7 @@ Details: [System completion 21–25](../specs/spec-system-completion.md#21-appli
 22. **OpenShift runtime:** separate workload roles, migration job, least-privilege containers, capability-specific readiness, bounded pools and safe draining/fenced retries.
 23. **Capacity profile:** versioned measured combined budgets with an application safety margin and explicit enforcement; missing/unqualified limits gate affected capabilities instead of pretending capacity is known. *Superseded for correlation and maintenance by REV-39: they have no gate, and an unset limit is unlimited.*
 24. **Service handoff:** required version/endpoint/capability/allocation/ownership/recovery manifest; actual facts come from the service owners and incompatible capabilities gate release.
-25. **Keycloak operations:** the user's team owns controlled realm/client changes, individually accountable administrators, MFA, staged upgrade tests and recovery validation without changing other teams' infrastructure policies.
+25. **Identity-provider operations:** the user's team owns controlled client/configuration changes, individually accountable administrators, MFA, staged upgrade tests and recovery validation without changing other teams' infrastructure policies. *Superseded in product by REV-73: the identity provider is Authelia (a single-binary OIDC provider configured by YAML), not Keycloak; realm/admin-console concepts no longer apply. See the [identity configuration spec](../specs/spec-identity-configuration.md) and [REV-73](design-register.md#rev-73--replace-keycloak-with-authelia-for-air-gapped-operability-2026-11-14).*
 
 ## Verification, delivery and support — 5 decisions
 
@@ -109,7 +109,7 @@ Details: [System completion 26–30](../specs/spec-system-completion.md#26-ci-an
 26. **CI/release artifacts:** domain/migration/contract/integration/browser/security gates, actual CEL/ES differential tests, immutable images, schema/profile manifests and compatibility records.
 27. **Acceptance:** cross-subject race/outage/restore/security cases and the existing sustained/recovery/visibility workloads; correctness requires zero isolation, replay or revoked-credential violations.
 28. **Delivery/rollout:** six dependency-ordered milestones, environment separation, simultaneous native v1/v2, expand/migrate/contract, compatible canaries and rollback without database rewind.
-29. **Support:** application/Keycloak accountability, service-owner escalation, defined containment/exit checks and audited, preconditioned repair tools rather than arbitrary product SQL access.
+29. **Support:** application/identity-provider accountability (the identity provider is Authelia since REV-73), service-owner escalation, defined containment/exit checks and audited, preconditioned repair tools rather than arbitrary product SQL access.
 30. **Closure:** preserve all 55 original IDs as design-closed; separately require eight delivery evidence records for actual bindings, code, measured budgets, acceptance, recovery, identity/integrations, release/support and operational observation.
 
 ## Later user direction — 2026-09-24

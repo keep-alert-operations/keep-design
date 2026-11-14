@@ -8,7 +8,7 @@ behavior, database transaction boundaries and current worker scope are unchanged
 
 | Repository | Authoritative contents |
 |---|---|
-| keep-frontend | Next.js application, UI tests, generated HTTP types, Keycloak theme, frontend image |
+| keep-frontend | Next.js application, UI tests, generated HTTP types, frontend image |
 | keep-api | Product routes, human sessions, management commands, synchronous operator provisioning, live publishing and SSE |
 | keep-ingestion | Public v1 and private v2/Grafana Kafka admission, gateway proof, Kong policy, ingestion image |
 | keep-processor | Kafka source consumer, alert source processing and source transaction entrypoint |

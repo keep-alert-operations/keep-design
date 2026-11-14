@@ -15,7 +15,7 @@ Sign-in and sessions, tenants and roles, grants, directory publication, tenant v
 ## Ask like
 
 - Who can see alerts from another tenant?
-- How does sign-in work with Keycloak?
+- How does sign-in work with Authelia?
 - Who is eligible to be assigned?
 
 ## Read first
@@ -27,17 +27,17 @@ None listed.
 Include each source's preamble and scope corrections, plus the selected sections and their subsections.
 
 - [identity-session](../../specs/spec-identity-configuration.md) — normative; preamble required.
-  - [1. Ownership and realm boundary](../../specs/spec-identity-configuration.md#1-ownership-and-realm-boundary)
+  - [1. Ownership and client boundary](../../specs/spec-identity-configuration.md#1-ownership-and-client-boundary)
   - [2. Login flow and browser boundary](../../specs/spec-identity-configuration.md#2-login-flow-and-browser-boundary)
   - [4. Session and token settings](../../specs/spec-identity-configuration.md#4-session-and-token-settings)
   - [5. Session persistence and CSRF](../../specs/spec-identity-configuration.md#5-session-persistence-and-csrf)
-  - [6. LDAP federation and stable identity](../../specs/spec-identity-configuration.md#6-ldap-federation-and-stable-identity)
+  - [6. LDAP authentication, directory read and stable identity](../../specs/spec-identity-configuration.md#6-ldap-authentication-directory-read-and-stable-identity)
   - [7. Membership supply and the five-minute target](../../specs/spec-identity-configuration.md#7-membership-supply-and-the-five-minute-target)
   - [8. Applying access changes](../../specs/spec-identity-configuration.md#8-applying-access-changes)
   - [9. Outage behavior](../../specs/spec-identity-configuration.md#9-outage-behavior)
   - [10. Logout and revocation](../../specs/spec-identity-configuration.md#10-logout-and-revocation)
   - [11. Cache lifetime, restart and recovery](../../specs/spec-identity-configuration.md#11-cache-lifetime-restart-and-recovery)
-  - [14. Local Keycloak development exception](../../specs/spec-identity-configuration.md#14-local-keycloak-development-exception)
+  - [14. Local OpenLDAP and Authelia development stack](../../specs/spec-identity-configuration.md#14-local-openldap-and-authelia-development-stack)
 - [tenant-access](../../specs/spec-tenant-access.md) — normative; preamble required.
   - [3. Grant model and changes](../../specs/spec-tenant-access.md#3-grant-model-and-changes)
   - [4. Administrator continuity](../../specs/spec-tenant-access.md#4-administrator-continuity)

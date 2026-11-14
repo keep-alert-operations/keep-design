@@ -582,17 +582,17 @@
       "path": "keep-design/specs/spec-identity-configuration.md",
       "authority": "normative",
       "sections": [
-        "1. Ownership and realm boundary",
+        "1. Ownership and client boundary",
         "2. Login flow and browser boundary",
         "4. Session and token settings",
         "5. Session persistence and CSRF",
-        "6. LDAP federation and stable identity",
+        "6. LDAP authentication, directory read and stable identity",
         "7. Membership supply and the five-minute target",
         "8. Applying access changes",
         "9. Outage behavior",
         "10. Logout and revocation",
         "11. Cache lifetime, restart and recovery",
-        "14. Local Keycloak development exception"
+        "14. Local OpenLDAP and Authelia development stack"
       ],
       "include_preamble": true
     },
@@ -2161,7 +2161,7 @@
       "covers": "Sign-in and sessions, tenants and roles, grants, directory publication, tenant visibility and assignee eligibility.",
       "ask_like": [
         "Who can see alerts from another tenant?",
-        "How does sign-in work with Keycloak?",
+        "How does sign-in work with Authelia?",
         "Who is eligible to be assigned?"
       ],
       "aliases": [
@@ -2169,7 +2169,7 @@
         "authorization",
         "tenant access",
         "oidc",
-        "keycloak",
+        "authelia",
         "directory publication",
         "tenant",
         "role",

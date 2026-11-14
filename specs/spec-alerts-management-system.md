@@ -20,7 +20,7 @@ Each contract has one authoritative home. Read the relevant domain document toge
 | [Kafka-first alert pipeline](spec-kafka-alert-pipeline.md) | Admission, transactional Kafka source processing, gateway policy, temporal boundaries, correlation triggers, search reconciliation and cutover. |
 | [Alerts and history technical design](spec-alert-history-technical.md) | CEL semantics/execution, alert storage, ordered pipeline, projection, feed/history cursors, live updates, purge and rebuild. |
 | [Tenants and access](spec-tenant-access.md) | Tenant lifecycle, role matrix, grants, directory selection, access audit and API contracts. |
-| [Identity configuration](spec-identity-configuration.md) | Team-owned Keycloak, LDAP membership, username/password sign-in, sessions, five-minute access enforcement and outage behavior. |
+| [Identity configuration](spec-identity-configuration.md) | Team-owned Authelia OIDC, LDAP membership, username/password sign-in, sessions, five-minute access enforcement and outage behavior. |
 | [Operators, API keys and Grafana](spec-operator-operations.md) | Operator lifecycle, credentials, ingress authentication and remote provisioning. |
 | [Incidents](spec-incident-operations.md) | Manual/automatic incident behavior, ownership, activity, notes, inactivity, retention and period reports (REV-53). |
 | [Correlation rules](spec-correlation-rules.md) | Conditions, grouping, transition evidence, reset boundaries, arbitration and coordination. |
@@ -82,7 +82,7 @@ flowchart LR
   API --> Redis[(Redis hints)]
   Redis --> API
   API -->|SSE and reconciliation| UI
-  LDAP[Company LDAP] --> KC[Team-owned Keycloak]
+  LDAP[Company LDAP] --> KC[Team-owned Authelia OIDC]
   KC --> API
   LDAP --> Directory[Explicit trusted directory publication]
   Directory --> PG
@@ -94,7 +94,7 @@ flowchart LR
 | Elasticsearch | Rebuildable current-alert/current-note search projection | May lag; a searchable watermark proves visibility. Never authorizes access or supplies authoritative history. |
 | Kafka | Self-contained received alerts and transactional changed transport | Broker acknowledgement precedes 202. Delivery UUID/proof prevents duplicate application; per-key source order and per-tenant changed order govern their respective consumers. Retention can lose unprocessed accepted records. |
 | Redis | Low-latency invalidation hints | Loss is repaired by PostgreSQL generation reconciliation and polling. |
-| Keycloak / LDAP | Human authentication / company identity and nested membership | Keep combines a valid session, accepted directory evidence and current product grants on every authorization decision. |
+| Authelia / LDAP | Human authentication (Authelia binds LDAP read-only) / company identity and nested membership read by Keep's `ldap.py` | Keep combines a valid session, accepted directory evidence and current product grants on every authorization decision. The IdP supplies no group/role claims. |
 | Kong / Grafana | Operator authentication / shared remote alert delivery configuration | Kong Key Auth plus Keep policy verifies credential/tenant/generation; all-node proof gates the remote saga. Ingress verifies private mTLS context. |
 | Protected recovery evidence | Minimal retirement, revocation and replay fences surviving database rollback | Restore and physical cleanup are gated by the independently supplied durability contract. |
 
@@ -140,7 +140,7 @@ The sustained ingestion requirement is 250 deliveries/second company-wide, inclu
 
 These targets do not establish measured capacity. Before enabling affected capabilities, qualify combined workloads and record numeric application budgets, connection/resource allocations and service capability evidence.
 
-The user's team owns Keep and Keycloak configuration/operation. Dedicated teams own LDAP, PostgreSQL, Elasticsearch, Kafka, Redis, OpenShift, Kong, Grafana and their infrastructure policy, HA, backups, retention, allocation and service recovery. Keep defines its schemas, client behavior and product data lifetimes, then validates the supplied service contracts. Installed versions, endpoints, credentials, named contacts and actual recovery guarantees belong in the environment manifest.
+The user's team owns Keep and Authelia configuration/operation (REV-73 replaced Keycloak with the single-binary Authelia OIDC provider for air-gapped operability). Dedicated teams own LDAP, PostgreSQL, Elasticsearch, Kafka, Redis, OpenShift, Kong, Grafana and their infrastructure policy, HA, backups, retention, allocation and service recovery. Keep defines its schemas, client behavior and product data lifetimes, then validates the supplied service contracts. Installed versions, endpoints, credentials, named contacts and actual recovery guarantees belong in the environment manifest.
 
 ## Initial-release exclusions
 
