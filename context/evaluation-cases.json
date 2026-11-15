@@ -1058,6 +1058,19 @@
       ]
     },
     {
+      "id": "password-sign-in-disabled-account",
+      "task": "A disabled AD account can still sign in with its password.",
+      "paths": [],
+      "topics": [],
+      "must_include_topics": [
+        "identity-access"
+      ],
+      "must_exclude_topics": [],
+      "must_include_sources": [
+        "identity-session"
+      ]
+    },
+    {
       "id": "ldap-group-not-correlation",
       "task": "LDAP group removals take far longer than five minutes to reach Keep.",
       "paths": [],

@@ -20,7 +20,7 @@ Each contract has one authoritative home. Read the relevant domain document toge
 | [Kafka-first alert pipeline](spec-kafka-alert-pipeline.md) | Admission, transactional Kafka source processing, gateway policy, temporal boundaries, correlation triggers, search reconciliation and cutover. |
 | [Alerts and history technical design](spec-alert-history-technical.md) | CEL semantics/execution, alert storage, ordered pipeline, projection, feed/history cursors, live updates, purge and rebuild. |
 | [Tenants and access](spec-tenant-access.md) | Tenant lifecycle, role matrix, grants, directory selection, access audit and API contracts. |
-| [Identity configuration](spec-identity-configuration.md) | Team-owned Keycloak, LDAP membership, username/password sign-in, sessions, five-minute access enforcement and outage behavior. |
+| [Identity configuration](spec-identity-configuration.md) | Password sign-in through one LDAP bind, the ADAPI directory, samAccountName identity, sessions, access enforcement and outage behavior. |
 | [Operators, API keys and Grafana](spec-operator-operations.md) | Operator lifecycle, credentials, ingress authentication and remote provisioning. |
 | [Incidents](spec-incident-operations.md) | Manual/automatic incident behavior, ownership, activity, notes, inactivity, retention and period reports (REV-53). |
 | [Correlation rules](spec-correlation-rules.md) | Conditions, grouping, transition evidence, reset boundaries, arbitration and coordination. |
@@ -79,12 +79,12 @@ flowchart LR
   UI[Next.js browser] --> API[Product API + live updates]
   API --> PG
   API --> ES
-  API --> Redis[(Redis hints)]
+  API --> Redis[(Redis hints and search cache)]
   Redis --> API
   API -->|SSE and reconciliation| UI
-  LDAP[Company LDAP] --> KC[Team-owned Keycloak]
-  KC --> API
-  LDAP --> Directory[Explicit trusted directory publication]
+  AD[Active Directory LDAP bind] -->|password check| API
+  ADAPI[ADAPI directory] -->|sign-in lookup, search, save on pick| API
+  ADAPI --> Directory[Explicit trusted directory refresh]
   Directory --> PG
 ```
 
@@ -93,8 +93,8 @@ flowchart LR
 | PostgreSQL | Current domain state/history, authorization, immutable source replay proof, command results and non-alert jobs | Source application and product commands commit here; ingress has no database dependency. |
 | Elasticsearch | Rebuildable current-alert/current-note search projection | May lag; a searchable watermark proves visibility. Never authorizes access or supplies authoritative history. |
 | Kafka | Self-contained received alerts and transactional changed transport | Broker acknowledgement precedes 202. Delivery UUID/proof prevents duplicate application; per-key source order and per-tenant changed order govern their respective consumers. Retention can lose unprocessed accepted records. |
-| Redis | Low-latency invalidation hints | Loss is repaired by PostgreSQL generation reconciliation and polling. |
-| Keycloak / LDAP | Human authentication / company identity and nested membership | Keep combines a valid session, accepted directory evidence and current product grants on every authorization decision. |
+| Redis | Low-latency invalidation hints and a two-hour picker search cache | Hint loss is repaired by PostgreSQL generation reconciliation and polling. The search cache is non-authoritative and is bypassed when Redis fails. |
+| Active Directory / ADAPI | Password check by LDAP bind / company identity and recursive membership | Keep combines a valid session, accepted directory evidence and current product grants on every authorization decision. |
 | Kong / Grafana | Operator authentication / shared remote alert delivery configuration | Kong Key Auth plus Keep policy verifies credential/tenant/generation; all-node proof gates the remote saga. Ingress verifies private mTLS context. |
 | Protected recovery evidence | Minimal retirement, revocation and replay fences surviving database rollback | Restore and physical cleanup are gated by the independently supplied durability contract. |
 
@@ -111,7 +111,7 @@ Terminal post-202 business conflicts are recorded internally and advance the par
 
 ### Human reads and writes
 
-Sign-in uses username and password through backend OIDC authorization code flow with PKCE. Browser requests use an opaque protected session cookie; tokens remain server-side. Product APIs reauthorize tenant scope and nested references. Automatic directory refresh and its five-minute LDAP-change propagation target are nice-to-have under REV-35. Explicit trusted publication supplies identity updates; last-known trusted identity data, known revocations, current grants and session expiry still apply.
+Sign-in uses username and password on Keep's own page; the backend checks the password with one LDAP bind and looks the person up in ADAPI (REV-73). Browser requests use an opaque protected session cookie that lasts at most 24 hours. Product APIs reauthorize tenant scope and nested references. Automatic directory refresh and its five-minute LDAP-change propagation target are nice-to-have under REV-35. Explicit trusted publication supplies identity updates; last-known trusted identity data, known revocations, current grants and session expiry still apply.
 
 Alert feeds/counts query Elasticsearch under tenant scope, CEL, transient text filtering and suppression policy. Alert detail/history and incident/configuration reads use PostgreSQL. Feed pagination uses a five-minute search snapshot; other collection and history cursor semantics are specified per resource.
 
@@ -140,7 +140,7 @@ The sustained ingestion requirement is 250 deliveries/second company-wide, inclu
 
 These targets do not establish measured capacity. Before enabling affected capabilities, qualify combined workloads and record numeric application budgets, connection/resource allocations and service capability evidence.
 
-The user's team owns Keep and Keycloak configuration/operation. Dedicated teams own LDAP, PostgreSQL, Elasticsearch, Kafka, Redis, OpenShift, Kong, Grafana and their infrastructure policy, HA, backups, retention, allocation and service recovery. Keep defines its schemas, client behavior and product data lifetimes, then validates the supplied service contracts. Installed versions, endpoints, credentials, named contacts and actual recovery guarantees belong in the environment manifest.
+The user's team owns Keep and its sign-in configuration/operation. Dedicated teams own Active Directory, ADAPI, PostgreSQL, Elasticsearch, Kafka, Redis, OpenShift, Kong, Grafana and their infrastructure policy, HA, backups, retention, allocation and service recovery. Keep defines its schemas, client behavior and product data lifetimes, then validates the supplied service contracts. Installed versions, endpoints, credentials, named contacts and actual recovery guarantees belong in the environment manifest.
 
 ## Initial-release exclusions
 

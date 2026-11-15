@@ -16,7 +16,7 @@ Cross-resource UI, HTTP, persistence, transactions, security and application dep
 
 Select FastAPI with Uvicorn for Python HTTP APIs, Pydantic strict request/response models, Psycopg 3 pools and explicit parameterized SQL for transactional repositories. Use one Uvicorn process per API container; scale application containers through the platform's supported deployment model and qualified allocation. CPU-intensive CEL compilation/evaluation uses bounded isolated workers, not the event loop. Native input parsing preserves duplicate-key detection and exact object bytes before model validation; framework coercion must not weaken the strict v1/v2 contract. [FastAPI container guidance](https://fastapi.tiangolo.com/deployment/server-workers/) and [Psycopg concurrency](https://www.psycopg.org/psycopg3/docs/advanced/async.html) support these runtime choices.
 
-Use Next.js App Router with TypeScript for the frontend, a server-rendered non-sensitive shell and client-managed operational views. Python remains the sole business-command/authentication authority; no duplicate Next.js mutation backend or direct browser database/service access. Use the official Elasticsearch and Redis clients and `confluent-kafka` for Kafka. Select Authlib for OIDC protocol handling, `ldap3` for the read-only directory adapter, and the already selected `cel-expr-python` runtime. Pin tested package/runtime versions and native builds in lockfiles after capability qualification; floating latest tags are prohibited. These library selections do not assert compatibility with unprovided company versions. [Authlib](https://authlib.org/projects/authlib/), [Kafka Python client](https://docs.confluent.io/kafka-clients/python/current/overview.html), [ldap3](https://ldap3.readthedocs.io/en/latest/index.html).
+Use Next.js App Router with TypeScript for the frontend, a server-rendered non-sensitive shell and client-managed operational views. Python remains the sole business-command/authentication authority; no duplicate Next.js mutation backend or direct browser database/service access. Use the official Elasticsearch and Redis clients and `confluent-kafka` for Kafka. Select `ldap3` for the sign-in bind, `httpx` for the ADAPI directory client, and the already selected `cel-expr-python` runtime. Pin tested package/runtime versions and native builds in lockfiles after capability qualification; floating latest tags are prohibited. These library selections do not assert compatibility with unprovided company versions. [Kafka Python client](https://docs.confluent.io/kafka-clients/python/current/overview.html), [ldap3](https://ldap3.readthedocs.io/en/latest/index.html).
 
 Organize backend modules by identity/access, ingestion, alerts, incidents, correlation, maintenance, presets/dashboards, operators, search/live and shared persistence/protocols. A module exposes command/query services and repositories; it does not bypass another module's invariants by editing its tables from ad hoc routes. Cross-resource operations use the explicitly selected shared transaction/lock service, not distributed HTTP calls between domain services. Use Kafka for the alert path and the existing PostgreSQL jobs/outboxes only for unrelated configuration/operator/retention work; no Celery/RabbitMQ or CDC.
 
@@ -58,7 +58,7 @@ change alone does not return users to the initial session-check screen. Continue
 normal session revalidation, clear protected content on access loss or expiry,
 and reset tenant-scoped content and subscriptions when switching tenants.
 
-The later user-approved sign-in design uses the Keep Keycloak theme described in [identity section 1](spec-identity-configuration.md#1-ownership-and-realm-boundary). Its light/dark selection is stored on the identity origin, independently of the application origin, with light as the initial default. Only the appearance string is persisted; credentials remain in the normal Keycloak form submission.
+The user-approved sign-in design is Keep's own `/sign-in` page described in [identity section 1](spec-identity-configuration.md#1-ownership-and-sign-in-page). Its light/dark selection is stored on the application origin, with light as the initial default. Only the appearance string is persisted; credentials go only to `POST /auth/login` and are never stored in the browser.
 
 ## 4. Common interaction and information boundaries
 
@@ -93,9 +93,9 @@ Responses contain `data` and `meta` (request ID, current revision/ETag, relevant
 
 Use `{error: {code, message, request_id, fields, conflicts, retry_after_seconds}}`, omitting inapplicable fields. `fields` contains stable JSON paths and CEL source spans; `conflicts` contains only currently accessible IDs/revisions and repair instructions. Never echo secret/body values, SQL, stack traces, directory rosters or inaccessible resource names. Translate database unique/check conflicts into the resource's stable errors.
 
-Browser navigation recovery for an expired/consumed/missing sign-in callback follows
-[identity section 2](spec-identity-configuration.md#2-login-flow-and-browser-boundary):
-a no-store redirect to the public retry page. JSON clients retain the error envelope.
+Sign-in has no callback; a 401 in the workspace opens `/sign-in` with the current
+path as `return_to`, as [identity section 2](spec-identity-configuration.md#2-login-flow-and-browser-boundary)
+describes. JSON clients retain the error envelope.
 
 | Status | Meaning and client behavior |
 |---|---|
@@ -156,7 +156,7 @@ Human API roles are non-owner/non-BYPASSRLS with FORCE tenant RLS and transactio
 
 ## 12. Identity, access and audit physical records
 
-Use `tenants` (UUID, kind, display name/key, revision, permission revision), a partial unique Global singleton and unique global name claims; `principals` (internal UUID, directory source/immutable object ID, kind, eligibility/tombstone), unique source/object identity; `oidc_bindings` unique issuer/subject referencing that principal; and `tenant_grants` unique tenant/principal with role, actor and revision. No tenant delete/disable column is exposed as a feature.
+Use `tenants` (UUID, kind, display name/key, revision, permission revision), a partial unique Global singleton and unique global name claims; `principals` (internal UUID, directory source/immutable object ID, kind, eligibility/tombstone), unique source/object identity, where the object ID is the lowercase samAccountName (REV-73); and `tenant_grants` unique tenant/principal with role, actor and revision. No tenant delete/disable column is exposed as a feature.
 
 Use immutable `directory_verifications` with completeness/timing/coverage and semantic revision, staged `directory_objects`/`directory_edges` then atomic accepted-generation pointers. Unchanged re-verification advances freshness, not semantic content. Key group edges by immutable IDs; keep accepted complete membership sets/closure for tracked roots with path/coverage proof, cycles deduplicated. Publish known negative eligibility immediately with its own revision; partial absence never deletes grants. Bound staging by the qualified directory allocation and abandon only unpublished incomplete generations. Current negative evidence cannot be overwritten by an older generation.
 
@@ -248,7 +248,7 @@ Rollback restore always rotates deployment epoch, invalidates restored human ses
 
 Serve a single HTTPS origin; require strict configured issuer/upstream hosts, certificate validation and managed trust bundles. Apply CSP restricted to self with per-response nonces where needed, frame-ancestors none, no object embedding, nosniff, restrictive referrer policy and HSTS through the approved gateway configuration. Load fonts/scripts/assets locally. Escape all source/user text; no HTML/Markdown evaluation. Render validated runbook URLs as links with safe new-tab relations, never server-fetch arbitrary alert URLs. No user-configured external webhook/test destination or SSRF-capable preview is added.
 
-Disable caching of protected API/session/HTML data at Next.js, browser intermediary and reverse proxy layers (`private, no-store`); hashed public static assets may be cached. Next.js data cache must not share one tenant's protected fetch across users. Keep CSRF/session/OIDC protections from the identity supplement. Limit accepted proxy identity/forwarded headers to trusted ingress; native v1 remains deliberately unauthenticated but reachable only through its intended internal route with size/capacity controls, not an invented user-auth requirement.
+Disable caching of protected API/session/HTML data at Next.js, browser intermediary and reverse proxy layers (`private, no-store`); hashed public static assets may be cached. Next.js data cache must not share one tenant's protected fetch across users. Keep CSRF/session and sign-in protections from the identity supplement. Limit accepted proxy identity/forwarded headers to trusted ingress; native v1 remains deliberately unauthenticated but reachable only through its intended internal route with size/capacity controls, not an invented user-auth requirement.
 
 Use mounted, versioned OpenShift Secrets for service credentials/wrapping keys under approved encrypted secret storage. Share the operator AES-GCM envelope mechanism for session/token secret material; use separate key purposes/associated data. Rotate wrapping keys on the existing 90-day/compromise schedule, test rewrap before retirement and preserve required supported recovery versions. Cursor/CSRF signing/encryption keys have separate purposes, key IDs and rotation overlap at least the longest valid cursor/login transaction; deployment-epoch change invalidates obsolete cursor contexts. Restrict access by workload role, never expose secrets in health/metrics/logs or client bundles. Service identity privileges are capability-scoped; no runtime database owner, platform admin or shared human credential.
 
@@ -276,11 +276,11 @@ Every profile contains workload generator seed/distribution, data sizes/history 
 
 See [delivery service bindings](https://github.com/keep-alert-operations/keep-delivery/blob/main/status/delivery-readiness.md#service-bindings).
 
-## 25. Team-owned Keycloak operations
+## 25. Team-owned sign-in operations
 
-Retain the selected existing internal Keycloak and dedicated environment realms. The Keep team owns sanitized realm/client/mapper configuration, theme/application password sign-in/console MFA/refresh policy, administrative access and upgrade/recovery verification. Require at least two individually accountable trained administrators, MFA, separate nonproduction credentials, and an audited privileged recovery procedure through the company's identity verification process. This is staffing responsibility, not invented employee assignments or a Keep-local super-admin bypass.
+The user's team owns Keep's sign-in and directory configuration: the LDAP host, port, encryption and bind-format settings, the ADAPI binding and its `ClientId` secret, and the global-super-admin group. Active Directory, its password and lockout policy, and ADAPI stay with their owning teams. Keycloak was removed by REV-73; there is no separate identity-provider console, realm or theme to operate. This is staffing responsibility, not invented employee assignments or a Keep-local super-admin bypass.
 
-Release realm/config changes through staging exports/diffs and reviewed deployment jobs, with secrets injected separately. Keep a safe configuration export with each release; it is not a backup of user/session/database state. Coordinate Keycloak's database/secret recovery with their owning services, then verify immutable LDAP bindings, application password sign-in, console MFA and revocation before login readiness. Test upgrades against the full sign-in/directory/logout matrix before production. Operational logging/retention uses the existing approved service; no new infrastructure backup schedule or HA topology is asserted. A Keycloak outage continues the already selected valid-local-session/last-known-identity behavior.
+Release sign-in and directory setting changes through reviewed deployment jobs, with secrets injected separately. Before first company use and after a directory change, verify one real sign-in (bind name format and WhoAmI answer), one real call per ADAPI route, a manual refresh and sign-out. Operational logging/retention uses the existing approved service; no new infrastructure backup schedule or HA topology is asserted. An AD or ADAPI outage continues the already selected valid-local-session/last-known-identity behavior; new sign-ins wait for both to return.
 
 ## 26. CI and release artifacts
 

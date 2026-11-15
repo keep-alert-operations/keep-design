@@ -86,7 +86,7 @@ The user's 2026-10-06 implementation check adds a combined diagnostic scenario o
 the existing 250/second sustained and 500/second recovery qualification gates.
 Record retained population, enabled features, payload size, replica/pool counts,
 test duration, routing/identity fixtures, failures and measured latency boundaries.
-A library-admission or synthetic-session workload cannot establish gateway, OIDC
+A library-admission or synthetic-session workload cannot establish gateway, sign-in
 or rendered-visibility qualification; those paths need their own real checks.
 
 ## 9. Recovery capacity and overload tests

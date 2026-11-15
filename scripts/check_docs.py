@@ -89,8 +89,8 @@ for label, path, wanted in references:
                           f'exactly once in {path} (found {found})')
 register = (ROOT / 'decisions/design-register.md').read_text(encoding='utf-8')
 ids = {int(value) for value in re.findall(r'^(?:\|\s*|##\s*)REV-(\d+)', register, re.M)}
-if ids != set(range(1, 73)):
-    errors.append('Expected REV-01 through REV-72')
+if ids != set(range(1, 74)):
+    errors.append('Expected REV-01 through REV-73')
 if errors:
     raise SystemExit('\n'.join(errors))
 print(f'Local document targets, fences, {sections} design-owned catalog sections '

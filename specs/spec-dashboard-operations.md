@@ -194,7 +194,7 @@ in either direction. Both bind into the cursor. Deleted-history discovery uses
 the newest retained definition's recording time for its updated-at sort/display,
 without inferring erased final metadata. `panel_count` is an exact decimal string.
 
-Fullscreen hides navigation and editor chrome but retains tenant, name, live/paused/degraded status, current time context and an obvious Exit control. It uses the ordinary human session and its existing idle/absolute expiry; there is no kiosk session, public sharing or tokenized read URL. Hidden-tab and reconnect behavior follows the shared live contract. No per-dashboard polling interval setting is saved.
+Fullscreen hides navigation and editor chrome but retains tenant, name, live/paused/degraded status, current time context and an obvious Exit control. It uses the ordinary human session and its 24-hour absolute expiry; there is no kiosk session, public sharing or tokenized read URL. Hidden-tab and reconnect behavior follows the shared live contract. No per-dashboard polling interval setting is saved.
 
 ## 10. Consistent count batches
 

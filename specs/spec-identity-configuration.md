@@ -1,117 +1,142 @@
 # Identity and sign-in configuration
 
+**Later user decision — 2026-11-15 (REV-73):** Keep's own password sign-in (one LDAP bind against Active Directory) and the ADAPI directory replace the earlier identity provider; Keycloak, OIDC, Keep's LDAP directory reader, the idle timeout and provider logout were removed by REV-73. This document describes the current behavior. See [REV-73](../decisions/design-register.md#rev-73--keep-password-sign-in-and-adapi-directory-replace-keycloak-2026-11-15).
+
 **Later user decision — 2026-09-30 (REV-35):** automatic directory synchronization is nice-to-have and is not deployed. Explicit trusted publication supplies identity updates; the five-minute LDAP-change propagation target is deferred. See [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have).
 
 **Later scope correction — 2026-09-30:** [Worker scope](spec-worker-scope.md) (REV-34) supersedes timer-driven maintenance release, automatic assignment cleanup, inactivity/retention worker deployment and asynchronous operator provisioning below. Earlier automation algorithms are retained as deferred design references; unaffected authorization, explicit commands, history access and recovery safeguards remain normative.
 
-OIDC sign-in, LDAP membership, sessions and access-change enforcement. [Tenants and access](spec-tenant-access.md) defines product grants and audit.
+Password sign-in, directory membership, sessions and access-change enforcement. [Tenants and access](spec-tenant-access.md) defines product grants, directory search, save on pick and audit.
 
-**User decisions:** the existing Keycloak installation belongs to the user's team, which can configure it. It runs inside company infrastructure and provides company-credential SSO. LDAP remains authoritative for users and teams. Nested membership applies to both tenant grants and the designated global-super-admin team. LDAP changes and account disablement target enforcement within five minutes under normal operation, including open sessions. During identity-refresh outages, use last-known identity data for normal authorization without an identity-data age cutoff.
+**User decisions:** Active Directory (AD) remains authoritative for users and teams. Keep checks a password with one LDAP bind and reads people and groups from ADAPI, the company AD REST API. Nested membership applies to both tenant grants and the designated global-super-admin group. During directory outages, use last-known identity data for normal authorization without an identity-data age cutoff. The five-minute enforcement target for directory changes is deferred with automatic refresh (REV-35).
 
-**Later user decision — 2026-09-23:** deploy an isolated local Keycloak with custom users and groups instead of an external LDAP dependency for local development. Section 14 defines this development exception; the preceding company-deployment contracts remain in force.
+**Later user decision — 2026-09-24:** Keep sign-in uses only username and password, with no one-time-code challenge or enrollment. This supersedes the earlier assistant-selected TOTP requirement for application users, including Keep global administrators.
 
-**Later user decision — 2026-09-24:** Keep sign-in uses only username and password, with no one-time-code challenge or enrollment. This supersedes the earlier assistant-selected TOTP requirement for application users, including Keep global administrators. Separate Keycloak console administration retains its existing MFA policy.
+**Accepted risks (user decisions, 2026-11-15, REV-73):** passwords cross the private network unencrypted while LDAP encryption is off; Keep has no lockout of its own; a disabled person keeps access until the next directory refresh or the end of their 24-hour session; a reused username inherits the old holder's access.
 
-## 1. Ownership and realm boundary
+## 1. Ownership and sign-in page
 
-The user's team owns Keycloak configuration and operation for this integration. Other underlying technologies retain the ownership described in the reliability supplement; this correction does not transfer ownership of LDAP, PostgreSQL or other shared services.
+The user's team owns Keep's sign-in configuration: the LDAP host and bind settings, the ADAPI binding and the designated global-super-admin group. Active Directory, its domain controllers and ADAPI keep their owning teams. Other underlying technologies retain the ownership described in the reliability supplement. Actual hostnames, the domain and installed versions are deployment facts to inventory, not values to invent.
 
-Use a dedicated production realm named `keep`, with separate `keep-dev` and `keep-staging` realms and credentials. Keep tenants share the production realm; creating a tenant does not create a Keycloak realm, client or role. Use the existing installation rather than introducing another identity product. Actual hostnames and the installed release are deployment facts to inventory, not values to invent.
-
-The user approved a Keep-branded username/password form on 2026-09-27. Implement it as the `keep` Keycloak login theme for the `keep-web` client, with the approved centered card, light/dark appearance, password visibility control, provider errors and directory-support help. This supersedes the earlier restriction to minimal standard-page branding. Submit credentials directly to Keycloak's generated form action and retain its authentication/session checks; do not add a Keep password API or authentication extension. Keep unrelated clients and console administration on their existing themes. Turn off self-registration, social sign-in, direct password grants, implicit flow, device/CIBA grants for this client, service-account grants and offline access. Users do not create a second Keep password.
+Keep serves its own sign-in page at `/sign-in`, a Next.js page outside `/auth` (which the Product API serves) and outside the workspace catalog route (which runs the session check). It keeps the Keep-branded design the user approved on 2026-09-27: a centered card, light/dark appearance, a password visibility control, error messages and directory-support help. Users sign in with their company username and AD password. There is no self-registration, social sign-in or separate Keep password, and Keep never changes AD passwords or profile attributes.
 
 ## 2. Login flow and browser boundary
 
-Register one confidential OIDC client, `keep-web`, per environment. The Python Product API owns the authorization-code exchange, with PKCE S256 and client-secret authentication. Next.js and the Product API are exposed under the same application origin. The browser receives an opaque Keep session cookie; OAuth access, ID and refresh tokens remain server-side.
+Next.js and the Product API are exposed under the same application origin. The browser receives an opaque Keep session cookie and never holds a directory credential.
 
 Use these application routes:
 
 | Route | Purpose |
 |---|---|
-| `GET /auth/login` | Start a login transaction and redirect to Keycloak. |
-| `GET /auth/callback` | Validate and consume the one-use login transaction; establish the local session. |
-| `POST /auth/logout` | Invalidate the local session and start provider logout. |
-| `POST /auth/backchannel-logout` | Receive a signed OIDC logout notification. |
-| `GET /auth/session` | Return current signed-in user and effective tenant access. |
-| `POST /auth/activity` | Record foreground application activity, including a visible dashboard heartbeat. |
+| `POST /auth/login` | JSON `{username, password, return_to}`. Check the password with one LDAP bind, look the person up in ADAPI and establish the local session. |
+| `GET /auth/session` | Return the signed-in user, effective tenant access and the session's `absolute_at`. |
+| `POST /auth/logout` | Revoke the local session. |
 
-Configure exact HTTPS callback and post-logout redirect URLs for each environment, without wildcard origins. After login, accept only a validated local relative return path. Keep one-use state, nonce and PKCE verifier server-side; login transactions expire after ten minutes and are bound to the initiating browser. Callback replay or failed validation cannot create a session.
+`GET /auth/login`, `GET /auth/callback`, `POST /auth/activity` and `POST /auth/backchannel-logout` were removed by REV-73. There is no login transaction, callback or provider redirect.
 
-Assistant-selected entry behavior opens `/auth/login` after an initial session check returns 401 `unauthenticated`, preserving the current local path and query as `return_to`. Existing authenticated workspaces retain their mounted session across navigation. Session loss after admission, explicit sign-out, access denial and service failures retain their explicit recovery controls. `/signed-out` and `/sign-in-expired` never automatically restart login.
+`POST /auth/login` checks, in order, before any bind:
 
-For a browser callback whose transaction is expired, consumed or missing, redirect
-to `/sign-in-expired` with 303 and no-store caching. This public page explains the
-stale attempt and offers an explicit `/auth/login` link to start a new transaction;
-it neither exchanges the rejected code nor creates a session. Do not automatically
-retry or forward old callback parameters. Non-HTML clients retain the structured
-401 `authentication_rejected` response.
+1. The human-authorization gate. While the initial bootstrap or a restore-integrity gate is closed, sign-in returns 503 and publishes nothing.
+2. The exact same Origin. The endpoint enforces its own 4 KiB body limit and rejects any `Content-Encoding` other than identity, because the general request middleware exempts `/auth/` POSTs from those checks.
+3. The username: trimmed, 1–64 characters, with no control characters, no AD-forbidden characters (`" / \ [ ] : ; | = , + * ? < >`) and no `@`. Otherwise 401 `authentication_rejected`.
+4. The password: an empty password is refused with 401 `authentication_rejected` before any bind, because an empty-password simple bind succeeds anonymously on AD.
 
-Request `openid profile` and a dedicated directory-identity scope. Include email only if a product display needs it; email is never an account key. Validate the ID token's signature, exact issuer, audience/authorized party, expiry, nonce and authentication time. Select RS256 and a maximum 30-second clock skew. Fetch signing keys from the configured issuer, refresh on an unknown key ID once, and reject unverifiable tokens. Do not discover an issuer from user-controlled input.
+After sign-in, accept only a validated local relative `return_to` path; anything else returns to the workspace root.
 
-The code-flow/PKCE choice follows [OAuth security best practice](https://www.rfc-editor.org/rfc/rfc9700.html). These application paths, scope choices and timing values are Keep selections.
+**Time budget.** Sign-in runs under the ordinary ten-second Product API handler timeout. An async timeout cannot stop a worker thread, so sign-in sizes its own steps: LDAP connect 2 seconds, LDAP receive 2 seconds, and the ADAPI lookup the smaller of 3 seconds and the remaining request budget minus 1 second. Before publishing, at least 1 second must remain; otherwise sign-in returns 503 `sign_in_unavailable` with nothing published.
+
+Assistant-selected entry behavior opens `/sign-in?return_to=…` after a session check returns 401 `unauthenticated`, preserving the current local path and query. Existing authenticated workspaces retain their mounted session across navigation. Session loss after admission, explicit sign-out, access denial and service failures retain their explicit recovery controls. `/signed-out` and an old `/sign-in-expired` address offer the sign-in page and never sign in by themselves.
 
 ## 3. Username and password authentication
 
-Require the company username and LDAP password at fresh authentication for all human Keep users. Local development uses the native credentials defined in section 14. Do not require a one-time code or authenticator enrollment for Keep admission, including users with previously enrolled factors. A valid Keycloak SSO session can satisfy a subsequent application login without prompting again. Password authentication is not repeated on every API request or tenant switch. The backend validates protected authentication evidence for the configured password flow; it must not require an OTP method claim.
+Require the company username and AD password at fresh authentication for all human Keep users. Local development uses the credentials defined in section 14. Do not require a one-time code or authenticator enrollment. Password authentication is not repeated on every API request or tenant switch.
 
-Password changes and account unlock requests go through the existing company directory process. Keycloak must not write LDAP passwords or profile attributes. Do not use a Keep local password or automatic email-based account linking as a bypass. Lost-factor recovery for separate Keycloak console administrators remains the user's team's responsibility through the established identity-verification process.
+**The bind.** The Product API performs one ldap3 simple bind in a worker thread. The server comes from `KEEP_LDAP_HOST`, `KEEP_LDAP_PORT` and `KEEP_LDAP_USE_TLS`, with a 2-second connect timeout. The read-only connection binds as `KEEP_LDAP_BIND_FORMAT` filled with the username (for example `{username}@corp.example`), sends the typed password as UTF-8 bytes and has a 2-second receive timeout. After a successful bind it asks the LDAP WhoAmI extended operation who is bound, then unbinds.
 
-Enable temporary Keycloak brute-force protection: five failed attempts trigger a 15-minute temporary login lock; no permanent automatic lock. This is an additional application setting, not a modification of LDAP's own password policy. Require MFA for separate Keycloak console administrators. Keycloak console administration and Keep global-super-admin membership are separate privileges.
+**The password** is used for that one bind only. It is never stored, logged, forwarded, put in an exception message or written to the database.
 
-## 4. Session and token settings
+**Which account signed in.** AD resolves `name@domain` by an explicit userPrincipalName before `sAMAccountName@domain`, so a bind can succeed as a different account than the one Keep looks up. The WhoAmI answer must name the typed username, or sign-in is refused:
+
+- `u:DOMAIN\name`: `name` equals the username, case-insensitively. The domain part is not checked; multi-domain forests are not handled (user decision).
+- `dn:…`: it equals the bind DN, case-insensitively (the local OpenLDAP form).
+- Anything else is refused.
+
+**The directory lookup.** After the bind, Keep reads the person's own `/users` row from ADAPI by exact samAccountName (section 6). Sign-in never reads groups and never rechecks a session later.
+
+| Outcome | Response |
+|---|---|
+| Wrong password (`invalidCredentials`) or a WhoAmI answer naming someone else | 401 `authentication_rejected`. One message for all cases; the reason is logged without the password. |
+| A disabled account (`userAccountControl & 2`) with the right password | The same 401 and message. |
+| A correct bind but no ADAPI row | 403 `account_not_in_directory` ("Your account isn't in the company directory."). |
+| A correct bind but more than one ADAPI row | 403 `account_ambiguous` ("More than one directory account has this username. Contact your administrator."). |
+| LDAP or ADAPI unreachable, or the time budget spent | 503 `sign_in_unavailable`; no session. |
+
+**What sign-in saves.** When the ADAPI row differs from the stored principal (a new person, a changed display name, or enabled ↔ disabled), sign-in publishes a single-object evidence for that person through the ordinary publisher (section 7). A re-enabled person whose stored row says ineligible can therefore sign in again. A person ADAPI reports as disabled is refused and their other open sessions end (section 8). An unchanged row publishes nothing, so routine sign-ins do not advance the directory revision. If the publication fence rejects the sign-in's evidence because a newer publication touched the person, sign-in still succeeds when the newer stored row is eligible and otherwise returns 401. A person in no granted group signs in with Global edit through Global's fixed policy.
+
+**On success**, revoke the session of any cookie the browser already sent, issue a new handle, create a session whose absolute deadline is 24 hours after sign-in and set the cookie (section 5).
+
+Keep has no lockout of its own (user decision). Failed binds still count toward AD's own lockout policy. Password changes and account unlock requests go through the existing company directory process.
+
+## 4. Session settings
 
 | Setting | Selected value |
 |---|---|
-| Keep idle timeout | 30 minutes since the last accepted application activity. |
-| Keep absolute timeout | 24 hours from the original Keycloak authentication time. |
-| Keycloak SSO Session Idle / Max | 30 minutes / 24 hours. |
-| Keycloak client session timeouts | Inherit those realm bounds; do not extend them. |
-| Keycloak access-token lifetime | Five minutes. |
-| Refresh rotation | Enabled; refresh-token reuse allowance zero. |
-| Refresh attempt interval while the local session is active | At most four minutes under healthy operation. |
-| Remember-me / offline tokens | Disabled for Keep. |
+| Absolute timeout | 24 hours from sign-in. |
+| Idle timeout | None. |
+| Activity heartbeat | None. |
+| Remember-me, refresh or offline credentials | None. |
+| Directory recheck during a session | None; changes arrive through publication. |
 
-The Product API enforces its own idle and absolute limits, regardless of provider grace windows or refresh traffic. A foreground dashboard sends an authenticated activity heartbeat every 60 seconds and therefore stays active. Stop it when the page is hidden. SSE data arriving at the browser, server refresh jobs and background tabs do not themselves reset Keep's idle clock. After 24 hours, even a continuously visible dashboard requires fresh authentication; no unattended kiosk identity is introduced.
-
-Use `auth_time` and an appropriate OIDC `max_age` request to prevent an old SSO session from restarting the 24-hour clock indefinitely. An idle timeout may return through valid SSO; reaching the absolute limit requires fresh authentication. An expired local session cannot be extended merely because an identity snapshot still exists.
-
-Serialize refresh per local session, persist the newly rotated refresh token atomically and fence stale workers. Multiple tabs must not race refresh tokens. Refreshed tokens must preserve the validated issuer, subject and immutable directory binding; a conflicting identity cannot replace the signed-in principal. A definitive provider revocation or `invalid_grant` ends the corresponding local session. A transport failure or ambiguous refresh response is not proof of revocation: apply section 9 while the local session remains valid, then reconcile or require fresh SSO. Never accept an expired access token as a Product API credential.
-
-Keycloak documents separate session and token controls in its [administration guide](https://www.keycloak.org/docs/latest/server_admin/). The numbers above are selected Keep settings, not documented defaults.
+The Product API enforces the absolute limit on every authorization, including SSE reauthorization. A visible dashboard stays signed in until the limit; after 24 hours it requires fresh sign-in. No unattended kiosk identity is introduced. An expired local session cannot be extended merely because identity data still exists.
 
 ## 5. Session persistence and CSRF
 
-Generate a 256-bit random session identifier. Set a nonpersistent `__Host-keep_session` cookie with `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/` and no `Domain`. Regenerate the identifier after authentication. Store only its hash in PostgreSQL, together with the identity binding, issuer/subject/provider session ID, original authentication time, activity/absolute deadlines and revocation state. Encrypt retained provider tokens with an application encryption key supplied through the approved secret mechanism; never put tokens or session cookies in logs.
+Generate a 256-bit random session identifier. Set a nonpersistent `__Host-keep_session` cookie with `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/` and no `Domain`. Issue a new identifier at every sign-in. Store only its hash in PostgreSQL, together with the principal, the deployment epoch, the sign-in time, the absolute deadline and the revocation state. Keep stores no directory or provider credential. Never put session cookies or passwords in logs.
 
-PostgreSQL is authoritative for local sessions, current grants and the identity checkpoint. Redis may distribute invalidations but is not required to preserve authorization correctness. If PostgreSQL cannot supply a trustworthy authorization decision, return a dependency failure; LDAP's last-known-data policy does not authorize bypassing current Keep grants or session revocation.
+PostgreSQL is authoritative for local sessions, current grants and the identity checkpoint. Redis may distribute invalidations and cache picker searches but is not required to preserve authorization correctness. If PostgreSQL cannot supply a trustworthy authorization decision, return a dependency failure; the last-known-data policy does not authorize bypassing current Keep grants or session revocation.
 
-Protect state-changing browser requests with a session-bound CSRF token and strict same-origin checks. Use the OIDC transaction protections for the callback and signed-token validation for backchannel logout instead of browser CSRF tokens. No mutation uses GET. Do not allow cross-origin credentialed Product API access in the initial release. The cookie and server-enforced timeout approach follows [OWASP session guidance](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html).
+Protect state-changing browser requests with a session-bound CSRF token and strict same-origin checks. Sign-in has no session yet, so it relies on the exact same-Origin check, its JSON body and its own size and encoding limits. No mutation uses GET. Do not allow cross-origin credentialed Product API access in the initial release. The cookie and server-enforced timeout approach follows [OWASP session guidance](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html).
 
-## 6. LDAP federation and stable identity
+## 6. LDAP bind, ADAPI directory and stable identity
 
-Configure Keycloak LDAP federation in `READ_ONLY` mode, with imported users and a maximum 60-second user-cache lifetime. Select changed-user synchronization every 60 seconds and a full reconciliation daily. These Keycloak jobs support authentication/profile consistency; they are not the proof that Keep's nested membership and disablement target is met.
+**LDAP.** Keep uses LDAP only to check a password with the user's own bind. It has no LDAP service account and runs no LDAP searches. Encryption is the `KEEP_LDAP_USE_TLS` setting, off for now on the private network (user decision, overriding the earlier rule that directory connections use TLS). When it is on, the server certificate is validated, optionally against `KEEP_LDAP_CA_FILE`.
 
-Use TLS with certificate validation for directory connections and a read-only service identity. Keycloak handles human password authentication. Keep's separate directory reader never receives or binds with a user's password.
+**ADAPI.** Keep reads people and groups from ADAPI at `KEEP_ADAPI_URL`, sending the `ClientId` header from the secret `KEEP_ADAPI_CLIENT_ID`. It uses three routes:
 
-Keep identifies directory objects by `(directory source, immutable object ID)`: for example, validated `objectGUID` for Active Directory or `entryUUID` for a compatible LDAP directory. The deployed directory schema determines the actual mapping. DN, username, group name and email are mutable labels, not grant keys.
+- `/users` and `/groups`. Their query parameters (`samAccountName`, `customFilter`, `attributesToLoad` and others) are OR'ed and exact unless `*` is used. They return JSON arrays of string-valued rows and cap silently at 1,000 rows.
+- `/groups/members/user?samAccountName=…&isRecursive=true`. It returns a group's recursive members with `sAMAccountName`, `distinguishedName`, `objectGUID` and `userAccountControl`, handles cycles, includes people reached through distribution groups, has no cap and does not take `attributesToLoad`.
 
-Configure a protected, read-only OIDC claim containing that immutable directory identity. Only users from the configured LDAP federation may supply it; local Keycloak accounts and user-editable attributes must not manufacture it. Bind `(issuer, sub)` to an internal Keep principal and this directory identity after validating the mapping. A conflicting mapping blocks admission and raises an operational error; never merge accounts by matching email or username. Deleting and recreating an account with the same name creates a different principal and inherits no old grants.
+A non-200 response or malformed JSON means the directory is unavailable; it never proves absence. Each call has its own timeout: 5 seconds in the refresh command; inside a request, the smaller of 3 seconds and the remaining request budget minus 1 second; in a background save, the smaller of 5 seconds and the job's remaining budget minus 1 second.
 
-Keycloak groups/roles and browser token claims are not authoritative Keep tenant permissions. Keep keeps its own grants, and the designated LDAP team supplies global-super-admin eligibility. Use a standard Python OIDC library and a small directory-schema adapter; do not build a pluggable identity-provider framework for the first release.
+**Identity.** Keep identifies users and groups by `(directory source adapi, lowercase samAccountName)` (user decision: samAccountName does not change). Keep stores no GUID and runs no GUID reuse check, so a reused username is the same Keep principal and inherits the old holder's grants (accepted risk). Display names and distinguished names are labels. A user's label is `displayName`; a group's label is `displayName` when ADAPI returns it, otherwise `cn`. Product rows reference the internal principal ID, never the username.
+
+**Lookup.** The reader is given a kind hint: a stored principal's kind, the requested kind on save on pick, or `user` at sign-in. It asks the hinted endpoint first (`/users?samAccountName=<exact>` or `/groups?samAccountName=<exact>`) and the other endpoint only if the first has no row. An object is deleted only when both endpoints return 200 with zero rows. More than one row is ambiguous and fails closed. A returned `sAMAccountName` that does not equal the key, case-insensitively, is refused. A person is eligible when `int(userAccountControl) & 2 == 0`. Members whose samAccountName ends in `$` (computer accounts) are skipped.
+
+AD groups are not Keep tenant permissions by themselves. Keep keeps its own grants, and the group named by `KEEP_SUPERADMIN_GROUP` (a samAccountName) supplies global-super-admin eligibility. The Product API and the refresh command read that one setting.
 
 ## 7. Membership supply and the five-minute target
 
-**REV-35 current boundary:** use explicit trusted publications for bootstrap and
-manual identity refresh. The automatic polling algorithm and timing budgets below
-are deferred design references, not current deployment or release gates.
+**REV-35 current boundary:** use explicit trusted publications for bootstrap,
+manual identity refresh, sign-in and save on pick. The automatic polling algorithm
+and timing budgets below are deferred design references, not current deployment
+or release gates.
 
-Use a Keep background directory reader with a read-only LDAP connection to obtain account eligibility, group edges and complete transitive membership. This avoids making live authorization depend on login-time JWT groups or on Keycloak changed-user synchronization detecting every group-edge change.
+ADAPI supplies account eligibility and complete recursive membership, so live authorization never depends on login-time group data. A group's members come from the recursive members route as flattened group → user edges; Keep tracks no subgroups. Member display names come in batches of `KEEP_ADAPI_LOOKUP_BATCH` names (50) per call: `/users?customFilter=(|(sAMAccountName=a)(sAMAccountName=b)…)&attributesToLoad=sAMAccountName,displayName,userAccountControl`, with the names escaped. A member that the members route returned but a batch omitted keeps the members route's `userAccountControl` and its samAccountName as label. A batch never marks it deleted, and it does not make the evidence incomplete.
 
-Track the designated global-super-admin group, teams referenced by tenant grants, their transitive children, active-session users, directly granted users and current assignees. Support bounded directory search for administrative user/team selection. Before accepting a previously unknown principal or team grant, obtain the required complete eligibility evidence. Do not enumerate the entire company directory for every request.
+Publications come from four places, all through the same guarded verifier and PostgreSQL publisher:
 
-Traverse by immutable IDs with cycle detection and deduplication; include the deployed directory's actual membership semantics, including primary-group membership where applicable. Do not assume `memberOf` alone contains transitive membership. A complete successful traversal may establish absence; a timeout, missing page, inaccessible subtree or incomplete traversal may not. Preserve alternative membership paths and combine all applicable grants with the selected highest-role-wins rule.
+- the manual refresh command, which re-reads tracked roots: the global-super-admin group, teams and users referenced by grants, users with active sessions, current assignees and pending saves without a failure ([worker scope 4](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have));
+- sign-in, for the signing-in person's own changed row (section 3);
+- save on pick, when an administrator picks an unsaved person or group ([tenant access 5](spec-tenant-access.md#5-directory-selection-and-visibility));
+- the request-started background save of a group too large to save inside the request.
 
-Select these normal-operation budgets:
+One evidence covers at most 10,000 objects. Do not enumerate the entire company directory. A complete successful read may establish absence; a timeout, non-200 response, ambiguity or exhausted bound may not. Combine all applicable grants with the selected highest-role-wins rule.
+
+Publish a complete verification generation atomically in PostgreSQL, including source, verification start/end, covered objects, completeness and revision. Tenant/access supplement 11/19 distinguishes ordered verification generation/time from semantic directory content revision. Generations are allocated before reading, so generation order matches read order. An evidence is rejected only when a covered root or team already has a newer generation. A covered user that a newer generation already holds is skipped, and memberships are rebuilt from each user's current stored eligibility, so the newer fact wins. Independently verified negative evidence, such as account disablement, takes effect immediately; a later partial result cannot resurrect it.
+
+Every publication that changes something advances the directory revision and fences in-flight visibility proofs. This includes first and changed sign-ins, saves on pick and, in a refresh, each team's own publication. The publisher's statements are set-based, so a 10,000-object publication holds the identity guard for well under one second.
+
+Deferred normal-operation budgets for a future automatic refresh:
 
 | Stage | Application target |
 |---|---|
@@ -120,9 +145,7 @@ Select these normal-operation budgets:
 | Product API use of a published revision | Next authorization check; mutations also guard the revision at commit. |
 | Existing SSE subscription recheck | Before sending protected content and at least every 30 seconds. |
 
-This reserves up to 150 seconds for application polling, verification and idle-stream rechecks, leaving at most 150 seconds of the user's five-minute budget for directory visibility/replication and other upstream delay. The LDAP endpoint contract must fit that remaining budget. These are selected budgets requiring measurement, not assertions about the company directory or installed Keycloak. A slow successful cycle is a target miss and must be reported, not relabeled healthy.
-
-Publish a complete verification generation atomically in PostgreSQL, including source, verification start/end, covered objects, completeness and revision. Tenant/access supplement 11/19 distinguishes ordered verification generation/time from semantic directory content revision: an unchanged re-verification updates freshness without invalidating content-based cursors or advancing a tenant revision. Fence out-of-order results. A refresh that reused older cached data does not advance its verification time. Independently verified negative evidence, such as account disablement, takes effect immediately even if another part of a refresh fails; a later partial result cannot resurrect it.
+These budgets would leave at most 150 seconds of a five-minute target for directory replication and other upstream delay. They are selected budgets requiring measurement, not assertions about the company directory.
 
 ## 8. Applying access changes
 
@@ -130,31 +153,27 @@ Publish a complete verification generation atomically in PostgreSQL, including s
 
 Every Product API authorization combines the valid local session, accepted directory evidence and current Keep grants. Do not maintain an independently stale effective-role cache. Permission edits committed in Keep affect subsequent authorization checks immediately. Guard mutation authorization against concurrent changes to grants and identity revisions; re-evaluate if the decision changes before commit. Do not undo already committed work retroactively.
 
-SSE subscriptions use the same authority. Stop delivery for lost tenants, including counts and invalidation messages that reveal their data. If view remains after loss of edit/admin, preserve permitted reads and remove write actions. Positively confirmed account disablement terminates all that principal's local sessions. Losing the global-super-admin group removes only that privilege and leaves other valid access, including Global edit for an otherwise eligible user.
+SSE subscriptions use the same authority. Stop delivery for lost tenants, including counts and invalidation messages that reveal their data. If view remains after loss of edit/admin, preserve permitted reads and remove write actions. Positively confirmed account disablement, from a refresh or a sign-in, terminates all that principal's local sessions. There is no in-session recheck, so a person disabled in AD keeps access until the next refresh or the end of their session (accepted risk). Losing the global-super-admin group removes only that privilege and leaves other valid access, including Global edit for an otherwise eligible user.
 
 Filter tenant listings, search, selectors, resource lookups and subscriptions through effective access. An inaccessible or cross-tenant resource returns the selected non-disclosing 404 behavior; a visible resource with a forbidden action returns 403. Authentication expiry returns 401. A dependency failure without the evidence needed to decide access returns 503 rather than inventing either permission or directory removal.
 
-Recompute initial/last administrator checks from the same accepted membership revision, counting eligible people once. Known loss of every local administrator leaves the tenant operating and raises a repair condition visible to global super-admins. A directory timeout alone does not create that condition. On positively confirmed assignee ineligibility, immediately expose the alert/incident as unassigned and run the existing idempotent cleanup/history contracts; do not wait for a later login, and do not clear assignments solely because verification is unavailable.
+Recompute initial/last administrator checks from the same accepted membership revision, counting eligible people once. Known loss of every local administrator leaves the tenant operating and raises a repair condition visible to global super-admins. A directory timeout alone does not create that condition. On positively confirmed assignee ineligibility, immediately expose the alert/incident as unassigned and run the existing idempotent cleanup/history contracts; do not clear assignments solely because verification is unavailable.
 
 ## 9. Outage behavior
 
 **Current scope (REV-35):** Automatic directory retry and polling, and assignment reconciliation, are deferred; identity updates come from explicit publication; see [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). The last-trusted-data outage policy below remains normative.
 
-Keep the user's selected policy: existing valid sessions retain normal read, write and administrative permissions from the last successfully verified identity data combined with current Keep grants. No five-minute staleness cutoff, read-only downgrade or automatic privilege loss applies solely because LDAP or Keycloak is unavailable. Current known disablement, revocations and ordinary session deadlines remain effective.
+Keep the user's selected policy: existing valid sessions retain normal read, write and administrative permissions from the last stored identity data combined with current Keep grants. No staleness cutoff, read-only downgrade or automatic privilege loss applies solely because AD, LDAP or ADAPI is unavailable. Current known disablement, revocations and the session deadline remain effective.
 
-Treat dependencies separately. A Keycloak outage does not stop a healthy direct LDAP reader from applying membership changes. An LDAP outage does not stop Keep permission edits or a valid signed Keycloak logout notification. Cached memberships cannot restore a session already invalidated by either source.
+New sign-ins need both a successful bind and an ADAPI lookup; if either is unavailable, sign-in returns 503 `sign_in_unavailable`. No cached credential or cached directory row replaces them. An ADAPI outage does not stop Keep permission edits on saved principals or local sign-out. Picker search may show results from the search cache; save on pick returns 503 `directory_unavailable`.
 
-New sign-ins still need a valid OIDC exchange. If Keycloak can complete it during an LDAP-reader outage, an already linked principal may use its trusted stored directory evidence. A first-time user without the required verified directory binding cannot be admitted on a guessed username or group list. An unavailable Keycloak exchange cannot be replaced with cached credentials.
-
-Retry failed directory verification every 60 seconds with small jitter; preserve the last complete evidence and its original timestamp. Show a degraded identity-service indicator and last successful verification time. Publish verified recovery changes immediately, recompute effective access and reconcile assignments/admin vacancies before declaring the affected coverage healthy. Do not log a failed or partial refresh as a successful synchronization.
+A failed or partial refresh preserves the last complete evidence and its original timestamp. The refresh command reports every failed root and exits non-zero. Do not log a failed or partial refresh as a successful synchronization. An operator reruns the command after the outage.
 
 ## 10. Logout and revocation
 
-On user logout, revoke the local session in PostgreSQL before clearing its cookie. Then use OIDC RP-initiated logout for the Keep realm, with a registered return URL to a signed-out page that does not automatically restart login. Local logout succeeds even if Keycloak cannot be reached; the UI states when provider logout could not be completed. A later explicit login may reuse provider SSO if provider logout failed. Revoke retained refresh credentials on a best-effort basis and remove local token material.
+On sign-out, revoke the local session in PostgreSQL before clearing its cookie. Sign-out is local only: the response carries no provider URL, and `/signed-out` does not sign in again by itself. Sign-out succeeds whether or not AD or ADAPI is reachable.
 
-Configure a backchannel logout URL with provider session IDs required and front-channel logout disabled for this client. Validate the signed logout token's issuer, audience, time, logout event, subject/session binding and replay identifier; reject a nonce-bearing or wrong-purpose token. Apply it idempotently to matching local sessions, close their subscriptions and retain a revocation fence to prevent a racing callback from recreating the same session. This follows the [OIDC backchannel logout specification](https://openid.net/specs/openid-connect-backchannel-1_0.html).
-
-Keep revocation fences for at least 24 hours and five minutes after the event, covering the maximum session lifetime and validation allowance. Refresh provides a secondary way to detect provider session termination under healthy operation. During a provider outage, unknown revocation follows the user's cached-identity/valid-local-session policy; known revocation never does.
+A session ends at its 24-hour deadline, at sign-out, when a later sign-in from the same browser replaces it, when confirmed disablement revokes it, or when restore invalidates it (section 11). Known revocation always applies, including during a directory outage.
 
 ## 11. Cache lifetime, restart and recovery
 
@@ -162,38 +181,35 @@ Keep revocation fences for at least 24 hours and five minutes after the event, c
 
 Persist the last verified identity checkpoint in PostgreSQL so ordinary process/pod restarts do not lose the accepted outage view. A restart preserves original verification times and negative evidence; loading the checkpoint does not make it fresh.
 
-Keep the current evidence while referenced by a grant, tracked group dependency, live session, assignment or retained product history. During an identity outage, pause identity-cache eviction. Under healthy synchronization, remove unreferenced cache-only records after 30 days without use; retain immutable principal references and display snapshots for as long as their owning product history requires. This selects cache cleanup, not a new audit-history retention policy. Purge unusable provider token material when a session expires or is revoked; retain only the minimal fences required by section 10.
+Keep the current evidence while referenced by a grant, tracked group dependency, live session, assignment or retained product history. During an identity outage, pause identity-cache eviction. Under healthy synchronization, remove unreferenced cache-only records after 30 days without use; retain principal references and display snapshots for as long as their owning product history requires. This selects cache cleanup, not a new audit-history retention policy. The picker search cache in Redis expires after two hours and never feeds authorization.
 
-Deleted directory identities become ineligible tombstones. Their grants are visibly orphaned and cannot transfer by name. A subsequently re-enabled account with the same immutable identity can use its still-current grants after fresh authentication; its old revoked sessions remain invalid. Existing alert/incident history and cleanup contracts remain authoritative.
+Deleted directory identities, absent from both ADAPI endpoints, become ineligible tombstones. Their grants are visibly orphaned. A re-enabled account, or a new account with the same samAccountName, is the same Keep principal and can use its still-current grants after fresh sign-in; its old revoked sessions remain invalid. Existing alert/incident history and cleanup contracts remain authoritative.
 
-After database rollback or disaster restore, invalidate all restored Keep sessions and require fresh SSO. Before re-enabling human authorization, reconcile restored grants/configuration with protected permission-change recovery evidence and obtain a fresh complete directory checkpoint. If post-backup permission changes cannot be established, keep human authorization gated for operator reconciliation. This prevents restoring known-revoked access from an old backup; it is a restore-integrity gate, not an age cutoff during an ordinary identity outage. Ingestion recovery retains its separate reliability/operator contracts. Backup execution and protection of required recovery evidence follow the relevant owning teams' contracts.
+After database rollback or disaster restore, invalidate all restored Keep sessions and require fresh sign-in. Before re-enabling human authorization, reconcile restored grants/configuration with protected permission-change recovery evidence and obtain a fresh complete directory checkpoint. If post-backup permission changes cannot be established, keep human authorization gated for operator reconciliation. This prevents restoring known-revoked access from an old backup; it is a restore-integrity gate, not an age cutoff during an ordinary identity outage. Ingestion recovery retains its separate reliability/operator contracts. Backup execution and protection of required recovery evidence follow the relevant owning teams' contracts.
 
 ## 12. Global-super-admin setup and repair
 
-Store the directory source and immutable ID of the designated global-super-admin team in controlled deployment configuration. Bootstrap validation must resolve that team and verify at least one eligible direct/nested member before initial human administration is enabled. No first-user promotion or Keep-local emergency super-admin account is introduced.
+Store the samAccountName of the designated global-super-admin group in `KEEP_SUPERADMIN_GROUP`, controlled deployment configuration read by the Product API and the refresh command. Bootstrap validation must resolve that group and verify at least one eligible member before initial human administration is enabled. The refresh run with `KEEP_DIRECTORY_BOOTSTRAP_QUALIFIED` carries the bootstrap flag on the publication that covers the group. That flag may only open the initial bootstrap gate; it cannot open a restore-integrity gate. No first-user promotion or Keep-local emergency super-admin account is introduced.
 
-If a verified directory change leaves the group empty or deleted, keep tenants and ingestion operating and remove the now-ineligible global privilege. The user's team repairs the directory group through company directory administration, or changes the configured immutable group mapping through its controlled deployment process. An outage alone does not imply emptiness.
+If a verified directory change leaves the group empty or deleted, keep tenants and ingestion operating and remove the now-ineligible global privilege. The user's team repairs the group through company directory administration, or changes the configured group through its controlled deployment process. An outage alone does not imply emptiness.
 
-Validate a replacement group's complete eligible membership before switching mappings. Switch atomically, invalidate the old derived privilege and record operator, old/new immutable IDs, time and reason in protected operational change evidence. This deployment path is separate from tenant permission editing. Keycloak console recovery credentials do not themselves confer Keep super-admin access.
+Validate a replacement group's complete eligible membership before switching. Switch atomically, invalidate the old derived privilege and record operator, old/new group, time and reason in protected operational change evidence. This deployment path is separate from tenant permission editing.
 
 ## 13. Operation and qualification
 
 **Current scope (REV-35):** The five-minute propagation target and continuous synchronization metrics are deferred and are not release gates; see [worker scope](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Configuration, upgrade and audit requirements below remain normative.
 
-Keep sanitized realm/client settings and mapping definitions under version control; inject secrets separately. Record the deployed Keycloak version and test this configuration on that version before release. Avoid custom Keycloak provider code in the initial baseline. When strengthening authentication requirements or changing identity bindings, invalidate affected existing provider/local sessions so old authentication cannot bypass the new policy. Rehearse version upgrades in staging, including LDAP mapping, refresh rotation and logout; use the team's Keycloak maintenance process and the database owner's recovery contract.
+Keep sanitized sign-in and directory settings under version control; inject `KEEP_ADAPI_CLIENT_ID` and other secrets separately. Record the AD domain, LDAP host and ADAPI version in the environment manifest. Before company use, one real call per ADAPI route confirms the response shapes the local mock copies, and one real sign-in confirms the bind name format and the WhoAmI answer. A mismatch fails closed with 401 or 503. When strengthening authentication requirements or changing the directory source, invalidate affected local sessions so old authentication cannot bypass the new policy.
 
-Deliver authentication failures, factor resets, administrative configuration changes and synchronization health to the approved operational logging service without credentials. Measure verification age, coverage/completeness, cycle duration, end-to-end membership/disablement propagation, refresh failures and logout delivery. Operational telemetry retention remains with its owning service. The tenant/access audit policy permits current tenant admins and global super-admins only; Global's corresponding audit history is global-super-admin-only. Enforce current effective access through this supplement's session and identity policy. Tenant/access supplement 13–19 completes audit event coverage, the user's 365-day tenant audit period, assistant-selected platform audit readership/retention, and recovery integration. Operational telemetry ownership remains unchanged.
+Deliver sign-in failures (with their reason, never the password), administrative configuration changes and refresh results to the approved operational logging service without credentials. Measure verification age, coverage/completeness, refresh duration and failed roots. Operational telemetry retention remains with its owning service. The tenant/access audit policy permits current tenant admins and global super-admins only; Global's corresponding audit history is global-super-admin-only. Enforce current effective access through this supplement's session and identity policy. Tenant/access supplement 13–19 completes audit event coverage, the user's 365-day tenant audit period, assistant-selected platform audit readership/retention, and recovery integration.
 
 See [identity acceptance cases](../verification/verification-plan.md#identity).
 
-## 14. Local Keycloak development exception
+## 14. Local directory development exception
 
-Use a dedicated local `keep-local` realm with native Keycloak users and groups when the application explicitly runs in `development`. This is the user's local deployment choice, not a replacement of company LDAP for staging/production. The application still performs real authorization-code OIDC authentication and its normal PostgreSQL session, grant, directory-publication and recovery checks. It introduces no test login endpoint, browser-supplied principal or automatic first-user promotion.
+Local development replaces AD and ADAPI with two local services when the application explicitly runs in `development`. This is the user's local deployment choice, not a replacement of the company directory for staging/production. The application still performs a real LDAP bind and its normal PostgreSQL session, grant, directory-publication and recovery checks. It introduces no test login endpoint, browser-supplied principal or automatic first-user promotion.
 
-Assistant-selected local bindings use directory source `keycloak-local`, native immutable Keycloak user/group UUIDs and the validated OIDC `sub` claim as the user object ID. Mutable names, paths and email addresses do not confer identity or permissions. A recreated name has a different UUID and inherits no grants. Local administrators create users, credentials and group membership through the isolated Keycloak realm; nested groups supply transitive team membership. The configured global-super-admin group must contain an eligible person before initial human authorization opens.
+- **OpenLDAP** (a pinned image) checks passwords with plain LDAP on `127.0.0.1:58389`. Its users are seeded with generated passwords stored under `.local/identity/`. OpenLDAP does not accept `user@domain`, so the bind format is `uid={username},ou=people,dc=keep,dc=local`, and WhoAmI answers in the `dn:` form.
+- **A mock ADAPI** (`keep-delivery/scripts/local_adapi.py` on `127.0.0.1:58092`), started by local Start, serves the same users and groups from `.local/identity/adapi-directory.json`. It copies the response shapes, the `ClientId` check, the parameter semantics, the 1,000-row search cap and non-200 errors. It includes a disabled user (514) and a distribution-group chain, and offers test hooks.
 
-A separate confidential `keep-directory` service account uses client credentials solely to read the local Admin REST API. Grant only the required realm-management read/query permissions; do not enable service accounts or password grants on `keep-web`. The dedicated reader requires a loopback HTTPS issuer, configured certificate trust, explicit allocation/page bounds, a secret environment binding and explicit `KEEP_ENVIRONMENT=development`. It enumerates this small local realm, including subgroup/member pagination, excludes service-account identities, and publishes through the same guarded directory verifier and PostgreSQL publisher. The company LDAP reader and schema configuration remain unchanged.
-
-REV-35 removes continuous local polling. Startup performs one complete publication; subsequent identity changes require explicit manual refresh. The optional future poller starts each local verification cycle about every 60 seconds. Complete evidence can update users, teams, labels and memberships; incomplete traversal preserves the last complete publication while separately applying positively verified disablement. An identity missing from enumeration requires explicit absence from both the user and group endpoints before it becomes a tombstone. Provider timeouts, malformed responses, ambiguity and exhausted bounds cannot establish deletion or an empty successful roster. This implementation is not a measured claim about the five-minute production enforcement target.
-
-Development startup may invoke the existing initial-bootstrap publication flag after verifying the configured group's membership. That flag may only open `directory_bootstrap_required`; it cannot open a restore-integrity gate. The regular signed-token, password authentication, CSRF, session timeout, reauthorization, assignment and audit contracts continue to apply. Store generated local credentials outside version control and preserve them across ordinary restarts. The [local setup instructions](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/local-keycloak.md) contain operational commands and verification status.
+Local principals use the same `adapi` source and samAccountName keys as the company. Local Start publishes once with the bootstrap flag before starting API/UI. After identity changes, local administrators run the refresh action, which publishes once and starts no worker. Store generated local credentials, the wrapping key and the deployment epoch outside version control and preserve them across ordinary restarts. The [local runtime instructions](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/local-runtime.md) contain operational commands and verification status.

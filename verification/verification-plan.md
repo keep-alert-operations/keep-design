@@ -22,7 +22,7 @@
 - Exercise concurrent users and arrivals together at 5,000 deliveries/minute,
   100 users and 50 tenants, recording retained data growth, exact durable/search
   counts, errors, latency boundaries and resource allocation. Keep fixture API
-  tests, real OIDC/browser tests and supplied-service qualification distinct.
+  tests, real sign-in/browser tests and supplied-service qualification distinct.
 - Verify request deadlines under database contention and that timed-out local
   transactions cannot later commit. Recheck synchronous operator and SSE budgets.
   With ordered SQL pipelining, change the restore fence between acquisition's
@@ -331,14 +331,19 @@ The implementation must demonstrate: manual creation without alerts; explicit im
 
 **Current scope (REV-35, REV-34):** LDAP-change propagation timing (item 2) and assignee cleanup (item 4) are future qualification; verify explicit publication instead; see [worker scope](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have). Other items remain required.
 
-1. First and returning login with username/password only (including users with previously enrolled OTP), incorrect-password rejection, no application OTP enrollment/challenge, SSO return, idle expiry, 24-hour expiry, foreground dashboards and multiple-tab refresh races. Verify separate Keycloak console MFA/recovery.
-   Expired, consumed and missing callback transactions offer browser retry without
-   exchanging the rejected code or creating a session; JSON clients still receive
-   401. Explicit retry must create a new transaction and permit valid sign-in.
-2. Direct/nested grant additions/removals, cycles, alternative paths, account disablement and super-admin loss, measured from the LDAP change through an already-open API/SSE session.
-3. Partial/paged LDAP failures, identity-provider failure, independently healthy LDAP/Keycloak paths, unknown-user login and verified recovery without empty-cache authorization changes.
+**REV-73:** items 1–5 describe password sign-in and the ADAPI directory; items 6–11 add its sign-in publication, search, save on pick, publication and removal checks. Plan criteria A1–A27 of the 2026-11-15 change map onto them as noted. See [identity configuration](../specs/spec-identity-configuration.md) and [tenant access 5](../specs/spec-tenant-access.md#5-directory-selection-and-visibility).
+
+1. Sign-in (identity 2–3): the correct username and password signs in, sets the cookie and `/auth/session` reports `global_super_admin: true` for a member of the configured group (A1); a wrong password returns 401 `authentication_rejected` with no cookie and no session row (A2); an empty password never reaches LDAP (A3); a disabled account (514) with the right password gets the same 401 (A4); LDAP or ADAPI down returns 503 `sign_in_unavailable` with no session (A5); a first sign-in of a person in no granted group gets Global edit and saves the principal (A6). The bind uses the configured format and UTF-8 password bytes, and a mixed Hebrew/English password works on the local OpenLDAP (A9). The password never appears in logs, `auth_sessions` or `audit_events` (A10). A WhoAmI answer naming someone else is refused without calling ADAPI, `u:DOMAIN\name` and the OpenLDAP `dn:` form pass, and zero or two ADAPI rows return 403 `account_not_in_directory` or `account_ambiguous` (A20). No OTP enrollment or challenge exists.
+2. Directory changes through the manual refresh (identity 6–7; worker scope 4): after disabling a user in the directory, a refresh marks them ineligible, ends their sessions and records audit; a granted group root stays a group, not a tombstone; a group with a member that the batch lookup omits still publishes (A13, through `run_cycle` and through `directory --once`). Cover direct and distribution-group membership, alternative paths and super-admin loss through an already-open API/SSE session. At company-like size (3,000 users with sessions, 20 groups of 200, 50 ms per call), the refresh publishes within 60 seconds per evidence with at most 60 + 20 × 6 ADAPI calls, and one failing or oversized team does not block the others while the command exits non-zero naming it (A25).
+3. Outages (identity 9): ADAPI or LDAP failures never establish deletion or an empty roster; existing sessions keep last-known access; sign-in returns 503; picker search falls back as specified; a failed refresh preserves the last complete evidence and reports its failed roots.
 4. Last-admin protection and concurrent grant edits, external admin vacancy, assignee cleanup and inaccessible-tenant discovery checks.
-5. Local/provider logout, signed backchannel validation, delayed callbacks, known revocation during an outage, pod restart and stale database restore.
+5. Sessions and sign-out (identity 4, 5, 10, 11): a session is valid after 31 minutes idle and refused after 24 hours (A7); sign-out ends the session locally and its response has no `logout_url` (A8); signing in with an old cookie present revokes the old session (A24); known revocation applies during an outage; pod restart preserves the checkpoint; a stale database restore invalidates sessions and keeps the restore gate.
+6. Sign-in keeps the stored person current (identity 3): a person re-enabled after a refresh marked them disabled can sign in; a person ADAPI reports disabled at sign-in loses their other open sessions; an unchanged sign-in does not advance `directory_revision`; sign-in while human authorization is gated returns 503 with nothing published (A23).
+7. Picker search (tenant access 5): input such as `x)(objectClass=*` is escaped in the outgoing filter, and the browser finds a user by display name (A11); a 1,000-row answer tells the user to type more in the API metadata and the picker (A14); a repeated search within two hours does not call ADAPI, a search after the TTL does, a search with Redis down still works, and save on pick always calls ADAPI (A19).
+8. Save on pick (tenant access 5; worker scope 3, 4 and 6): an unsaved group is granted at once and its members, including those reached through a distribution group, get the role, while a viewer gets 403 (A12). With 50 ms per call, a 1,500-member group saves inline with 200 within 8 seconds using at most 1 + 1 + 30 ADAPI calls and every member's display name; a group slowed past 7 seconds returns 202 with nothing published by the request, polls return 202 until the background save finishes and then 200, and the pending row is gone (A22). The background save is safe (A26): polls never call ADAPI; two API apps and concurrent polls produce one lease and one publication; a late lease owner's result changes nothing; an expired lease is handed over and completes; a member signing in mid-save keeps the newer row; an ADAPI failure polls as 503 `directory_unavailable` and `retry: true` completes it; a group over 10,000 objects fails with `directory_group_too_large` while `directory --once` still publishes everything else; shutdown during a save releases the lease and joins the executor before the pool closes; a viewer gets 403 on POST and GET; and `directory --once` saves a pending row nobody is polling.
+9. Concurrent publications (identity 7): a save that publishes while a refresh is reading does not make the refresh drop its updates, and a save rejected twice returns 503 `directory_busy` (A21). A 10,000-member publication holds the identity guard for under one second while a concurrent loop of grant mutations sees no `lock_timeout` errors (A27).
+10. Removal (REV-73): migration 0070 applies cleanly with the 0001–0069 checksums unchanged (A15). No Keycloak or OIDC remains in code, configuration, tests or current documents, except lines that say REV-73 removed them, and no Keycloak container runs on the local stack (A16). The sign-in page is served at `/sign-in` through production-style routing, and a workspace 401 lands on `/sign-in?return_to=…` (A24).
+11. Local stack (identity 14): local OpenLDAP and the mock ADAPI start with local Start; existing local grants, assignments and dashboards still belong to the same test users after the one-time principal remap (A18); browser journeys cover sign-in, wrong password, sign-out, save on pick, a group grant and super-admin access.
 
 ## Correlation
 
@@ -467,8 +472,9 @@ Production capacity, multi-node failover/rebalance, clock-discontinuity and roll
   uses the extended operator-only timeout and never advertises background progress.
 - Qualify actual backend/provisioning DB roles, proxy deadlines, shutdown/disconnect,
   fleet-wide gateway proof, production concurrency/capacity and migration rollback
-  independently of synthetic local tests. Identity/Keycloak replacement needs a
-  separate accepted design plus nested-group/freshness/outage qualification.
+  independently of synthetic local tests. A scheduled or automatic directory
+  refresh needs a separate accepted design plus nested-group/freshness/outage
+  qualification.
 
 ## REV-36 Product API live publishing
 
