@@ -29,6 +29,7 @@ Each contract has one authoritative home. Read the relevant domain document toge
 | [Dashboards](spec-dashboard-operations.md) | Saved panel layout, count batches, editing, drill-through, APIs and history. |
 | [Shared system contracts](spec-system-completion.md) | Common UI/HTTP/errors, non-alert schemas, incident/correlation routes, locking, security and workloads. |
 | [Reliability and operations](spec-reliability-operations.md) | SLOs, capacity objectives, backpressure, failures, telemetry and recovery. |
+| [Observability](spec-observability.md) | Log record fields, alert content in logs, shipping and indices, metrics, service level classification and RUM (REV-74). |
 
 Supporting records are separate from runtime contracts:
 

@@ -2156,3 +2156,167 @@ Assistant-selected detail: the `identity-access` topic gains a related topic,
 outside service while a request waits; the identity-access topic page is regenerated.
 Navigation choice only; no product requirement, authorization boundary, issue ID or
 REV number changes.
+
+## REV-74 — Observability: logs, metrics and RUM (2026-11-12)
+
+User decisions. Every Keep service gets full logs and metrics; logs say what happened
+in each service and metrics give the numbers at each moment; metrics cover service
+monitoring and real user monitoring; every flow and failure path is monitored
+([observability](../specs/spec-observability.md)). The user also decided:
+
+- Metrics are exposed on a `/metrics` path and collected by Prometheus or an
+  OpenTelemetry collector.
+- Logs are sent to Elasticsearch through one Fluent Bit deployment that every service
+  sends its logs to, one index per service.
+- Keep configures no retention or other Elasticsearch settings. The logs Elasticsearch
+  and the alert-search Elasticsearch are each configurable and may be the same cluster
+  or different ones.
+- Logs must be indicative and relevant, and easy to query: all logs of one alert, and
+  the alert itself in the logs so it can be found by application, component and its
+  other fields. This supersedes "alert bodies" in the redaction sentence of
+  [reliability 20](../specs/spec-reliability-operations.md#20-application-observability-and-telemetry-ownership)
+  for log records. Secrets stay out of logs and alert values stay out of metric labels.
+- RUM goes through the Product API.
+- No traces for now; the 1% trace sampling in reliability 20 stays a recorded gap.
+
+Assistant-selected details (2026-11-12):
+
+- **Record format.** JSON with Elastic Common Schema names, from the standard logging
+  module, always also written to stderr. Existing event tokens and messages are kept.
+- **Registry and catalog.** One field registry and one event catalog in `keep-domain`.
+  With no index template, the registry keeps one type per field so Elasticsearch's
+  automatic mapping never meets a conflicting value.
+- **Where the alert goes.** Identifying fields on every alert-level record; the whole
+  alert once per delivery on the source processor's record, and on ingestion's record
+  of a rejected or unconfirmed member. Only the native field names are used; a
+  sender-supplied name never becomes a log field.
+- **Lookup.** `keep.alert.id` from source processing onward; the native identity
+  digest on ingestion and source-processor records, because ingestion has no
+  PostgreSQL dependency and cannot know the alert ID.
+- **No sampling** of alert-level events, with an emergency setting that reduces
+  successes only.
+- **Shipping.** Services post batches to Fluent Bit's HTTP input from a background
+  thread, each to its own path; shipping never blocks or fails the logged work.
+  Indices are `keep-logs-<service>`; names are settings.
+- **Metrics.** `prometheus-client` on a dedicated metrics port; closed label sets;
+  PostgreSQL-held state read by bounded aggregates inside existing processes. No new
+  deployed application component (REV-34 to REV-36).
+- **Service level classes**, including a separate `validate` class for dry-run
+  endpoints, which have no selected objective.
+- **RUM endpoint.** Session and CSRF required, bounded batches, per-session rate limit,
+  excluded from the Product API's own indicators.
+- **Rollout.** Additive and off unless configured.
+
+Later user decision (2026-11-12): the flow of an alert inside each service is visible
+in the logs. Each service records every step an alert takes inside it as its own
+record ([observability 3](../specs/spec-observability.md#3-alert-content-in-logs)).
+This replaces the earlier choice of one alert-level record per service and delivery.
+
+Assistant-selected details of that decision (2026-11-12):
+
+- **Which steps.** Only points where an alert can stop, branch or wait: received,
+  validated or rejected, each unconfirmed publish attempt, published or unconfirmed
+  (ingestion); consumed, matched or replayed, applied or refused, change published
+  (source processor); consumed, each attachment, correlated or skipped (correlation);
+  consumed, indexed or deferred (indexer). Statements inside one transaction are not
+  separate steps: they succeed or fail together.
+- **Order.** A sequence number per pass, because timestamps have millisecond
+  precision and several steps share one.
+- **True after commit.** A step reporting a PostgreSQL effect is held and written
+  after the commit, and dropped on rollback.
+- **Linking.** The delivery ID is on ingestion, source-processor and correlation
+  records; the changed-event ID on the source processor's applied and published
+  records and on correlation and indexer records. Correlation reads the delivery ID
+  from the source-result row it already reads as proof; no query is added.
+- **Volume control.** One setting reduces the trail to outcome records. It replaces
+  the emergency sampling setting chosen earlier under this REV.
+
+Later user decision (2026-11-12): the Product API's actions on an alert are in the
+same trail. Assistant-selected details:
+
+- **One step for every change.** The code that publishes an alert change notes
+  `alert_changed` for every cause except a delivered input, so user commands,
+  notes, incident links and moves, correlation links and maintenance effects are
+  all recorded without touching each route.
+- **Commit boundary in one place.** The shared unit of work writes the steps
+  noted inside it when it commits and drops them when it rolls back; a nested
+  unit settles only its own.
+- **A request is a pass.** Its steps carry the request ID and the user, taken
+  where the request is authorized. A refused command leaves only its request
+  record.
+- **Repeated reads.** The summary of automatic refreshes is keyed by user, route
+  and resource, covers reads, searches and the session check, and never hides
+  a failure or a request slower than one second.
+
+Assistant-selected details of the metrics (2026-11-12), under the user's decision
+that metrics give the numbers at every moment:
+
+- **One counter and two histograms for every event.** `keep_events_total` by
+  event, outcome and reason; `keep_event_duration_seconds` and
+  `keep_event_delay_seconds` by event. They are fed where the record is
+  written, so coverage follows the event catalog instead of a second list.
+  This replaces the separately named pipeline metrics first planned.
+- **Stage timings.** Receipt to commit on `alert_applied`, change to the end of
+  the correlation pass on `alert_correlated`, change to searchable on
+  `alert_indexed`, and received to confirmed on `alert_published`.
+- **Kafka numbers** from the client's statistics callback every five seconds.
+- **Rules and dashboard as files** in delivery, with rule unit tests, run by a
+  Prometheus and the existing Grafana in the local stack.
+
+Assistant-selected details of real user monitoring (2026-11-12), under the user's
+decision that it goes through the Product API:
+
+- **What the browser reports.** Page views by section, page load timings, API
+  calls as the browser saw them (counted in the browser into fixed duration
+  buckets), failed calls one by one, time in each live-connection state and
+  each loss with its cause, unhandled JavaScript errors, time with the tab
+  visible or hidden, and events its own buffer dropped.
+- **No error text.** A JavaScript error is logged as its class and same-origin
+  frames only. The plan had allowed a truncated message; error text can quote
+  content, and the rule for server errors already forbids it.
+- **Closed labels.** Sections, outcomes, states and reasons are fixed lists, and
+  a route must be one of the application's own templates.
+- **Limits.** Twelve batches a minute for each session; a batch refused as
+  malformed is refused whole.
+- **Switch.** The Product API setting turns the endpoint on. A browser that
+  gets "not found" stops sending for its session, so no second setting is
+  needed in the frontend.
+
+Assistant-selected details of sign-in outcomes (2026-11-16), after REV-73 replaced
+the sign-in, under the user's decision that every flow and failure is monitored:
+
+- **One event for each outcome.** A sign-in attempt ends in `sign_in_completed`,
+  `sign_in_rejected` or `sign_in_unavailable`, with how long it took. Each is
+  counted and timed like every other event, so no separate sign-in metric exists.
+- **No way out without an outcome.** A failure outside sign-in's own checks,
+  after the username check, is `sign_in_unavailable` under the error code the
+  person was answered with: the database, the restore gate, an unexpected
+  error. When the request's time ends first, the outcome is unavailable with
+  `request_timeout`, whatever sign-in concluded afterwards. A request refused
+  before the username check leaves only its request record.
+- **Reasons are fixed codes.** The reason is the code the bind, the directory
+  client or the stored person gave. Any other value is recorded as `other`, so
+  an error's own text reaches neither a record nor a metric label.
+- **Who.** A completed sign-in carries the user ID on the event and on its
+  request record. A rejected or unavailable one names nobody: the typed
+  username is not logged, because a mistyped one can be a password.
+- **Levels.** A rejection is `info`: a wrong password is an ordinary fact and
+  the counter shows the rate. Unavailable is `warning` and names the dependency
+  that failed, LDAP or ADAPI.
+- **Missing settings.** `sign_in_configuration_missing` is written once for
+  each process and names the settings without their values. Each attempt
+  refused for it is still counted as unavailable.
+- **A fenced publication** at sign-in is recorded as `sign_in_publication_fenced`.
+- **Not selected:** an alert rule for sign-in being unavailable, and events for
+  sign-out, a person saved at sign-in and the directory refresh.
+
+Not built in this step: view and panel load timings, command retries, the
+estimated receipt-to-screen delay, long tasks and session-ended counts.
+
+Not selected: a Kafka record header carrying the ingestion request ID (proposed,
+awaiting the user's answer). Unchanged and still unbuilt: the rendered-visibility
+acknowledgement protocol of alert-history technical 21; RUM reports a labelled
+estimate only. Consequences recorded for the operating owners: the log indices hold
+every tenant's alerts outside Keep's tenant permissions, and nothing rolls over or
+deletes them. Original issue IDs and REV numbering are unchanged. Executed evidence
+belongs in delivery.
