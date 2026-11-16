@@ -2142,3 +2142,17 @@ No company deployment exists, so there are no company users or grants to migrate
 Before company use, one real call per ADAPI route and one real sign-in confirm the
 response shapes, the bind format and the WhoAmI answer. Original issue IDs and REV
 numbering are unchanged. Executed evidence belongs in delivery.
+
+## Context catalog: identity work reads reliability — 2026-11-16
+
+A retrospective of the REV-73 design and build sessions found that the design put
+LDAP and ADAPI calls inside sign-in and save-on-pick requests without reading the
+`reliability` topic, which holds the ten-second Product API handler timeout. Plan
+critics raised two blockers from it and a change reviewer found a third defect in the
+same budget handling, all before merge. The user approved one catalog fix.
+
+Assistant-selected detail: the `identity-access` topic gains a related topic,
+`reliability`, read when sign-in or directory work calls LDAP, ADAPI or another
+outside service while a request waits; the identity-access topic page is regenerated.
+Navigation choice only; no product requirement, authorization boundary, issue ID or
+REV number changes.

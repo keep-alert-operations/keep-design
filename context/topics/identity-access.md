@@ -71,6 +71,7 @@ None listed; use `context.py find` for dated evidence.
 - Sessions or access revocation affect SSE streams. [Live publishing, SSE and reconciliation](live-updates.md)
 - Stored identity/audit records or privileges change. [PostgreSQL schema, privileges and migrations](database.md)
 - Identity recovery or publication proof changes. [Recovery fences, replay and retained history](recovery.md)
+- Sign-in or directory work calls LDAP, ADAPI or another outside service while a request waits. [Reliability and failure behavior](reliability.md)
 
 ## Where the code lives
 

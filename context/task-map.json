@@ -2220,6 +2220,10 @@
         {
           "when": "Identity recovery or publication proof changes.",
           "topic": "recovery"
+        },
+        {
+          "when": "Sign-in or directory work calls LDAP, ADAPI or another outside service while a request waits.",
+          "topic": "reliability"
         }
       ],
       "repositories": [
