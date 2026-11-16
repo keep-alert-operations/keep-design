@@ -2075,7 +2075,11 @@ backchannel logout and revocation fences.
   422 with nothing saved. `GET …/resolve?kind=&username=` polls PostgreSQL only
   and hands a pending row with no live lease over again. The picker shows "Saving
   from the directory…", polls 3 seconds after each response, and offers Try again
-  (`retry: true`) on 503. Grants still accept only saved principals.
+  (`retry: true`) on 503. Grants still accept only saved principals. Added after
+  review (assistant-selected, 2026-11-16): a deleted stored principal (a tombstone)
+  isn't usable, so a group recreated in the directory is saved again on pick; and an
+  ADAPI call that outlasts its own timeout means the save didn't fit (202), not an
+  outage.
 - **Background saver (assistant-selected, 2026-11-15).** Pending saves keep the
   `directory_verification_requests` table, one row per `(source, object_id)`, with
   `kind`, `lease_owner`, `lease_until`, `last_failure` and `updated_at`. The
