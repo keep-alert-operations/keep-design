@@ -15,7 +15,7 @@ Sign-in and sessions, tenants and roles, grants, directory publication, tenant v
 ## Ask like
 
 - Who can see alerts from another tenant?
-- How does sign-in work with Keycloak?
+- How does password sign-in check an AD account?
 - Who is eligible to be assigned?
 
 ## Read first
@@ -27,17 +27,19 @@ None listed.
 Include each source's preamble and scope corrections, plus the selected sections and their subsections.
 
 - [identity-session](../../specs/spec-identity-configuration.md) — normative; preamble required.
-  - [1. Ownership and realm boundary](../../specs/spec-identity-configuration.md#1-ownership-and-realm-boundary)
+  - [1. Ownership and sign-in page](../../specs/spec-identity-configuration.md#1-ownership-and-sign-in-page)
   - [2. Login flow and browser boundary](../../specs/spec-identity-configuration.md#2-login-flow-and-browser-boundary)
-  - [4. Session and token settings](../../specs/spec-identity-configuration.md#4-session-and-token-settings)
+  - [3. Username and password authentication](../../specs/spec-identity-configuration.md#3-username-and-password-authentication)
+  - [4. Session settings](../../specs/spec-identity-configuration.md#4-session-settings)
   - [5. Session persistence and CSRF](../../specs/spec-identity-configuration.md#5-session-persistence-and-csrf)
-  - [6. LDAP federation and stable identity](../../specs/spec-identity-configuration.md#6-ldap-federation-and-stable-identity)
+  - [6. LDAP bind, ADAPI directory and stable identity](../../specs/spec-identity-configuration.md#6-ldap-bind-adapi-directory-and-stable-identity)
   - [7. Membership supply and the five-minute target](../../specs/spec-identity-configuration.md#7-membership-supply-and-the-five-minute-target)
   - [8. Applying access changes](../../specs/spec-identity-configuration.md#8-applying-access-changes)
   - [9. Outage behavior](../../specs/spec-identity-configuration.md#9-outage-behavior)
   - [10. Logout and revocation](../../specs/spec-identity-configuration.md#10-logout-and-revocation)
   - [11. Cache lifetime, restart and recovery](../../specs/spec-identity-configuration.md#11-cache-lifetime-restart-and-recovery)
-  - [14. Local Keycloak development exception](../../specs/spec-identity-configuration.md#14-local-keycloak-development-exception)
+  - [12. Global-super-admin setup and repair](../../specs/spec-identity-configuration.md#12-global-super-admin-setup-and-repair)
+  - [14. Local directory development exception](../../specs/spec-identity-configuration.md#14-local-directory-development-exception)
 - [tenant-access](../../specs/spec-tenant-access.md) — normative; preamble required.
   - [3. Grant model and changes](../../specs/spec-tenant-access.md#3-grant-model-and-changes)
   - [4. Administrator continuity](../../specs/spec-tenant-access.md#4-administrator-continuity)

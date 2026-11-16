@@ -8,8 +8,8 @@ behavior, database transaction boundaries and current worker scope are unchanged
 
 | Repository | Authoritative contents |
 |---|---|
-| keep-frontend | Next.js application, UI tests, generated HTTP types, Keycloak theme, frontend image |
-| keep-api | Product routes, human sessions, management commands, synchronous operator provisioning, live publishing and SSE |
+| keep-frontend | Next.js application including the sign-in page, UI tests, generated HTTP types, frontend image |
+| keep-api | Product routes, password sign-in and human sessions, directory search and save on pick, management commands, synchronous operator provisioning, live publishing and SSE |
 | keep-ingestion | Public v1 and private v2/Grafana Kafka admission, gateway proof, Kong policy, ingestion image |
 | keep-processor | Kafka source consumer, alert source processing and source transaction entrypoint |
 | keep-correlation | Changed-record consumer and correlation worker entrypoint |
@@ -22,8 +22,8 @@ behavior, database transaction boundaries and current worker scope are unchanged
 
 The service name is **Ingestion API**. The repository is `keep-ingestion`.
 Network ingress remains a network concept. A repository rename alone does not
-rename wire fields, Kafka roles, native endpoints, deployed database roles or the
-OIDC client ID; such migrations require explicit contracts. [REV-67](../decisions/design-register.md#rev-67--the-system-is-named-keep-2026-11-10)
+rename wire fields, Kafka roles, native endpoints or deployed database roles;
+such migrations require explicit contracts. [REV-67](../decisions/design-register.md#rev-67--the-system-is-named-keep-2026-11-10)
 is that contract for the rename from Appchi to Keep, including migration `0066`.
 
 ## Package and runtime boundaries

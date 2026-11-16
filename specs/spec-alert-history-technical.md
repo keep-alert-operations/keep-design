@@ -18,7 +18,7 @@ Keep the Python backend, PostgreSQL authority, Elasticsearch current-alert proje
 
 Use separately deployable application workload roles for ingress, Product API, Kafka source processing, correlation, search projection and scheduling/cleanup, sharing versioned Python packages/images with role-specific entrypoints. Ingress publishes directly to Kafka; source processing and indexing remain separate workloads. Replica counts, resource placement and allocations follow the OpenShift team's supported model and measured profile.
 
-Keep owns its schemas, query/compiler code, transactions, worker protocol, migrations and client behavior. Dedicated teams supply service versions, supported capabilities, credentials, capacity, durability and recovery interfaces; they retain infrastructure retention, backups, HA and topology. The user's team-owned Keycloak remains the already-selected identity-service ownership exception. All numerical application settings below are selected defaults or qualification requirements, not measured throughput or imposed infrastructure settings.
+Keep owns its schemas, query/compiler code, transactions, worker protocol, migrations and client behavior. Dedicated teams supply service versions, supported capabilities, credentials, capacity, durability and recovery interfaces; they retain infrastructure retention, backups, HA and topology. The user's team owns Keep's sign-in and directory configuration; Active Directory and ADAPI stay with their owning teams. All numerical application settings below are selected defaults or qualification requirements, not measured throughput or imposed infrastructure settings.
 
 ## 2. CEL compiler and runtime
 

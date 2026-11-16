@@ -1,7 +1,7 @@
 # Current service flow
 
-The diagram below reflects Kafka-first admission, REV-34–36 worker scope and the
-REV-37 repository split. PostgreSQL remains transactional authority; Kafka offsets
+The diagram below reflects Kafka-first admission, REV-34–36 worker scope, the
+REV-37 repository split and REV-73 password sign-in with the ADAPI directory. PostgreSQL remains transactional authority; Kafka offsets
 advance only after the required durable application proof.
 
 ```mermaid
@@ -21,12 +21,12 @@ flowchart LR
     UI[Frontend<br/>keep-frontend] --> API[Product API + live publishing + SSE<br/>keep-api]
     API --> PG
     API --> ES
-    API --> REDIS[Redis hints]
+    API --> REDIS[Redis hints + search cache]
     REDIS --> API
     API -->|SSE + PG reconciliation| UI
-    LDAP[Company LDAP] --> KC[Team-owned Keycloak]
-    KC --> API
-    LDAP -->|explicit trusted directory publication| PG
+    AD[Active Directory<br/>LDAP bind] -->|password check at sign-in| API
+    ADAPI[ADAPI directory REST] -->|sign-in lookup, search, save on pick| API
+    ADAPI -->|explicit directory refresh command| PG
     MIG[keep-migrations] -->|explicit ordered migration job| PG
 ```
 

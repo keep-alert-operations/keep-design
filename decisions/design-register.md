@@ -1943,3 +1943,202 @@ specific tenant.
 
 APIs, authorization, audit and operators are unchanged; no migration. Original issue
 IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
+
+## REV-73 — Keep password sign-in and ADAPI directory replace Keycloak (2026-11-15)
+
+User decisions. The user's team found the Keycloak↔LDAP integration unreliable and
+asked to remove Keycloak completely, in company and local environments. Keep gets
+its own username/password page; the Product API checks the password with one ldap3
+simple bind against Active Directory and reads people and groups from ADAPI, the
+company AD REST API ([identity configuration](../specs/spec-identity-configuration.md),
+[tenant access 5 and 12](../specs/spec-tenant-access.md#5-directory-selection-and-visibility),
+[worker scope 3–6](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have)).
+The user calls this "the new SSO"; it is password sign-in, not single sign-on. The
+user approved the plan on 2026-11-15 with background saves (Q9 = c). The user's
+decisions:
+
+- The sign-in page keeps the look of the former Keycloak theme. The bind is
+  `username@<domain>` (the format is a setting) with the password sent as UTF-8
+  bytes. The password is used for that one bind only: never stored, logged or
+  forwarded.
+- LDAP encryption is a setting, off for now on the private network; plain LDAP
+  locally. This overrides identity section 6's earlier rule that directory
+  connections use TLS with certificate validation.
+- After the bind, Keep looks the person up in ADAPI by samAccountName for the
+  display name and the disabled flag (`userAccountControl & 2`). A disabled person
+  is refused. A person unknown to Keep is saved at that moment.
+- Users and groups are identified by samAccountName ("samAccountName doesn't
+  change"); no GUID and no GUID reuse check.
+- Sessions last 24 hours absolute. There is no idle timeout, no Keep lockout and
+  sign-out is local only. Sign-in reads no groups, and a session is not rechecked.
+- Group membership and disablement change only through the manual directory
+  refresh, which stays a command. A scheduled refresh comes later, in its own
+  change with its own REV.
+- Picker searches use `/users` and `/groups` with `samAccountName=*term*` and
+  `customFilter=(displayName=*term*)`, with no security-group filter, and show the
+  display name only. Search answers are cached in Redis for "a couple of hours".
+- Save on pick: an administrator picking an unknown person or group makes Keep read
+  it (and a group's recursive members) from ADAPI and save it immediately. A group
+  too big to save within the request limit is saved in the background and shown as
+  pending (Q9 = c). For these request-started saves only, this replaces REV-35's
+  sentence in [worker scope 4](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have)
+  that unknown identities await explicit publication and "there is no autonomous job
+  to service that request in this scope".
+- Group members come from `/groups/members/user?samAccountName=…&isRecursive=true`,
+  which the user stated handles cycles, includes people reached through
+  distribution groups, has no 1,000 cap and does not take `attributesToLoad` (Q6).
+  `/users` returns disabled accounts too (Q7). Searches cap silently at 1,000 rows;
+  failures return non-200. Multi-domain forests are not handled (Q8: "dont consider
+  it"); there are no domain settings.
+- The `ClientId` header value comes from an environment variable (Q1).
+- Global super-admins are the user's team AD group, configured by samAccountName.
+- Keep's own LDAP directory reader is removed. Local development uses an OpenLDAP
+  container for passwords and a mock ADAPI with the same test users. The branch
+  `feature/replace-keycloak-authelia` is ignored.
+- **Accepted risks (user decisions).** Passwords cross the private network
+  unencrypted while encryption is off. Keep has no lockout; failed binds still count
+  toward AD's own lockout. A disabled person keeps access until the next refresh or
+  the end of their 24-hour session. A reused username inherits the old holder's
+  access.
+
+Removed by this decision: Keycloak and its realm, theme and local container; OIDC
+and the Authlib dependency; the routes `GET /auth/login`, `GET /auth/callback`,
+`POST /auth/activity` and `POST /auth/backchannel-logout`; Keep's LDAP directory
+reader; the 30-minute idle timeout and activity heartbeat; provider logout,
+backchannel logout and revocation fences.
+
+- **Directory source and identity (assistant-selected, 2026-11-15).** The source is
+  named `adapi`; `principals.object_id` holds the lowercase samAccountName. A lookup
+  gets a kind hint (the stored kind, the requested kind, or `user` at sign-in), asks
+  the hinted endpoint first and the other only if it has no row. An object is
+  deleted only when both endpoints return 200 with zero rows. More than one row is
+  ambiguous and fails closed, and a returned name must equal the key. Members whose
+  name ends in `$` are skipped. A group's label is `displayName` when returned, else
+  `cn`.
+- **ADAPI client (assistant-selected, 2026-11-15).** An httpx client sends the
+  `ClientId` header from `KEEP_ADAPI_CLIENT_ID`. Per-call timeouts are 5 seconds in
+  the refresh command and the smaller of 3 seconds and the remaining request budget
+  minus 1 second inside a request. A non-200 response or bad JSON means unavailable.
+  Member display names come in batches of 50 (`KEEP_ADAPI_LOOKUP_BATCH`) through an
+  escaped `customFilter` with `attributesToLoad`; a member a batch omits keeps the
+  members route's `userAccountControl` and is never marked deleted from a batch.
+- **Sign-in (assistant-selected, 2026-11-15).** The page is the Next.js route
+  `/sign-in`, outside `/auth` and outside the workspace catalog route. `POST
+  /auth/login` takes JSON `{username, password, return_to}` and checks, before any
+  bind, the human-authorization gate, the exact Origin, its own 4 KiB body limit and
+  identity-only `Content-Encoding`, the username (1–64 characters, no AD-forbidden
+  characters, no `@` or `\`) and a non-empty password, because an empty-password
+  simple bind succeeds anonymously on AD. The bind runs with 2-second connect and
+  receive timeouts, then LDAP WhoAmI must name the typed username (`u:DOMAIN\name`,
+  domain not checked, or the bind DN for `dn:`), because AD resolves a
+  userPrincipalName before `sAMAccountName@domain`. Results: 401
+  `authentication_rejected` for a wrong password, a WhoAmI mismatch or a disabled
+  account; 403 `account_not_in_directory` or `account_ambiguous` for zero or two
+  ADAPI rows; 503 `sign_in_unavailable` when LDAP or ADAPI is down or less than
+  1 second of the request budget remains before publishing. Sign-in publishes a
+  single-object evidence only when the person's row changed (new, renamed, enabled ↔
+  disabled; saving a changed row is an assistant addition the user approved with
+  the plan), so a re-enabled person can sign in and a disabled one loses their
+  other sessions. On success the previous cookie's session is revoked and a new
+  handle issued. `return_to` validation moves into the authentication module.
+- **Kept routes (assistant-selected, 2026-11-15).** `POST /auth/logout` is local
+  and returns no `logout_url`; `GET /auth/session` drops `refresh_uncertain` and
+  keeps `absolute_at`. Authentication drops the idle test, and visibility proofs
+  bind on the session handle hash, sign-in time and absolute deadline.
+- **Settings (assistant-selected, 2026-11-15).** `KEEP_LDAP_HOST`, `KEEP_LDAP_PORT`,
+  `KEEP_LDAP_USE_TLS` (default false), `KEEP_LDAP_CA_FILE`, `KEEP_LDAP_BIND_FORMAT`,
+  `KEEP_ADAPI_URL`, `KEEP_ADAPI_CLIENT_ID` (secret), `KEEP_ADAPI_LOOKUP_BATCH` (50),
+  `KEEP_ADAPI_SEARCH_CACHE_TTL_SECONDS` (7,200) and `KEEP_SUPERADMIN_GROUP`. The
+  Product API and the refresh command read this one super-admin setting; the
+  refresh's separate super-admin object ID setting is removed. The OIDC settings,
+  the directory configuration file and the search profile are removed. Bootstrap
+  stays `KEEP_DIRECTORY_BOOTSTRAP_QUALIFIED`.
+- **Search and its cache (assistant-selected, 2026-11-15).** In `customFilter`,
+  `( ) * \` are escaped. At most 200 rows are shown; a 1,000-row answer asks the
+  user to type more. Unsaved rows return `id: null`, and a search never changes what
+  is stored or queues anything. The cache holds the raw `/users` and `/groups`
+  answers for 2 hours under a SHA-256 key of kind and normalized term, merges stored
+  state from PostgreSQL on every request, feeds only picker listings, and falls
+  through to ADAPI when Redis is down or a value is corrupt. This widens Redis from
+  "hint transport" to "hint transport and non-authoritative picker search cache".
+- **Save on pick (assistant-selected, 2026-11-15).**
+  `POST /api/tenants/{id}/permission-principals/resolve` with `{kind, username,
+  retry}` is the only save route; tenant admins and global super-admins only. It
+  takes the exclusive identity guard first, then authorizes, then publishes. Check
+  order: a pending row (failed without `retry: true` → 503 with `last_failure`;
+  failed with `retry: true` → hand over again; leased or queued → 202); then a
+  stored, usable principal → 200 with no re-read; otherwise an inline save with a
+  7-second verifier deadline and at least 1 second left before publishing → 200,
+  or, when it does not fit, nothing published, a pending row, a hand-over and 202
+  `{status: "pending"}`. A fence rejection retries once within the budget, then 503
+  `directory_busy`. A name neither endpoint knows, or that two rows match, returns
+  422 with nothing saved. `GET …/resolve?kind=&username=` polls PostgreSQL only
+  and hands a pending row with no live lease over again. The picker shows "Saving
+  from the directory…", polls 3 seconds after each response, and offers Try again
+  (`retry: true`) on 503. Grants still accept only saved principals. Added after
+  review (assistant-selected, 2026-11-16): a deleted stored principal (a tombstone)
+  isn't usable, so a group recreated in the directory is saved again on pick; and an
+  ADAPI call that outlasts its own timeout means the save didn't fit (202), not an
+  outage.
+- **Background saver (assistant-selected, 2026-11-15).** Pending saves keep the
+  `directory_verification_requests` table, one row per `(source, object_id)`, with
+  `kind`, `lease_owner`, `lease_until`, `last_failure` and `updated_at`. The
+  hand-over claims a 120-second lease with a conditional update, and only the
+  winner queues the job. Each Product API process runs one saver thread with a
+  queue of 20; a full queue releases the claim. Each job runs in a fresh context
+  under its own 80-second budget (verifier deadline `min(60 s, remaining − 15 s)`,
+  ADAPI calls `min(5 s, remaining − 1 s)`), re-checks and extends its lease at
+  start, holds no database connection while reading ADAPI, filters every row update
+  on `lease_owner`, and turns any unexpected error into `directory_unavailable`.
+  Failure reasons are `directory_unavailable`, `directory_group_too_large`,
+  `directory_verification_deadline` and `directory_busy`; the verifier reports them
+  as structured reasons. The save-on-pick 202 is a deliberate exception to [worker
+  scope 3](../specs/spec-worker-scope.md#3-request-owned-operator-provisioning)'s
+  rule that no successful 202 means work continues in the background; operator
+  provisioning keeps that rule. The saver is the second background component inside
+  the Product API, next to REV-36's live publisher ([worker scope 5 and
+  6](../specs/spec-worker-scope.md#6-live-updates-inside-the-product-api)). Its
+  share of the existing API pool is one connection at a time per process, used
+  briefly for the claim, the publication and the result. Shutdown, before the pool
+  closes, sets a stop event, releases this process's leases and shuts the executor
+  down with `cancel_futures`. It is not a poller: it runs only jobs handed to it.
+- **Publications and the fence (assistant-selected, 2026-11-15).** Sign-in, save on
+  pick, the background save and the refresh all publish through the same publisher,
+  with generations allocated before reading. An evidence is rejected only when a
+  covered root or team has a newer generation; a covered user that a newer
+  generation holds is skipped, and memberships are rebuilt from current stored
+  eligibility. The publisher's per-object statements become set-based, so a
+  10,000-object publication holds the identity guard for well under one second.
+  Every publication that changes something advances `directory_revision` and fences
+  in-flight visibility proofs; this now also happens on first and changed
+  sign-ins, on saves on pick and, during a refresh, once per team.
+- **Refresh command (assistant-selected, 2026-11-15).** `directory --once` reads
+  through ADAPI. It publishes one evidence for all user roots (batched lookups) and
+  one per team root, each with its own generation and 10,000-object cap, so one
+  large or failing team cannot block the rest. A fence rejection retries once with a
+  new generation. Pending saves without a failure are included; failed ones are
+  skipped. The command lists every failed root and exits non-zero if any failed. The
+  publication covering the super-admin group carries the bootstrap flag. The group
+  refresh remains a manual command.
+- **Schema (assistant-selected, 2026-11-15).** Migration `0070_password_login_adapi`
+  drops `oidc_bindings`, `login_transactions` and `logout_fences` and the session
+  columns for issuer, subject, provider session, tokens, refresh state and activity;
+  extends `directory_verification_requests` and deletes its old rows; and grants
+  the API role SELECT, UPDATE and DELETE on it, INSERT, UPDATE and DELETE on
+  directory edges and root checkpoints, and USAGE on the directory generation
+  sequence. Applied migrations are unchanged.
+- **Local development (assistant-selected, 2026-11-15).** A pinned OpenLDAP image on
+  `127.0.0.1:58389` with bind format `uid={username},ou=people,dc=keep,dc=local`
+  (OpenLDAP does not accept `user@domain`), and a mock ADAPI
+  (`keep-delivery/scripts/local_adapi.py`, `127.0.0.1:58092`) started by local Start
+  that copies the stated response shapes, the `ClientId` check, the 1,000 cap and
+  non-200 errors. Local credentials, the wrapping key and the deployment epoch move
+  with their values preserved. A one-time remap moves existing local principals to
+  `adapi` usernames after migration 0070 and before the first refresh, so local
+  grants and history keep their owners. The OpenShift load-test bundle uses the same
+  two services.
+
+No company deployment exists, so there are no company users or grants to migrate.
+Before company use, one real call per ADAPI route and one real sign-in confirm the
+response shapes, the bind format and the WhoAmI answer. Original issue IDs and REV
+numbering are unchanged. Executed evidence belongs in delivery.
