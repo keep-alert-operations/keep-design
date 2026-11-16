@@ -108,9 +108,8 @@
       ],
       "finish": "Checks ran on the final code, results and skipped checks are recorded, and affected documentation is current.",
       "skills": [
-        "eng-plan",
-        "eng-verify",
-        "eng-deliver"
+        "write-plan",
+        "verify-work"
       ]
     },
     {
@@ -140,7 +139,7 @@
       ],
       "finish": "Findings ranked by severity with failure scenarios, or a clear statement that none survived verification.",
       "skills": [
-        "eng-review"
+        "review-change"
       ]
     },
     {
