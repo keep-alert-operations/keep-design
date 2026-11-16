@@ -33,6 +33,15 @@ Include each source's preamble and scope corrections, plus the selected sections
   - [16. Dependency recovery guarantees and application recovery](../../specs/spec-reliability-operations.md#16-dependency-recovery-guarantees-and-application-recovery)
   - [20. Application observability and telemetry ownership](../../specs/spec-reliability-operations.md#20-application-observability-and-telemetry-ownership)
   - [21. Operational alerting](../../specs/spec-reliability-operations.md#21-operational-alerting)
+- [observability-signals](../../specs/spec-observability.md) — normative; preamble required.
+  - [2. Log records](../../specs/spec-observability.md#2-log-records)
+  - [3. Alert content in logs](../../specs/spec-observability.md#3-alert-content-in-logs)
+  - [4. What is never logged](../../specs/spec-observability.md#4-what-is-never-logged)
+  - [5. Log quality rules](../../specs/spec-observability.md#5-log-quality-rules)
+  - [6. Shipping and indices](../../specs/spec-observability.md#6-shipping-and-indices)
+  - [7. Metrics](../../specs/spec-observability.md#7-metrics)
+  - [8. Service level classification](../../specs/spec-observability.md#8-service-level-classification)
+  - [9. Real user monitoring](../../specs/spec-observability.md#9-real-user-monitoring)
 - [kafka-first-runbook](../../../keep-delivery/docs/runbooks/kafka-first.md) — instruction; preamble required.
   - [Workload bindings](../../../keep-delivery/docs/runbooks/kafka-first.md#workload-bindings)
   - [Failure and recovery](../../../keep-delivery/docs/runbooks/kafka-first.md#failure-and-recovery)

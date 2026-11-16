@@ -681,6 +681,21 @@
       ],
       "include_preamble": true
     },
+    "observability-signals": {
+      "path": "keep-design/specs/spec-observability.md",
+      "authority": "normative",
+      "sections": [
+        "2. Log records",
+        "3. Alert content in logs",
+        "4. What is never logged",
+        "5. Log quality rules",
+        "6. Shipping and indices",
+        "7. Metrics",
+        "8. Service level classification",
+        "9. Real user monitoring"
+      ],
+      "include_preamble": true
+    },
     "reliability-gates": {
       "path": "keep-design/specs/spec-reliability-operations.md",
       "authority": "normative",
@@ -2452,6 +2467,10 @@
         "telemetry",
         "metric",
         "observability",
+        "logging",
+        "log record",
+        "rum",
+        "fluent bit",
         "operational alerting",
         "error budget",
         "overload"
@@ -2463,6 +2482,7 @@
       "orientation": [],
       "sources": [
         "reliability-failures",
+        "observability-signals",
         "kafka-first-runbook"
       ],
       "evidence": [

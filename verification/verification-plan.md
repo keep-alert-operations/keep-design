@@ -528,3 +528,96 @@ against the eventual supplied binding before claiming that integration qualified
 Verify OpenShift restricted execution, private routing, direct member TLS/DNS,
 startup order and replacement/requalification. Record local and target-cluster
 evidence separately.
+
+## Observability (REV-74)
+
+Check the [observability](../specs/spec-observability.md) contract on isolated real
+services. Local results do not establish company collection, the deployed logs
+cluster or a production 30-day indicator.
+
+- **Records.** Every process writes only valid records with the required fields;
+  every emitted event is in the catalog and every field in the registry with one
+  type; existing message-asserting tests pass unchanged. Each HTTP request yields
+  exactly one request record whose request ID equals the `X-Request-ID` response
+  header, and every other record of that request carries the same ID.
+- **Alert lookup.** An alert sent through the stack, then acknowledged and resolved
+  in the UI, is recovered by its alert ID from the source processor, correlation,
+  indexer and Product API indices in time order. The same alert is found by
+  application and component alone in every service's index including ingestion, and
+  its source-processor record holds every submitted field unchanged. A member
+  rejected at validation and a member whose publication was unconfirmed each leave
+  an ingestion record with the whole alert.
+- **Alert flow.** One alert sent through the stack leaves, in each of ingestion, the
+  source processor, correlation and the indexer, the steps of
+  [observability 3](../specs/spec-observability.md#3-alert-content-in-logs) in
+  sequence order, every one carrying the identifiers of its pass. The delivery ID
+  returns the ingestion, source-processor and correlation steps of one arrival, and
+  the changed-event ID the indexer's. A repeat, a clear, a replayed delivery, a
+  delivery refused after acceptance, a rejected member, an unconfirmed publication
+  and a change that needs no correlation each leave the step that names them. An
+  application or decision that rolls back leaves its failure record and no record
+  of the effect. With the outcome-only setting each service writes only its outcome
+  records and every failure.
+- **Actions on an alert.** Assigning, resolving, reopening, dismissing and noting
+  an alert in the UI, linking it to an incident and a bulk command each leave
+  `alert_changed` with the cause, the user, the status before and after and the
+  revision, the request ID of the response, and the changed-event ID under which
+  correlation and the indexer then record their own steps. A refused command
+  leaves only its request record with the error code. A command whose
+  transaction rolls back leaves no `alert_changed`.
+- **Real user monitoring.** Using the UI produces page views by section, page
+  load timings, the browser's own count of API calls by the application's route
+  templates, and live-connection time. An unhandled JavaScript error appears in
+  the browser index with its class and the user, and without its text. The
+  endpoint accepts a batch only with the session and its CSRF token, answers
+  "not found" when the setting is off, refuses a malformed batch whole and a
+  session that sends too often, and counts an event outside the closed sets as
+  invalid.
+- **Sign-in outcomes.** A sign-in leaves exactly one of `sign_in_completed`,
+  `sign_in_rejected` and `sign_in_unavailable`, under the request ID of its
+  request record, and increments the event counter with the same outcome and
+  reason. A completed one carries the user ID on the event and on the request
+  record. A rejected one carries its reason at `info` and no user; an
+  unavailable one is a `warning` that names LDAP or ADAPI. A sign-in that fails
+  after the bind for a database outage, a closed restore gate or an unexpected
+  error, or that outlasts the request's time, is still one unavailable event
+  under the error code the person was answered with. A reason is one of
+  the fixed codes or `other`. The typed username, the password and an error's
+  own text are in no record. Missing sign-in settings are reported once for
+  each process, by setting name only.
+- **Never logged.** Credentials, session cookies, tokens and user names carrying
+  canary strings appear in no record, including unhandled-exception paths. Alert
+  fields appear only under the alert object, never in a metric label or an error
+  field.
+- **Relevance.** An idle dashboard left open for ten minutes produces only summary
+  records for its automatic refreshes. A persisting failure is recorded at most
+  once a minute.
+- **Coverage.** Each catalogued flow and failure has a test that triggers it and
+  asserts its log event and metric. Every registered route has exactly one service
+  level class. Stopping Kafka, PostgreSQL, Elasticsearch, Redis and Fluent Bit in
+  turn produces the expected events and metrics.
+- **Shipping.** Each service's records arrive only in that service's index, and a
+  full run ends with no record rejected by Elasticsearch. With Fluent Bit stopped
+  for five minutes every service keeps working, ingestion admission latency is
+  unchanged, stderr holds every record, queued records arrive afterwards and any
+  beyond the queue limit are counted as dropped. With Elasticsearch stopped for
+  five minutes no record is lost or duplicated. The logs and alert-search targets
+  work as one cluster and as two.
+- **Event metrics.** Each step of an alert sent through the stack increments the
+  counter of its own name in the service that took it, with the same outcome
+  and reason as its record, also when the record is not written. The stage
+  timings appear in the delay and duration histograms, whose buckets hold the
+  1, 2 and 5 second thresholds. Consumer lag follows the broker. Every alert
+  rule passes its unit test and the rule file loads.
+- **Metrics.** `/metrics` answers on each process's metrics port and not on any
+  public application port. No metric has a label outside the allowed list, and no
+  label's value set grows with tenants, alerts or users. Indicator recording rules
+  and alert rules pass rule unit tests, including minimum-observation guards.
+- **RUM.** Browser journeys produce the expected numbers for a page load, a section
+  change, a forced API failure, a dropped live connection and a thrown JavaScript
+  error. The endpoint rejects unauthenticated, oversized and malformed batches,
+  limits a session's rate and leaves the session's activity time unchanged.
+- **Cost.** With instrumentation on, admission p99 and source-processor throughput
+  stay within their normal run-to-run spread, and the measured log volume per
+  delivery is reported. With every new setting unset, behavior is unchanged except
+  that stderr logs are structured.

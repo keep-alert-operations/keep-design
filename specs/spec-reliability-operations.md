@@ -155,6 +155,8 @@ Owning teams decide physical sizing, replicas, headroom, expansion, forecasts an
 
 ## 20. Application observability and telemetry ownership
 
+**Later user decision — 2026-11-12 (REV-74):** [Observability](spec-observability.md) is the signal contract for the requirements below. Alert-level log records carry the alert's native fields, which supersedes "alert bodies" in the redaction sentence of this section for log records; secrets stay redacted and alert values stay out of metric labels. Trace sampling is not built in this scope and remains a recorded gap.
+
 Keep emits outcomes/latency, Kafka partition lag/age/retention risk, non-alert job depth, blocked processing/proof, correlation health, scheduler/projection lag and UI acknowledgement coverage through supported company observability interfaces. Use Prometheus-compatible metrics where provided. Dedicated teams monitor their services and expose agreed health/incident signals.
 
 Observability/technology teams own telemetry storage/retention and infrastructure audit policy. Obtain sufficient measurements or supported aggregates for rolling 30-day application SLIs; record any compatibility gap. Retain 1% successful application trace sampling with bounded error coverage within the collector team's limits.
