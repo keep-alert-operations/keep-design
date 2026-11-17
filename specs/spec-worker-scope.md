@@ -131,21 +131,31 @@ with the worker; the current release does not claim it.
 **Later user decision — 2026-11-15 (REV-73):** Keep's password sign-in (one LDAP
 bind) and the ADAPI directory replace the earlier identity provider.
 Keycloak, OIDC and Keep's LDAP directory reader were removed by REV-73.
-The group refresh remains
-a manual command. Saves started by an administrator's pick may finish in the
+The group refresh remained
+a manual command until REV-75 (below). Saves started by an administrator's pick may finish in the
 background; for those saves only, this replaces the earlier rule that no autonomous
 job services an API request for an unknown identity.
+
+**Later user decision — 2026-11-17 (REV-75):** the refresh command runs once a day
+as an OpenShift CronJob (below), so group membership changes reach Keep within a
+day. It is the same one-off command, not a directory worker: the directory role,
+pollers inside services and the five-minute target stay deferred.
+
+**Later user decision — 2026-11-17 (REV-76):** Keep no longer handles disabled or
+deleted people; deleted groups keep their handling
+([identity 6](spec-identity-configuration.md#6-ldap-bind-adapi-directory-and-stable-identity)).
 
 **Boundary:** preserve Keep-owned grants and the accepted PostgreSQL identity
 checkpoint. Existing eligible users use the last trusted checkpoint without an age
 cutoff. Current Keep grant edits, known revocations and session expiry still apply.
 Sign-in reads only the person's own ADAPI row and publishes it when it changed; it
 never reads groups, and sessions are not rechecked. Do not treat AD groups as Keep
-permissions or quietly introduce a background poller or a scheduled refresh; a
-scheduled refresh is a later change with its own REV.
+permissions or introduce a background poller inside a service. The daily scheduled
+refresh (REV-75) is the only scheduled directory work.
 
-Explicit, complete trusted publication supplies initial bootstrap, manual refresh,
-sign-in of a new or changed person, save on pick and restore validation. Active
+Explicit, complete trusted publication supplies initial bootstrap, the daily and
+manual refresh, sign-in of a new or changed person, save on pick and restore
+validation. Active
 Directory, read through ADAPI, remains authoritative; the local directory
 development exception ([identity 14](spec-identity-configuration.md#14-local-directory-development-exception))
 remains separate. Grants accept only saved principals; without the required
@@ -189,9 +199,26 @@ covered. Each publication advances the directory revision, so a refresh fences
 in-flight visibility proofs once per team. With `KEEP_DIRECTORY_BOOTSTRAP_QUALIFIED`,
 the publication covering the global-super-admin group carries the bootstrap flag.
 
+**Daily scheduled refresh (REV-75).** The CronJob `keep-directory-refresh` runs
+`python -m keep.identity.worker --once --budget-seconds ${RUN_BUDGET_SECONDS}` from
+the Product API image with the dedicated identity database login, by default at
+`0 2 * * *`. It forbids overlapping runs (`concurrencyPolicy: Forbid`), retries
+nothing (`backoffLimit: 0`, `restartPolicy: Never`), may start up to an hour late
+(`startingDeadlineSeconds` 3,600) and is stopped after 2,100 seconds
+(`activeDeadlineSeconds`). It can be suspended, uses two database connections
+(`KEEP_POOL_SIZE=2`) and never bootstraps: no `--bootstrap`, and
+`KEEP_DIRECTORY_BOOTSTRAP_QUALIFIED=false` explicitly. Its run budget (default
+1,800 seconds) and SIGTERM set the refresh's stop event, checked before every ADAPI
+call; a stop never interrupts a publication. Units not yet read fail as
+`directory_stopped`, units already published stay published, and the run still
+reports and exits 1. A manual run has no budget unless given one. Both entry points
+write REV-74 log records as service `api`, role `directory-refresh`
+([identity 13](spec-identity-configuration.md#13-operation-and-qualification)).
+An urgent change is applied by starting a Job from the CronJob at once.
+
 Local Start publishes once before starting API/UI. Local administrators use
 `scripts/local-identity.ps1 -Action Refresh` after identity changes; this action
-publishes once and does not start a worker.
+publishes once and does not start a worker. The local stack has no scheduler.
 
 ## 5. Nice-to-have components
 
@@ -202,7 +229,7 @@ publishes once and does not start a worker.
 | Inactivity sweeps | Automatically resolve stale alerts/incidents under their distinct activity anchors. |
 | Retention sweeps | Reclaim eligible content under dependency, replay, rebuild and protected-recovery proof. |
 | Operator background orchestration | Automatic retry/restart recovery and periodic drift repair with independent scaling. |
-| Directory worker | Automatic or scheduled trusted user/team refresh through ADAPI (the user wants a scheduled group refresh later, under its own REV); reinstate and qualify complete membership, disablement, five-minute propagation and last-trusted outage behavior. |
+| Directory worker | Continuous trusted user/team refresh through ADAPI, beyond REV-75's daily scheduled run of the one-off command; reinstate and qualify complete membership, five-minute propagation and last-trusted outage behavior. |
 
 CLI startup rejects the deferred roles. Retained internal algorithms/tests are not
 an environment flag to enable them silently. Reintroduction requires an explicit
@@ -211,7 +238,8 @@ processor, indexer, correlation, frontend and backend. Two kinds of background
 work run inside the Product API: live publishing under REV-36 and request-started
 directory saves under REV-73 (section 6). Explicit recovery/proof helpers remain.
 This is not a claim of exactly six running processes or replicas.
-The directory role is deferred by REV-35; explicit one-off publication remains.
+The directory role is deferred by REV-35; explicit one-off publication remains, and
+REV-75 runs it once a day as a CronJob that exits after each run.
 See [implementation evidence](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/worker-scope-implementation.md).
 
 ## 6. Live updates inside the Product API

@@ -49,6 +49,7 @@ Bit. The stderr copy may be rendered as `event key=value` text for a local conso
 | `keep.kafka.topic`, `keep.kafka.partition`, `keep.kafka.offset`, `keep.kafka.consumer`, `keep.projection_seq` | Positions |
 | `keep.outcome`, `keep.reason`, `keep.cause`, `keep.status_before`, `keep.status_after`, `keep.revision`, `keep.suppressed` | The domain outcome and its cause |
 | `keep.count`, `keep.member`, `keep.attempt`, `keep.repeats`, `keep.fields`, `keep.time_defaulted`, `keep.audit` | Batch size, index of the alert in its request, attempt number, number of like records not written since the last one, names of the fields a rejected alert got wrong, whether the creation time was defaulted, audit marker |
+| `keep.kind`, `keep.root`, `keep.units`, `keep.published`, `keep.failed_roots` | Directory refresh (REV-75): the kind of a failed root (`team` or `user`), a failed group's samAccountName (never a person's), the run's units, units published and failed roots |
 
 Every field is declared once, with one type, in a field registry in `keep-domain`,
 and every event once in an event catalog there. A record may use only registered
