@@ -2407,6 +2407,12 @@ entirely ([identity 3 and 6–11](../specs/spec-identity-configuration.md#3-user
   and returns the same row shape, as a list holding one object. Batches
   (`customFilter`) and picker searches stay on `/users`; exact group lookups stay on
   `/groups`. This has not been checked against the real ADAPI.
+- When no person matches, `/users/user` answers 404 (user answer, 2026-11-17). Keep
+  reads that 404 as "no row" without reading its body; every other non-200 and every
+  malformed body stays "directory unavailable". A 404 caused by a wrong ADAPI path
+  also reads as "no row"; since a missing person is never stored or negated, that
+  only turns sign-in's 503 into 403 `account_not_in_directory` and a pick's 503 into
+  422 (accepted risk, assistant-selected handling).
 
 This supersedes REV-73's disabled check at sign-in, its rule that a disabled person
 loses their other sessions, and its accepted risk that "a disabled person keeps
