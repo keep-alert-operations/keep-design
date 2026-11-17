@@ -35,7 +35,8 @@ repositories are missing inputs; do not create substitute specifications.
 
 An intent is the kind of request. It decides which topic fields a plan shows, adds
 any Keep-specific reading, and lists steps and a finish line. Generic procedure
-stays in the shared eng-* skills; intents only point to them.
+stays in the global agent skills (`write-plan`, `verify-work`, `review-change`);
+intents only point to them.
 
 | Intent | For | Adds |
 |---|---|---|
@@ -215,8 +216,9 @@ source references after changes, and inspect the dates/revisions behind evidence
 
 For substantial work, keep the objective, intent, selected topics, authoritative
 source references, decisions, completed verification and unresolved dependencies
-in the existing task checkpoint. On resume, reconcile that checkpoint with current
-instructions, files and Git state. A checkpoint never overrides a changed source.
+in the task's plan file in `.plans/` at the workspace root. On resume, reconcile that
+plan file with current instructions, files and Git state. A plan file never
+overrides a changed source.
 
 ## Maintain and evaluate the layer
 

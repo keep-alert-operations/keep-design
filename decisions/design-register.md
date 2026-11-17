@@ -2465,3 +2465,18 @@ Rollback is a revert: the schema is unchanged and stored rows stay valid under b
 versions; after a revert, people stay eligible until their next sign-in or pick
 reads `userAccountControl` again. Original issue IDs and REV numbering are
 unchanged. Executed evidence belongs in delivery.
+
+## Context catalog: current skill names and plan files — 2026-11-16
+
+The user reviewed the workspace agent guidance and asked to drop the Codex wording
+and the `codex/` branch prefix, naming new branches by the kind of work instead
+(`feat/`, `fix/` and similar). The guidance itself lives in delivery; this repository
+changes only where the catalog and the context guide named retired skills or an
+undefined task checkpoint.
+
+Assistant-selected details: the `change` intent points to `write-plan` and
+`verify-work` and the `review` intent to `review-change`; the old `eng-deliver`
+pointer is dropped because no current skill replaces it. The context guide names a
+substantial task's plan file in `.plans/` at the workspace root as the place for its
+objective, decisions, verification and unresolved dependencies. Navigation and
+process wording only; no product requirement, issue ID or REV number changes.
