@@ -155,6 +155,8 @@ Owning teams decide physical sizing, replicas, headroom, expansion, forecasts an
 
 ## 20. Application observability and telemetry ownership
 
+**Later user decision — 2026-11-12 (REV-74):** [Observability](spec-observability.md) is the signal contract for the requirements below. Alert-level log records carry the alert's native fields, which supersedes "alert bodies" in the redaction sentence of this section for log records; secrets stay redacted and alert values stay out of metric labels. Trace sampling is not built in this scope and remains a recorded gap.
+
 Keep emits outcomes/latency, Kafka partition lag/age/retention risk, non-alert job depth, blocked processing/proof, correlation health, scheduler/projection lag and UI acknowledgement coverage through supported company observability interfaces. Use Prometheus-compatible metrics where provided. Dedicated teams monitor their services and expose agreed health/incident signals.
 
 Observability/technology teams own telemetry storage/retention and infrastructure audit policy. Obtain sufficient measurements or supported aggregates for rolling 30-day application SLIs; record any compatibility gap. Retain 1% successful application trace sampling with bounded error coverage within the collector team's limits.
@@ -164,6 +166,8 @@ Keep redacts secrets/alert bodies from diagnostics, avoids high-cardinality sour
 ## 21. Operational alerting
 
 **Current scope (REV-34):** Maintenance execution-lag alerts assume the deferred maintenance scheduler and do not apply; see [worker scope](spec-worker-scope.md#1-maintenance-without-a-scheduler). Burn-rate, probe, escalation and operator failure signals below remain normative.
+
+**Daily directory refresh (REV-75).** The scheduled refresh supplies signals, not alerts: a failed Job (exit 1, or `DeadlineExceeded` past its 2,100-second deadline), `directory_root_failed` and `directory_refresh_completed` records naming failed group roots and counts, and `directory_refresh_failed` when a run cannot start ([worker scope 4](spec-worker-scope.md#4-directory-synchronization-is-nice-to-have)). The team that operates the cluster sets the alert rules; a failed or missing daily run matters most, because the roots it missed stay up to two days old. A failure never removes access. The freshness metric waits for the REV-74 state collector.
 
 For each SLO separately, compute burn rate as observed bad fraction divided by its allowed fraction: 0.001 for availability, 0.01 for the p99 latency threshold. Require both windows to breach: 14.4 times budget burn over one hour and five minutes, or six times over six hours and thirty minutes, triggers urgent response; one times over three days and six hours creates a non-urgent work item. This follows the [Google SRE multiwindow burn-rate approach](https://sre.google/workbook/alerting-on-slos/).
 
