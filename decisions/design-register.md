@@ -2320,3 +2320,142 @@ estimate only. Consequences recorded for the operating owners: the log indices h
 every tenant's alerts outside Keep's tenant permissions, and nothing rolls over or
 deletes them. Original issue IDs and REV numbering are unchanged. Executed evidence
 belongs in delivery.
+
+## REV-75 — Daily scheduled directory refresh (2026-11-17)
+
+User decisions. Under REV-73, group membership reached Keep's PostgreSQL only
+through the manual directory refresh. The user asked for a job that refreshes the
+groups ("later we need to create a cron job to refresh the groups", 2026-11-15),
+accepted an OpenShift CronJob that runs the existing one-off refresh command
+(2026-11-16) and chose to run it once a day (2026-11-17)
+([worker scope 4](../specs/spec-worker-scope.md#4-directory-synchronization-is-nice-to-have),
+[identity 7–9](../specs/spec-identity-configuration.md#7-membership-supply-and-the-five-minute-target)).
+This supersedes REV-73's "the group refresh remains a manual command" and worker
+scope 4's rule that a scheduled refresh is a later change. REV-35 is otherwise
+unchanged: there is no directory worker, no poller inside a service, no in-session
+recheck and no five-minute target. A membership change waits up to a day; an urgent
+one is applied by running the job at once.
+
+Assistant-selected details (2026-11-16 and 2026-11-17):
+
+- **The job.** An OpenShift CronJob `keep-directory-refresh` (pod label
+  `app: keep-directory-refresh`) runs
+  `python -m keep.identity.worker --once --budget-seconds ${RUN_BUDGET_SECONDS}`
+  from the Product API image, with the dedicated identity database login the
+  refresh already uses. The schedule is a parameter, default `0 2 * * *` (the time
+  of day is an assistant choice). `concurrencyPolicy: Forbid`, so runs never
+  overlap; `startingDeadlineSeconds` 3,600; `activeDeadlineSeconds` 2,100;
+  `backoffLimit: 0` and `restartPolicy: Never`, so a failed run waits for the next
+  day or a manual run; a `SUSPEND` parameter; the migration Job's security
+  context; `KEEP_POOL_SIZE=2`.
+- **No bootstrap from the job.** It never passes `--bootstrap` and sets
+  `KEEP_DIRECTORY_BOOTSTRAP_QUALIFIED=false` explicitly, so a scheduled run cannot
+  open the initial bootstrap gate
+  ([identity 12](../specs/spec-identity-configuration.md#12-global-super-admin-setup-and-repair)).
+  Bootstrap stays a manual run.
+- **Run budget.** `--budget-seconds` (job default 1,800, below the 2,100-second
+  deadline) and a SIGTERM handler set the refresh's stop event, which is checked
+  before every ADAPI call. A stop never interrupts a publication: units not yet
+  read fail as `directory_stopped`, units already published stay published, and
+  the run still writes its summary and exits 1. A manual run has no budget unless
+  given one. `directory_stopped` is a refresh result only; it is never stored as a
+  pending save's `last_failure`.
+- **Logs.** Both entry points, `python -m keep.identity.worker` and delivery's
+  `directory --once`, configure REV-74 logging as service `api`, role
+  `directory-refresh`. The refresh writes `directory_root_failed` for each failed
+  team root (the group's samAccountName and the reason) and for each failed batch
+  of person roots (their number and the reason, never their names, because
+  observability 4 keeps user names out of log records);
+  `directory_refresh_completed` (units, published units, failed roots, duration);
+  and `directory_refresh_failed` (reason and error class only, never a message or
+  stack) when the run cannot start. This supersedes REV-74's "not selected: events
+  for the directory refresh". The stdout lines and exit codes are unchanged.
+  OpenShift has no Fluent Bit yet, so the records reach the pod's stderr only.
+- **Signals, not alerts.** Keep supplies the failed Job and these records; the team
+  that operates the cluster sets the alert rules
+  ([reliability 21](../specs/spec-reliability-operations.md#21-operational-alerting)).
+  A freshness metric waits for REV-74's state collector.
+- **Where it runs.** The OpenShift load-test bundle renders the CronJob suspended,
+  with network-policy allowlists for its label. The local stack stays manual: local
+  Start and `local-identity.ps1 -Action Refresh`.
+
+Accepted risks: a failed, slow or cut-short run leaves the roots it missed up to
+two days old until the next run or a manual rerun, and a failure never removes
+access. ADAPI load is about two calls per group, plus one per 50 group members and
+one per 50 tracked people, once a day. Scheduling, Forbid, the deadline and
+environment precedence are checked through the rendered template only; no
+OpenShift run has been made. Original issue IDs and REV numbering are unchanged.
+Executed evidence belongs in delivery.
+
+## REV-76 — Keep stops tracking disabled or deleted people (2026-11-17)
+
+User decisions. The user's organization does not disable or delete user accounts
+("my organization does not disable or delete users", 2026-11-17), so Keep stops
+handling disabled or deleted people, and the user chose to remove that handling
+entirely ([identity 3 and 6–11](../specs/spec-identity-configuration.md#3-username-and-password-authentication),
+[tenant access 3–6](../specs/spec-tenant-access.md#3-grant-model-and-changes)):
+
+- Sign-in no longer refuses a person whom ADAPI reports as disabled; Keep no longer
+  reads `userAccountControl`.
+- No sign-in and no directory publication ends anyone's sessions.
+- A person absent from both ADAPI endpoints is no longer stored as a deleted
+  tombstone.
+- Deleted groups keep their handling ("keep groups", 2026-11-17): a group absent
+  from both endpoints is still a tombstone, and its members lose that path.
+- Exact single-person lookups use ADAPI `GET /users/user`. It takes the same query
+  parameters as `/users` (`samAccountName=<name>` and repeated `attributesToLoad`)
+  and returns the same row shape, as a list holding one object. Batches
+  (`customFilter`) and picker searches stay on `/users`; exact group lookups stay on
+  `/groups`. This has not been checked against the real ADAPI.
+
+This supersedes REV-73's disabled check at sign-in, its rule that a disabled person
+loses their other sessions, and its accepted risk that "a disabled person keeps
+access until the next refresh or the end of their 24-hour session". REV-73's text
+stays as history.
+
+**Accepted risk (user decision).** If someone is disabled after all, AD refuses
+their next bind, but an open session lasts to its 24-hour deadline, and they still
+count as a group member (for example as a tenant administrator or an assignee)
+until they are removed from the group. A deleted person drops out of a group's
+members at the next refresh, because the members route stops listing them; their
+direct grants stay.
+
+Assistant-selected details (2026-11-17):
+
+- **Every person is eligible.** The reader neither requests nor parses
+  `userAccountControl`, so a missing or odd value no longer fails a read, and people
+  are always written as eligible and not deleted. The `principals.eligible` and
+  `deleted` columns and the read-side checks for `eligible AND NOT deleted` stay,
+  with no migration: they still serve deleted groups and access lost through
+  grants, and for people they no longer trigger.
+- **A missing person.** A lookup still reports a person absent from both endpoints
+  as not found, but publication neither stores nor negates them: no tombstone and
+  no change to a stored row. No failure reason is added, because a new one would
+  need a migration widening `last_failure`'s check. A pending pick of a missing
+  person therefore does not fail the other people in its refresh evidence: the
+  evidence completes and the pending row is deleted. Save on pick of a missing
+  person returns 422 `principal_not_in_directory`, as for a missing group.
+- **Old rows are lifted.** A person stored as ineligible or deleted by an earlier
+  version becomes eligible through their next sign-in, a pick (a stored person is
+  usable on pick only when eligible, so the pick reads ADAPI again), or a refresh
+  that tracks them or a group they are in.
+- **Sign-in.** A correct bind for a person with one ADAPI row signs in. No row
+  still returns 403 `account_not_in_directory`, and two rows 403
+  `account_ambiguous`. Sign-in keeps its stored-row check after publishing: when the
+  stored row is still unusable (a newer publication fenced the sign-in's, or an
+  older version wrote it ineligible during a rolling deploy), it returns a
+  retryable 503 `sign_in_unavailable` and creates no session. The rejection reasons
+  `account_disabled` and `account_ineligible` are removed.
+- **The refresh** still re-reads people, for display names and to lift old
+  ineligible rows; its roots are unchanged.
+- **Local development.** The `local-disabled` test user and the mock ADAPI's
+  disable and enable hooks are removed. The mock keeps ADAPI's response shape,
+  including `userAccountControl`, and its removal hooks, and it serves
+  `/users/user`.
+- **The frontend is unchanged.** Its "Ineligible" label for a person becomes
+  unreachable; removing it is a separate follow-up.
+
+Rollback is a revert: the schema is unchanged and stored rows stay valid under both
+versions; after a revert, people stay eligible until their next sign-in or pick
+reads `userAccountControl` again. Original issue IDs and REV numbering are
+unchanged. Executed evidence belongs in delivery.

@@ -26,7 +26,7 @@ flowchart LR
     API -->|SSE + PG reconciliation| UI
     AD[Active Directory<br/>LDAP bind] -->|password check at sign-in| API
     ADAPI[ADAPI directory REST] -->|sign-in lookup, search, save on pick| API
-    ADAPI -->|explicit directory refresh command| PG
+    ADAPI -->|directory refresh command, daily CronJob or by hand| PG
     MIG[keep-migrations] -->|explicit ordered migration job| PG
 ```
 
