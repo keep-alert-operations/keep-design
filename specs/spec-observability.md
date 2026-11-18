@@ -228,8 +228,8 @@ not as a failed scrape.
 
 ## 8. Service level classification
 
-Each HTTP request is classified once into `ingest_v1`, `ingest_v2`,
-`ingest_grafana`, `read`, `command`, `search`, `operator_command`, `validate`,
+Each HTTP request is classified once into `ingest_v1`, `ingest_v1_grafana`
+(the Grafana webhook into Global, REV-77), `ingest_v2`, `ingest_grafana`, `read`, `command`, `search`, `operator_command`, `validate`,
 `auth`, `live`, `rum`, `admin` or `health`, and its outcome into good, bad or
 excluded under reliability 3. Every registered route has exactly one class; a
 request that matches no route is `unmatched` and always excluded.
