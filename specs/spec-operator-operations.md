@@ -204,3 +204,22 @@ V1 recovery and broader alert replay continue to follow their selected contracts
 ## 29. Isolated local development
 
 The isolated development stack installs the actual keep-policy Lua plugin alongside Kong OSS Key Auth and exercises the same policy evaluator and non-ingesting proof routes. The local directory development exception ([identity 14](spec-identity-configuration.md#14-local-directory-development-exception)) is separate and unchanged here. Bind the observed node-local gateway identity and actual installed versions; synthetic identity-only readiness is not plugin proof. Local results are development evidence, not qualification of a shared company fleet. See [local v2](https://github.com/keep-alert-operations/keep-delivery/blob/main/docs/local-v2.md) and [Kafka-first pipeline](spec-kafka-alert-pipeline.md) section 7.
+
+## 30. Grafana webhook to native v1 (REV-77)
+
+Grafana can also send v1 alerts. `POST /api/ingest/v1/grafana` accepts the same standard webhook envelope as section 17, without authentication, like the native v1 route ([alert operations 10](spec-alert-operations.md#10-request-shapes-and-gateway-context)). Its alerts go to the fixed Global tenant. It involves no operator, API key, Kong route or routing label: Global has no managed operators, and the public ingestion listener serves it like `/api/ingest/v1/alerts`. Envelope validation and limits are those of sections 18–19.
+
+Each member maps to one native v1 payload:
+
+| v1 field | Grafana source |
+|---|---|
+| application, object, node_name, operator | Same-named per-alert labels, required. |
+| severity | Per-alert `severity` label, required: `error`, `major`, `warning` or `clear`. A member whose status is `resolved` becomes `clear`, so the alert resolves and keeps its last known severity ([alert operations 4](spec-alert-operations.md#4-severity-exceptional-clear-and-nulls)). |
+| key_field | Optional per-alert `key_field` label. Without it, the v1 key is derived from application, object and node_name ([alert operations 6](spec-alert-operations.md#6-v1-identity-encoding-and-collision-protection)). |
+| message | Per-alert `message` annotation, required. |
+| time_created | Required per-alert `startsAt`, converted as in section 18. |
+| provider, alert_rule_url | `grafana` and the per-alert `generatorURL`, as in section 18. |
+
+Validation then follows the native v1 rules. Each error names the Grafana source at fault, for example `labels.object`, `annotations.message` or `startsAt`. The adapter version `keep-grafana-native-v1` is recorded with the original member bytes, as in section 18. A received event may carry it only for v1, and `keep-grafana-v1` only for v2. The processor deploys before ingestion.
+
+Grafana rules that send the same application, object and node become one v1 alert unless they send different `key_field` labels (user decision, 2026-11-18). Teams repeat the original labels on resolution. The route is unauthenticated: anyone who can reach it can post to Global, the same exposure as the native v1 route.

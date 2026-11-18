@@ -626,3 +626,32 @@ cluster or a production 30-day indicator.
   stay within their normal run-to-run spread, and the measured log volume per
   delivery is reported. With every new setting unset, behavior is unchanged except
   that stderr logs are structured.
+
+## V1 alerts as sent and Grafana v1 (REV-77)
+
+Check [alert operations 3, 4 and 10](../specs/spec-alert-operations.md#3-managed-field-catalog)
+and [operator operations 30](../specs/spec-operator-operations.md#30-grafana-webhook-to-native-v1-rev-77).
+The plan criteria of the 2026-11-18 change (A1–A11) map onto these items as noted.
+
+1. **Stored as sent (A1, A2).** A native v1 alert with `object` and `major` is stored
+   and searchable as `object` and `major`, with `component` null; `severity == "high"`
+   does not find it. A v1 clear resolves it and keeps `major`; a later `error` for
+   the same key is an `identity_conflict`. A source update to a v1 alert stored
+   before REV-77 converts it first, with no activity row for the change of words.
+2. **V2 unchanged (A3).** v2 alerts keep `component` and critical/high, and S3 passes.
+3. **Conversion (A4, A5, A10).** The conversion rewrites Global's presets, maintenance
+   windows and correlation rules, then its v1 alerts, with new revisions and no
+   change to history or proof. Rewritten definitions match as before; an alert a
+   window suppressed stays suppressed and creates no incident; an expression it
+   cannot rewrite safely is listed and left as it was; specific tenants are not
+   touched; a second run changes nothing; `--reverse` restores the old words.
+4. **Older records (A9).** Correlation and maintenance accept journal rows and proof
+   recorded before REV-77, and that proof still compares byte-identical.
+5. **The UI (A6, A7).** In Global, alert details show Application, Object, Node
+   name, Operator and Provider, with no Component, Site, Impact or Runbook. Columns,
+   sort, grouping and quick views use Object and Error/Major/Warning. Specific
+   tenants are unchanged.
+6. **Grafana v1 (A8).** A standard Grafana webhook to `/api/ingest/v1/grafana`
+   creates a Global v1 alert with provider `grafana` and the rule link; a resolved
+   member resolves it and keeps its severity; a missing label is a 422 naming
+   `labels.<name>`. The v2 Grafana route is unchanged.
