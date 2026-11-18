@@ -2466,6 +2466,80 @@ versions; after a revert, people stay eligible until their next sign-in or pick
 reads `userAccountControl` again. Original issue IDs and REV numbering are
 unchanged. Executed evidence belongs in delivery.
 
+## REV-77 — V1 alerts kept as sent, shown as v1, and Grafana v1 (2026-11-18)
+
+User decisions. The user asked that v1 alerts not be translated into v2 words
+("dont change the labels and values of the v1 alerts to match v2 … save the alert as
+it is", 2026-11-17), that alert details and columns show v1 fields for v1 alerts,
+and that Grafana can send v1 alerts ("it will send a firing alert and then a
+resolved alert"). The user then chose ([alert operations 3, 4 and 10](../specs/spec-alert-operations.md#3-managed-field-catalog),
+[operator operations 30](../specs/spec-operator-operations.md#30-grafana-webhook-to-native-v1-rev-77)):
+
+- **Stored as sent.** A v1 alert keeps `object` and its severities `error`, `major`
+  and `warning`. This supersedes the error→critical and major→high mapping and the
+  mapping of `object` to `component`.
+- **Resolve keeps the severity** (2026-11-17). A resolved v1 alert keeps its last
+  real severity and only its status becomes resolved, as before.
+- **Status stays** (2026-11-17). v1 alerts keep showing Status (firing, acknowledged,
+  resolved). A Grafana `resolved` keeps the previous severity and is treated as
+  status resolved.
+- **Grafana v1 route** (2026-11-17). Grafana sends its standard webhook to a new
+  unauthenticated `POST /api/ingest/v1/grafana`, into Global, with provider
+  `grafana`.
+- **Convert automatically** (2026-11-17). Stored v1 alerts go back to their original
+  values, and Global's saved presets, maintenance windows and correlation rules are
+  rewritten so they keep matching.
+- **Accepted** (2026-11-18). Grafana rules on the same application, object and node
+  become one v1 alert unless they send different `key_field` labels. Rewriting a
+  Global correlation rule restarts it as an edit would: alerts from before stop
+  counting toward it, and open grouped incidents stop collecting new alerts.
+
+Assistant-selected details (2026-11-17 and 2026-11-18):
+
+- **Storage.** Migration 0071 adds a nullable `alerts.object`, makes `component`
+  nullable and widens the severity check to both versions' values. It rewrites no
+  rows. v1 rows hold `object` with a null `component`; v2 rows the reverse. Tightening
+  the check per version is left for later.
+- **Search and rules.** CEL gains `object` in the feed, maintenance and correlation
+  fields, and the `severity` enum becomes critical, high, error, major, warning and
+  clear. Urgency puts error with critical and major with high; severity groups list
+  critical, error, high, major, warning, clear. Preset columns, sort and grouping
+  gain `object`. Proof and evidence omit an absent `object`, so proof recorded
+  before this change stays byte-identical, and every reader of stored snapshots
+  tolerates a missing `object`. The search index needs a rebuild for its new
+  mapping.
+- **Older rows.** Rule evaluation uses stored values as they are. Display and search
+  show a v1 row stored before REV-77 in v1 words until the conversion reaches it.
+  When a source update reaches such a row, the processor first converts it in a
+  separate non-semantic step (cause `v1-native-conversion`), then applies the
+  update, so no activity row reports the change of words and the proof chain stays
+  continuous.
+- **The conversion.** One idempotent command with `--dry-run` and `--reverse`. It
+  rewrites Global's definitions first, through their normal save paths (new
+  revision and history entry), using CEL parse positions rather than text search,
+  and lists any expression it cannot rewrite safely. Then it converts v1 alert rows
+  through the same non-semantic step, so a window whose expression was rewritten
+  keeps suppressing the alerts it suppressed. History, proof and old revisions are
+  never rewritten; old activity keeps its old words.
+- **Grafana-to-v1 mapping.** Labels `application`, `object`, `node_name`, `operator`
+  and `severity` are required, `key_field` is optional, the `message` annotation is
+  required and `startsAt` becomes `time_created`. A resolved member becomes v1
+  `clear`, so a first-seen resolved alert shows `clear` like a first-seen v1 clear.
+  There is no routing label, because Global has no operators. Errors name the
+  Grafana source, for example `labels.object`. The adapter version
+  `keep-grafana-native-v1` is allowed only for v1, and `keep-grafana-v1` only for
+  v2; the processor deploys before ingestion.
+- **The UI.** Columns, sort, grouping and quick views follow the tenant: Global uses
+  v1 fields (Object, Error/Major/Warning), specific tenants v2. Alert details follow
+  the alert's schema version. Error and major reuse the critical and high colors.
+
+Accepted risks: the Grafana v1 route is unauthenticated, the same exposure as the
+native v1 route; a rule or window whose expression the conversion cannot rewrite
+matches only old-word alerts until someone edits it; rolling back requires pausing
+ingestion and the processor, running `--reverse`, then reverting code and the search
+alias. Original issue IDs and REV numbering are unchanged. Executed evidence
+belongs in delivery.
+
 ## Context catalog: current skill names and plan files — 2026-11-16
 
 The user reviewed the workspace agent guidance and asked to drop the Codex wording
