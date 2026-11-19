@@ -1362,6 +1362,11 @@ implementation ([preset sections 3, 8 and 16](../specs/spec-preset-operations.md
   the Feed and dashboards never sound. The alarm is a static frontend asset with its
   generator script committed beside it, so no API serves audio.
 
+**Later user decision — 2026-11-19 (REV-78).** Dashboards now sound for their noisy
+panels, once per dashboard tab, with a mute per panel. This supersedes "the Feed and
+dashboards never sound" above for dashboards only; editor previews and the Feed stay
+silent. See [REV-78](#rev-78--noisy-presets-sound-on-dashboards-2026-11-19).
+
 Original issue IDs and REV numbering are unchanged. Executed evidence belongs in delivery.
 
 ## REV-59 — Incident path on alert details (2026-11-03)
@@ -2538,6 +2543,70 @@ native v1 route; a rule or window whose expression the conversion cannot rewrite
 matches only old-word alerts until someone edits it; rolling back requires pausing
 ingestion and the processor, running `--reverse`, then reverting code and the search
 alias. Original issue IDs and REV numbering are unchanged. Executed evidence
+belongs in delivery.
+
+## REV-78 — Noisy presets sound on dashboards (2026-11-19)
+
+User decisions. The user asked that a noisy preset also sound on dashboards, with a
+way to mute each panel and one sound however many panels are noisy ("if there are
+multiple noisy panels, the dashboard won't play the sound multiple times but only
+once", 2026-11-19). They approved the
+[noisy dashboard panels mock](https://claude.ai/artifact/Vj4DMkZEweaerMztcgaLhj) and
+its plan ([dashboard sections 14 and 16](../specs/spec-dashboard-operations.md#16-accessibility-and-visual-states),
+[preset section 3](../specs/spec-preset-operations.md#3-saved-definition-and-initial-defaults)).
+This supersedes, for dashboards only, the REV-58 sentence "Editor previews, the Feed
+and dashboards never sound"; editor previews and the Feed stay silent.
+
+- **One alarm per dashboard (2026-11-19).** An open dashboard loops the shared REV-58
+  alarm once, however many of its panels sound.
+- **A bell per panel (2026-11-19).** Each noisy panel shows a bell at the end of its
+  title row: red and ringing while it sounds, grey while it has no alerts, and a
+  dashed bell-off icon without text when muted. Clicking it mutes or unmutes only that
+  panel.
+- **Status beside the name (2026-11-19).** A status chip beside the dashboard name,
+  and the same chip in the fullscreen bar, reads "Alarm playing · 2 panels" with Mute
+  all, "Alarm muted · 2 panels have alerts" with Unmute all, "Alarm waiting for a
+  click · 2 panels" with Turn on sound, "Alarm can't play in this browser · 2 panels",
+  or "Alarm · quiet" when no noisy panel has alerts. A dashboard without noisy panels
+  shows no chip. There is no banner.
+- **Mutes (2026-11-19).** A mute belongs to the browser tab: it stays when the user
+  leaves the dashboard and comes back (for example through a panel's link), nothing
+  is sent or stored, and a reload starts unmuted. A muted panel stays muted when its alerts drop
+  to zero and return. Mute all and Unmute all stay.
+- **Sound tab wording (2026-11-19).** The preset editor's notes read "Play an alarm
+  while this preset, or a dashboard panel showing it, is open and alerts match" and
+  "Everyone who opens this preset or such a dashboard hears it until no alerts match
+  or they mute it".
+
+Assistant-selected details (2026-11-19):
+
+- **Which panels sound.** An Alert count or Alert table panel whose preset is noisy
+  sounds while its last known count, or its table's matching total, is above zero and
+  it is not muted. Incident count, HTML, image, ServiceNow and Grafana panels never
+  sound and show no bell.
+- **The flag reaches count panels in the batch.** Each count and incident count
+  result of `POST /dashboards/{id}/counts` and `POST /dashboards/preview` carries
+  `preset_noisy`, read in the same transaction as `preset_revisions`, so the flag
+  belongs to the counted revision. Table panels already read their preset with its
+  `noisy` flag. The count batch response is not part of the OpenAPI contract, so the
+  contracts are unchanged.
+- **What is on screen decides.** The sounding panels come from the panels on screen,
+  an unsaved draft included, matched to batch results by panel and preset, so a panel
+  deleted or pointed at another preset in a draft stops its part at once. A loading or
+  failed count keeps the panel's last state and never counts as zero. A dashboard that
+  is deleted or no longer readable stops sounding.
+- **Never sounds.** The panel dialog preview, dashboard history and restore views and
+  the dashboards list. Counts and panel positions do not move when the alarm starts or
+  stops.
+- **Fullscreen.** The alarm state belongs to the dashboard view, not to the panels, so
+  entering or leaving fullscreen neither restarts nor duplicates the sound.
+- **Blocked sound** works as on the preset page: the chip waits, and the next click or
+  key press on the page starts the alarm.
+
+Accepted risks: a wall screen still needs one click after loading, and a hidden tab
+stops refreshing counts (as for presets), so a background dashboard starts sounding
+only once it is shown. Rollback is a revert: the API field is additive and there is no
+schema change. Original issue IDs and REV numbering are unchanged. Executed evidence
 belongs in delivery.
 
 ## Context catalog: current skill names and plan files — 2026-11-16

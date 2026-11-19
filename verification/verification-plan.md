@@ -114,7 +114,7 @@ Verify implementation against at least: view-versus-edit separation; Global beha
 
 Grouping (REV-44) also requires: create/replace/no-op/history/conflict and retried-command fingerprints with and without `group_by`; rejected unknown grouping fields; exact per-group totals summing to the total on a multi-shard index; the missing-value group last; Status groups agreeing with the Status quick views; severity, status and most-alerts-first ordering; `too_many_groups` above 1,000 values; group row continuation without duplicates or gaps, and a cursor rejected for another group or query; group-list continuation on the same PIT; the temporary toolbar change with Reset, cleared by a new revision or reopening; Feed grouping carried by Save as preset; unchanged dashboard counts with drill-through to grouped results; and one grouped request plus one quick-count request per invalidation while only first rows are shown.
 
-Alarm (REV-58) also requires: create/replace/no-op/history/conflict and retried-command fingerprints with and without `noisy`; existing presets reading as not noisy after the migration; the alarm starting on the results page only for a noisy preset with an exact total above zero, including when a live update brings the first matching alert; stopping at an exact zero, on leaving the page and after a saved revision turns it off; a loading or failed total keeping the previous state; per-tab mute that resets on reopening; the blocked-sound notice starting the alarm on the next click; the Sound tab sample, the switch and Save; and no sound from editor previews, the Feed or dashboards.
+Alarm (REV-58) also requires: create/replace/no-op/history/conflict and retried-command fingerprints with and without `noisy`; existing presets reading as not noisy after the migration; the alarm starting on the results page only for a noisy preset with an exact total above zero, including when a live update brings the first matching alert; stopping at an exact zero, on leaving the page and after a saved revision turns it off; a loading or failed total keeping the previous state; per-tab mute that resets on reopening; the blocked-sound notice starting the alarm on the next click; the Sound tab sample, the switch and Save; and no sound from editor previews or the Feed. Dashboards sound under REV-78; see [noisy dashboard panels](#noisy-dashboard-panels-rev-78).
 
 ## Maintenance
 
@@ -270,6 +270,28 @@ Investigating leaves a Firing-only count and joins an Investigating one. It bloc
 preset deletion, appears in preset references, refreshes with the batch, and colors by
 threshold. The dialog preview shows the count with its matching and linked alerts,
 and requires at least one status.
+
+### Noisy dashboard panels (REV-78)
+
+Verify that count batch and dashboard preview results carry `preset_noisy` equal to
+each preset's saved flag, for count and incident count results, true and false. As a
+viewer and as an editor: two noisy panels with alerts create one alarm audio element
+that plays once, and the header reads "Alarm playing · 2 panels" with Mute all; a
+bell mutes only its panel (pressed, icon only, URL unchanged), muting the last pauses
+the sound and shows "Alarm muted · 2 panels have alerts" with Unmute all, and Unmute
+all and Mute all act on every noisy panel. A noisy panel at zero shows a quiet bell;
+non-noisy, incident count, HTML, image, ServiceNow and Grafana panels have no bell; a
+failed batch after a sounding one keeps the last state. An Alert table panel on a
+noisy preset sounds above zero and is quiet at zero. A refused `play()` shows "Alarm
+waiting for a click" and the next click starts it; another failure shows "Alarm can't
+play in this browser". Fullscreen shows the same status and bells, and entering or
+leaving it neither restarts nor duplicates the sound, also when a table panel is the
+only one sounding. Muting sends no request, a reload starts unmuted, and a muted panel
+stays muted through 0 → alerts. Deleting a sounding panel in a draft, or pointing it at
+another preset, stops its part; a deleted or denied dashboard is silent. The panel
+dialog preview, history and restore views and the dashboards list never sound, panel
+positions do not move when the alarm starts or stops, and the preset page alarm is
+unchanged.
 
 ## Tenants and access
 

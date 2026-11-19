@@ -308,6 +308,12 @@ them; each of their batch results carries `count` (incidents), `alerts` and
 `linked_alerts`. `POST /alerts/counts` accepts `incident_status` on a query and then
 returns the same three numbers for it under `incidents`.
 
+**Later user decision — 2026-11-19 (REV-78):** each `count` and `incident_count`
+result of `POST /dashboards/{id}/counts` and `POST /dashboards/preview` carries
+`preset_noisy`, the referenced preset's saved `noisy` flag, read in the same
+transaction as `preset_revisions`. Muting a panel's alarm sends no request. See
+[REV-78](../decisions/design-register.md#rev-78--noisy-presets-sound-on-dashboards-2026-11-19).
+
 ## 15. Deletion and history
 
 **Current scope (REV-34):** Daily history cleanup is not deployed; expired history stays unreadable without physical deletion; see [worker scope](spec-worker-scope.md#2-assignment-and-data-lifetime-automation). Deletion, retention windows and fences below remain normative.
@@ -376,6 +382,26 @@ moved or resized.
 
 **Later user decision — 2026-11-10 (REV-69):** an incident count panel is labeled by
 its title and its number of incidents in words, as a count panel is.
+
+**Later user decision — 2026-11-19 (REV-78):** an open dashboard loops the shared
+noisy-preset alarm ([preset section 3](spec-preset-operations.md#3-saved-definition-and-initial-defaults))
+once, however many panels sound. An Alert count or Alert table panel on a noisy preset
+sounds while its last known count, or its table's matching total, is above zero and it
+is not muted; a loading or failed count keeps its last state and never counts as zero.
+Such a panel has a bell button at the end of its title row, named "Mute" plus the
+panel's label and pressed while muted: red and ringing while it sounds, grey without
+alerts, and a dashed bell-off icon without text when muted. It sits above the panel's
+stretched link and beside the editing controls. A status chip beside the dashboard
+name and in the fullscreen bar reads "Alarm playing · N panels" with Mute all, "Alarm
+muted · N panels have alerts" with Unmute all, "Alarm waiting for a click · N panels"
+with Turn on sound, "Alarm can't play in this browser · N panels" or "Alarm · quiet";
+a dashboard without noisy panels has no chip. Mutes last for the tab, including leaving
+the dashboard and coming back: nothing is sent or stored, a reload starts unmuted, and a muted panel stays muted when its alerts drop
+to zero and return. The panels on screen, an unsaved draft included, decide what
+sounds. Fullscreen neither restarts nor duplicates the sound. The panel dialog
+preview, history and restore views and the dashboards list never sound, and the alarm
+never moves counts or panels. Reduced motion stops the bell's ringing animation. See
+[REV-78](../decisions/design-register.md#rev-78--noisy-presets-sound-on-dashboards-2026-11-19).
 
 ## 17. Acceptance and observability
 
